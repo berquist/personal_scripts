@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# This script should in theory allow Keith to submit jobs to qchem by                       
+# just typing "sbumit <input file>" when Keith finally figures out how                      
+# to program                                                                               
+
+if [ "$#" -ne 3 ]; then echo "Usage: submit <input file> <ppn> <walltime (in hrs)>"
+ exit 1
+fi
+
+RUN="run.sh"
+echo "#!/bin/bash" > ${RUN}
+JOBNAME=${1/.inp/}
+echo "#PBS -N ${JOBNAME}" >> ${RUN}
+echo "#PBS -q shared" >> ${RUN}
+PPN=$2
+echo "#PBS -l nodes=1:ppn=${PPN}" >> ${RUN}
+TIME=$3
+echo "#PBS -l walltime=${TIME}:00:00" >> ${RUN}
+
+echo "mkdir $LOCAL/orcatemp" >> ${RUN}
+echo "cp $PBS_O_WORKDIR/${JOBNAME}.inp $LOCAl/orcatemp" >> ${RUN}
+echo "cd $LOCAL/orcatemp" >> ${RUN}
+
+echo "module rm openmpi" >> ${RUN}
+echo "module load openmpi/1.4.3-intel11" >> ${RUN}
+echo "`which orca` ${JOBNAME}.inp >& ${JOBNAME}.out" >> ${RUN}
+
+echo "cp ./* $PBS_O_WORKDIR" >> ${RUN}
+echo "rm -rf $LOCAL/orcatemp" >> ${RUN}
+
+qsub ${RUN}
