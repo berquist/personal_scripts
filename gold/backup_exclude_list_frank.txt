@@ -1,0 +1,14 @@
+/scratch
+/.cmake 
+/.continuum 
+/.felix
+/.fltk 
+/.gconf 
+/.gnome2 
+/.gnome2_private 
+/.gnupg 
+/.gnuplot_history
+/.kde 
+/.mc
+/.qt
+/.zcompdump
