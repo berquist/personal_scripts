@@ -1,0 +1,5 @@
+#!/bin/bash
+
+keywords="ATOM HETATM TER END"
+
+for word in keywords
