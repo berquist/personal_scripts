@@ -6,7 +6,7 @@ HOME=/home/eric
 SOURCE=$HOME
 BACKUPDIR=/media/Backup/BackupDir
 
-rsync -azPE --exclude-from '~/opt/bin/scripts/backup_exclude_list_gold.txt' \
+rsync -azPE --exclude-from '/home/eric/opt/bin/scripts/backup_exclude_list_gold.txt' \
     --link-dest=$BACKUPDIR/current $SOURCE $BACKUPDIR/back-$date
 
 rm -f $BACKUPDIR/current

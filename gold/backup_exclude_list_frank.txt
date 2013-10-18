@@ -1,6 +1,6 @@
 /scratch
+/.cache
 /.cmake 
-/.continuum 
 /.felix
 /.fltk 
 /.gconf 
