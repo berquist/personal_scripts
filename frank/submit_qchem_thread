@@ -1,25 +1,25 @@
 #!/bin/bash
 
-if [ "$#" -ne 2 ]; then
-    echo "Usage: submit-qchem <input file> <walltime (in hrs)>"
+if [ "$#" -ne 3 ]; then
+    echo "Usage: submit-qchem <input file> <ppn> <walltime (in hrs)>"
     exit 1
 fi
 
 JOBNAME=${1/.in/}
-TIME=$2
+PPN=$2
+TIME=$3
 
 cat <<EOF > $PWD/run-qchem.pbs
- 
 #!/bin/bash
 
 #PBS -N ${JOBNAME}
 #PBS -q shared
-#PBS -l nodes=1:ppn=1
+#PBS -l nodes=1:ppn=${PPN}
 #PBS -l walltime=${TIME}:00:00
 #PBS -j oe
 #PBS -l qos=low
 
-module load qchem/dlambrecht/4.1-release.O2.serial
+module load qchem/dlambrecht/4.1-trunk.20130919.ompO0
 
 cp \$PBS_O_WORKDIR/${JOBNAME}.qcin \$LOCAL
 cd \$LOCAL
@@ -31,7 +31,7 @@ run_on_exit() {
 
 trap run_on_exit EXIT
 
-qchem -save ${JOBNAME}.qcin \$PBS_O_WORKDIR/${JOBNAME}.out
+qchem -save -nt ${PPN} ${JOBNAME}.qcin \$PBS_O_WORKDIR/${JOBNAME}.out
 
 EOF
 

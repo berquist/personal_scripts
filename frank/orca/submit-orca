@@ -5,12 +5,13 @@ if [ "$#" -ne 3 ]; then
     exit 1
 fi
 
-JOBNAME=${1/.in/}
+JOBNAME=${1/.inp/}
 PPN=$2
 TIME=$3
 
 cat <<EOF > $PWD/run-orca.pbs
 #!/bin/bash
+
 #PBS -N ${JOBNAME}
 #PBS -q shared
 #PBS -l nodes=1:ppn=${PPN}
@@ -19,8 +20,8 @@ cat <<EOF > $PWD/run-orca.pbs
 #PBS -l qos=low
 
 module purge
-module load openmpi/1.4.5-gcc45
-module load orca/2.9.1
+module load openmpi/1.6.3-intel13
+module load orca/3.0.0
 
 cd \$PBS_O_WORKDIR
 cp \$PBS_O_WORKDIR/${JOBNAME}.in \$LOCAL
@@ -34,8 +35,8 @@ run_on_exit() {
 
 trap run_on_exit EXIT
 
-\`which orca\` ${JOBNAME}.in >& \$PBS_O_WORKDIR/${JOBNAME}.out
+$(which orca) ${JOBNAME}.in >& \$PBS_O_WORKDIR/${JOBNAME}.out
 
 EOF
 
-qsub $PWD/run-orca.pbs
+# qsub $PWD/run-orca.pbs
