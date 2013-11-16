@@ -1,0 +1,41 @@
+#!/bin/bash
+
+if [ "$#" -ne 3 ]; then 
+    echo "Usage: submit-orca <input file> <ppn> <walltime (in hrs)>"
+    exit 1
+fi
+
+JOBNAME=${1/.in/}
+PPN=$2
+TIME=$3
+
+cat <<EOF > $PWD/run-orca.pbs
+#!/bin/bash
+#PBS -N ${JOBNAME}
+#PBS -q shared
+#PBS -l nodes=1:ppn=${PPN}
+#PBS -l walltime=${TIME}:00:00
+#PBS -j oe
+#PBS -l qos=low
+
+module purge
+module load openmpi/1.4.5-gcc45
+module load orca/2.9.1
+
+cd \$PBS_O_WORKDIR
+cp \$PBS_O_WORKDIR/${JOBNAME}.in \$LOCAL
+cp \$PBS_O_WORKDIR/*.xyz \$LOCAL >& /dev/null
+cd \$LOCAL
+
+run_on_exit() {
+    set -v
+    cp \$LOCAL/* \$PBS_O_WORKDIR
+}
+
+trap run_on_exit EXIT
+
+\`which orca\` ${JOBNAME}.in >& \$PBS_O_WORKDIR/${JOBNAME}.out
+
+EOF
+
+qsub $PWD/run-orca.pbs

@@ -1,9 +1,11 @@
-#!/bin/env python2
+#!/usr/bin/env python2
 
 """qfull.py: For displaying each of the given user's jobs in the full format
 (like a combination of 'qstat -u <user>' and 'qstat -f <job id>)"""
 
-import os, re, argparse
+import os
+import re,
+import argparse
 import subprocess as sp
 
 # signature:
