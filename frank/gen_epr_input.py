@@ -6,7 +6,7 @@ def eprfile(charge, xyzfile):
     return """! uks pbe0 def2-tzvpp def2-tzvpp/jk ri rijk pmodel somf(1x) noautostart tightscf grid5
 
 %pal
- nprocs 16
+ nprocs 8
  end
 
 * xyzfile {0} 2 {1}.xyz *
@@ -20,9 +20,6 @@ def eprfile(charge, xyzfile):
  printlevel 5
  end
 
-%method
- z_tol 1e-10
- end
 """.format(charge, xyzfile)
 
 def eprfile_ptchrg(charge, xyzfile, ptchrgfile):
@@ -31,7 +28,7 @@ def eprfile_ptchrg(charge, xyzfile, ptchrgfile):
     return """! uks pbe0 def2-tzvpp def2-tzvpp/jk ri rijk pmodel somf(1x) noautostart tightscf grid5
 
 %pal
- nprocs 16
+ nprocs 8
  end
 
 * xyzfile {0} 2 {1}.xyz *
@@ -47,9 +44,6 @@ def eprfile_ptchrg(charge, xyzfile, ptchrgfile):
  printlevel 5
  end
 
-%method
- z_tol 1e-10
- end
 """.format(charge, xyzfile, ptchrgfile)
 
 def eprfile_dft(charge, xyzfile, functional):
@@ -58,7 +52,7 @@ def eprfile_dft(charge, xyzfile, functional):
     return """! uks {2} def2-tzvpp def2-tzvpp/jk ri rijk pmodel somf(1x) noautostart tightscf grid5
 
 %pal
- nprocs 16
+ nprocs 8
  end
 
 * xyzfile {0} 2 {1}.xyz *
@@ -81,14 +75,17 @@ def pbsfile(xyzfile):
 
 #PBS -N {0}
 #PBS -q ishared_large
-#PBS -l nodes=1:ppn=16
+#PBS -l nodes=1:ppn=8
 #PBS -l walltime=144:00:00
 #PBS -j oe
 #PBS -l qos=low
+#PBS -m abe
+#PBS -M erb74@pitt.edu
 
 module purge
-module load openmpi/1.4.5-gcc45
-module load orca/2.9.1
+module load intel/2013.0
+module load openmpi/1.6.5-intel12
+module load orca/3.0.1
 
 cp $PBS_O_WORKDIR/{0}.inp $LOCAL
 cp $PBS_O_WORKDIR/{0}.xyz $LOCAL
@@ -101,7 +98,7 @@ run_on_exit() {{
 
 trap run_on_exit EXIT
 
-`which orca` {0}.inp >& $PBS_O_WORKDIR/{0}.out
+$(which orca) {0}.inp >& $PBS_O_WORKDIR/{0}.out
 """.format(xyzfile)
 
 def pbsfile_ptchrg(xyzfile, ptchrgfile):
@@ -111,14 +108,17 @@ def pbsfile_ptchrg(xyzfile, ptchrgfile):
 
 #PBS -N {0}
 #PBS -q ishared_large
-#PBS -l nodes=1:ppn=16
+#PBS -l nodes=1:ppn=8
 #PBS -l walltime=144:00:00
 #PBS -j oe
 #PBS -l qos=low
+#PBS -m abe
+#PBS -M erb74@pitt.edu
 
 module purge
-module load openmpi/1.4.5-gcc45
-module load orca/2.9.1
+module load intel/2013.0
+module load openmpi/1.6.5-intel12
+module load orca/3.0.1
 
 cp $PBS_O_WORKDIR/{0}.inp $LOCAL
 cp $PBS_O_WORKDIR/{0}.xyz $LOCAL
@@ -132,7 +132,7 @@ run_on_exit() {{
 
 trap run_on_exit EXIT
 
-`which orca` {0}.inp >& $PBS_O_WORKDIR/{0}.out
+$(which orca) {0}.inp >& $PBS_O_WORKDIR/{0}.out
 """.format(xyzfile, ptchrgfile)
 
 def pbsfile_dft(xyzfile, functional):
@@ -142,14 +142,16 @@ def pbsfile_dft(xyzfile, functional):
 
 #PBS -N {1}
 #PBS -q ishared_large
-#PBS -l nodes=1:ppn=16
+#PBS -l nodes=1:ppn=8
 #PBS -l walltime=24:00:00
 #PBS -j oe
+#PBS -m abe
+#PBS -M erb74@pitt.edu
 
 module purge
 module load intel/2013.0
-module load openmpi/1.6.3-intel13
-module load orca/3.0.0
+module load openmpi/1.6.5-intel12
+module load orca/3.0.1
 
 cp $PBS_O_WORKDIR/{1}.inp $LOCAL
 cp $PBS_O_WORKDIR/{0}.xyz $LOCAL
@@ -162,7 +164,7 @@ run_on_exit() {{
 
 trap run_on_exit EXIT
 
-`which orca` {1}.inp >& $PBS_O_WORKDIR/{1}.out
+$(which orca) {1}.inp >& $PBS_O_WORKDIR/{1}.out
 """.format(xyzfile, functional)
 
 if __name__ == "__main__":

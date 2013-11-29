@@ -4,7 +4,7 @@
 (like a combination of 'qstat -u <user>' and 'qstat -f <job id>)"""
 
 import os
-import re,
+import re
 import argparse
 import subprocess as sp
 
