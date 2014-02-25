@@ -20,8 +20,9 @@ cat <<EOF > $PWD/run-orca.pbs
 #PBS -l qos=low
 
 module purge
-module load openmpi/1.6.3-intel13
-module load orca/3.0.0
+module load intel/2013.0
+module load openmpi/1.6.5-intel12
+module load orca/3.0.1
 
 cd \$PBS_O_WORKDIR
 cp \$PBS_O_WORKDIR/${JOBNAME}.in \$LOCAL

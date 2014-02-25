@@ -13,8 +13,9 @@ def pbsfile(inpfile, ppn, time):
 #PBS -l qos=low
 
 module purge
-module load openmpi/1.4.5-gcc45
-module load orca/2.9.1
+module load intel/2013.0
+module load openmpi/1.6.5-intel12
+module load orca/3.0.1
 
 cp $PBS_O_WORKDIR/{0}.in  $LOCAL
 cd $LOCAL
@@ -42,8 +43,9 @@ def pbsfile_coords(inpfile, ppn, time, xyzfile):
 #PBS -l qos=low
 
 module purge
-module load openmpi/1.4.5-gcc45
-module load orca/2.9.1
+module load intel/2013.0
+module load openmpi/1.6.5-intel12
+module load orca/3.0.1
 
 cp $PBS_O_WORKDIR/{0}.in  $LOCAL
 cp $PBS_O_WORKDIR/{3}.xyz $LOCAL
@@ -72,8 +74,9 @@ def pbsfile_ptchrg(inpfile, ppn, time, ptchrgfile):
 #PBS -l qos=low
 
 module purge
-module load openmpi/1.4.5-gcc45
-module load orca/2.9.1
+module load intel/2013.0
+module load openmpi/1.6.5-intel12
+module load orca/3.0.1
 
 cp $PBS_O_WORKDIR/{0}.in  $LOCAL
 cp $PBS_O_WORKDIR/{3}.xyz $LOCAL
@@ -102,8 +105,9 @@ def pbsfile_coords_ptchrg(inpfile, ppn, time, xyzfile, ptchrgfile):
 #PBS -l qos=low
 
 module purge
-module load openmpi/1.4.5-gcc45
-module load orca/2.9.1
+module load intel/2013.0
+module load openmpi/1.6.5-intel12
+module load orca/3.0.1
 
 cp $PBS_O_WORKDIR/{0}.in  $LOCAL
 cp $PBS_O_WORKDIR/{3}.xyz $LOCAL
@@ -122,6 +126,7 @@ trap run_on_exit EXIT
 
 if __name__ == "__main__":
     import argparse
+    import os.path
     import subprocess
 
     parser = argparse.ArgumentParser(description="")
@@ -158,6 +163,11 @@ if __name__ == "__main__":
     inpfile = args.iname
     xyzfile = args.xname
     ptchrgfile = args.pname
+
+    inpfile = os.path.splitext(inpfile)[0]
+    if xyzfile is not None: xyzfile = os.path.splitext(xyzfile)[0]
+    if ptchrgfile is not None: ptchrgfile = os.path.splitext(ptchrgfile)[0]
+
     ppn = args.ppn
     time = args.time
 
@@ -174,5 +184,6 @@ if __name__ == "__main__":
         print >> jobfile, pbsfile(inpfile, ppn, time)
 
     jobfile.close()
+
     subprocess.call(["echo", jobhandle])
     subprocess.call(["qsub", jobhandle])
