@@ -8,9 +8,11 @@ import socket
 import shutil
 
 parser = argparse.ArgumentParser(description='Compare Q-Chem test outputs with reference outputs. $QC, $QCREF, and $QCPLATFORM must be defined.')
-parser.add_argument('--copy', action='store_true', help='Copy the problem outputs to ~/qchem_test_outputs with the appropriate hostname.')
+parser.add_argument('--copy', dest='copy', action='store_true', help='Copy the problem outputs to ~/qchem_test_outputs with the appropriate hostname.')
+parser.add_argument('--delim', dest='delim', default=socket.gethostname(), help='The (hopefully) unique delimiter added for the copied test outputs.')
 args = parser.parse_args()
 copy = args.copy
+delim = args.delim
 
 os.chdir(os.path.expandvars('$QC/test'))
 
@@ -42,5 +44,5 @@ for line in tablecompare.splitlines():
         if copy:
             if not os.path.exists(output_path):
                 os.makedirs(output_path)
-            filename = os.path.splitext(l[1])[0] + '.' + socket.gethostname() + os.path.splitext(l[1])[1]
+            filename = os.path.splitext(l[1])[0] + '.' + delim + os.path.splitext(l[1])[1]
             shutil.copy2(l[1], output_path + '/' + filename)
