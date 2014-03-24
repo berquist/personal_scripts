@@ -31,6 +31,10 @@ outputs.sort()
 
 for f in outputs:
     print "================================================================================"
-    print "job: {}".format(f)
-    subprocess.call(["diff", os.path.join(dir1, f), os.path.join(dir2, f)])
+    print "========== job: {}".format(f)
+    try:
+        diff = subprocess.check_output(["diff", os.path.join(dir1, f), os.path.join(dir2, f)])
+    except subprocess.CalledProcessError as e:
+        diff = e.output
+    print diff
     print "================================================================================"
