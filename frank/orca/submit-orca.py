@@ -1,16 +1,18 @@
 #!/usr/bin/env python2
 
-def pbsfile(inpfile, ppn, time):
+def pbsfile(inpfile, ppn, time, queue):
     """
     """
     return """#!/bin/bash
 
 #PBS -N {0}
-#PBS -q shared
+#PBS -q {3}
 #PBS -l nodes=1:ppn={1}
 #PBS -l walltime={2}:00:00
 #PBS -j oe
 #PBS -l qos=low
+#PBS -m abe
+#PBS -M ${{USER}}@pitt.edu}
 
 module purge
 module load intel/2013.0
@@ -28,15 +30,15 @@ run_on_exit() {{
 trap run_on_exit EXIT
 
 `which orca` {0}.in >& $PBS_O_WORKDIR/{0}.out
-""".format(inpfile, ppn, time)
+""".format(inpfile, ppn, time, queue)
 
-def pbsfile_coords(inpfile, ppn, time, xyzfile):
+def pbsfile_coords(inpfile, ppn, time, queue, xyzfile):
     """
     """
     return """#!/bin/bash
 
 #PBS -N {0}
-#PBS -q shared
+#PBS -q {3}
 #PBS -l nodes=1:ppn={1}
 #PBS -l walltime={2}:00:00
 #PBS -j oe
@@ -48,69 +50,6 @@ module load openmpi/1.6.5-intel12
 module load orca/3.0.1
 
 cp $PBS_O_WORKDIR/{0}.in  $LOCAL
-cp $PBS_O_WORKDIR/{3}.xyz $LOCAL
-cd $LOCAL
-
-run_on_exit() {{
-    set -v
-    cp $LOCAL/* $PBS_O_WORKDIR
-}}
-
-trap run_on_exit EXIT
-
-`which orca` {0}.in >& $PBS_O_WORKDIR/{0}.out
-""".format(inpfile, ppn, time, xyzfile)
-
-def pbsfile_ptchrg(inpfile, ppn, time, ptchrgfile):
-    """
-    """
-    return """#!/bin/bash
-
-#PBS -N {0}
-#PBS -q shared
-#PBS -l nodes=1:ppn={1}
-#PBS -l walltime={2}:00:00
-#PBS -j oe
-#PBS -l qos=low
-
-module purge
-module load intel/2013.0
-module load openmpi/1.6.5-intel12
-module load orca/3.0.1
-
-cp $PBS_O_WORKDIR/{0}.in  $LOCAL
-cp $PBS_O_WORKDIR/{3}.xyz $LOCAL
-cd $LOCAL
-
-run_on_exit() {{
-    set -v
-    cp $LOCAL/* $PBS_O_WORKDIR
-}}
-
-trap run_on_exit EXIT
-
-`which orca` {0}.in >& $PBS_O_WORKDIR/{0}.out
-""".format(inpfile, ppn, time, ptchrgfile)
-
-def pbsfile_coords_ptchrg(inpfile, ppn, time, xyzfile, ptchrgfile):
-    """
-    """
-    return """#!/bin/bash
-
-#PBS -N {0}
-#PBS -q shared
-#PBS -l nodes=1:ppn={1}
-#PBS -l walltime={2}:00:00
-#PBS -j oe
-#PBS -l qos=low
-
-module purge
-module load intel/2013.0
-module load openmpi/1.6.5-intel12
-module load orca/3.0.1
-
-cp $PBS_O_WORKDIR/{0}.in  $LOCAL
-cp $PBS_O_WORKDIR/{3}.xyz $LOCAL
 cp $PBS_O_WORKDIR/{4}.xyz $LOCAL
 cd $LOCAL
 
@@ -122,7 +61,70 @@ run_on_exit() {{
 trap run_on_exit EXIT
 
 `which orca` {0}.in >& $PBS_O_WORKDIR/{0}.out
-""".format(inpfile, ppn, time, xyzfile, ptchrgfile)
+""".format(inpfile, ppn, time, queue, xyzfile)
+
+def pbsfile_ptchrg(inpfile, ppn, time, queue, ptchrgfile):
+    """
+    """
+    return """#!/bin/bash
+
+#PBS -N {0}
+#PBS -q {3}
+#PBS -l nodes=1:ppn={1}
+#PBS -l walltime={2}:00:00
+#PBS -j oe
+#PBS -l qos=low
+
+module purge
+module load intel/2013.0
+module load openmpi/1.6.5-intel12
+module load orca/3.0.1
+
+cp $PBS_O_WORKDIR/{0}.in  $LOCAL
+cp $PBS_O_WORKDIR/{4}.xyz $LOCAL
+cd $LOCAL
+
+run_on_exit() {{
+    set -v
+    cp $LOCAL/* $PBS_O_WORKDIR
+}}
+
+trap run_on_exit EXIT
+
+`which orca` {0}.in >& $PBS_O_WORKDIR/{0}.out
+""".format(inpfile, ppn, time, queue, ptchrgfile)
+
+def pbsfile_coords_ptchrg(inpfile, ppn, time, queue, xyzfile, ptchrgfile):
+    """
+    """
+    return """#!/bin/bash
+
+#PBS -N {0}
+#PBS -q {3}
+#PBS -l nodes=1:ppn={1}
+#PBS -l walltime={2}:00:00
+#PBS -j oe
+#PBS -l qos=low
+
+module purge
+module load intel/2013.0
+module load openmpi/1.6.5-intel12
+module load orca/3.0.1
+
+cp $PBS_O_WORKDIR/{0}.in  $LOCAL
+cp $PBS_O_WORKDIR/{4}.xyz $LOCAL
+cp $PBS_O_WORKDIR/{5}.xyz $LOCAL
+cd $LOCAL
+
+run_on_exit() {{
+    set -v
+    cp $LOCAL/* $PBS_O_WORKDIR
+}}
+
+trap run_on_exit EXIT
+
+`which orca` {0}.in >& $PBS_O_WORKDIR/{0}.out
+""".format(inpfile, ppn, time, queue, xyzfile, ptchrgfile)
 
 if __name__ == "__main__":
     import argparse
@@ -150,14 +152,20 @@ if __name__ == "__main__":
                         dest="ppn",
                         metavar="<ppn>",
                         type=int,
-                        default=8,
-                        help="number of cores to run on (max 48)")
+                        default=4,
+                        help="number of cores to run on (max shared=48, shared_large=16)")
     parser.add_argument("--time",
                         dest="time",
                         metavar="<time>",
                         type=int,
-                        default=144,
+                        default=96,
                         help="walltime to reserve (max 144 hours)")
+    parser.add_argument("--queue",
+                        dest="queue",
+                        metavar="<queue>",
+                        type=str,
+                        default="shared",
+                        help="queue to run in (typically shared or shared_large")
     args = parser.parse_args()
 
     inpfile = args.iname
@@ -170,20 +178,22 @@ if __name__ == "__main__":
 
     ppn = args.ppn
     time = args.time
+    queue = args.queue
 
     jobhandle = inpfile + ".pbs"
     jobfile   = open(jobhandle, "w")
 
     if xyzfile and ptchrgfile:
-        print >> jobfile, pbsfile_coords_ptchrg(inpfile, ppn, time, xyzfile, ptchrgfile)
+        print >> jobfile, pbsfile_coords_ptchrg(inpfile, ppn, time, queue, xyzfile, ptchrgfile)
     elif xyzfile:
-        print >> jobfile, pbsfile_coords(inpfile, ppn, time, xyzfile)
+        print >> jobfile, pbsfile_coords(inpfile, ppn, time, queue, xyzfile)
     elif ptchrgfile:
-        print >> jobfile, pbsfile_ptchrg(inpfile, ppn, time, ptchrgfile)
+        print >> jobfile, pbsfile_ptchrg(inpfile, ppn, time, queue, ptchrgfile)
     else:
-        print >> jobfile, pbsfile(inpfile, ppn, time)
+        print >> jobfile, pbsfile(inpfile, ppn, time, queue)
 
     jobfile.close()
 
     subprocess.call(["echo", jobhandle])
-    subprocess.call(["qsub", jobhandle])
+    # call manually: 'find . -name "*pbs" -exec qsub '{}' \;'
+    # subprocess.call(["qsub", jobhandle])

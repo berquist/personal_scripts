@@ -18,6 +18,8 @@ cat <<EOF > $PWD/run-orca.pbs
 #PBS -l walltime=${TIME}:00:00
 #PBS -j oe
 #PBS -l qos=low
+#PBS -m abe
+#PBS -M ${USER}@pitt.edu
 
 module purge
 module load intel/2013.0

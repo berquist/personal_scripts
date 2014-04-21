@@ -17,6 +17,8 @@ cat <<EOF > $PWD/run-qchem.pbs
 #PBS -l walltime=${TIME}:00:00
 #PBS -j oe
 #PBS -l qos=low
+#PBS -m abe
+#PBS -M ${USER}@pitt.edu
 
 module load qchem/dlambrecht/4.1-release.O2.serial
 

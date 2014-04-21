@@ -1,5 +1,7 @@
 #!/usr/bin/env python2
 
+"""qdel.py: For deleting all PBS jobs within a given set of ids (including those)."""
+
 import argparse
 import subprocess as sp
 

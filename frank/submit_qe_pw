@@ -25,6 +25,8 @@ cat <<EOF > $PWD/run_qe_pw.${JOBNAME}.pbs
 #PBS -l walltime=${TIME}:00:00
 #PBS -j oe
 #PBS -l qos=low
+#PBS -m abe
+#PBS -M ${USER}@pitt.edu
 
 JOB=${JOBNAME}
 IN=\$JOB.in
