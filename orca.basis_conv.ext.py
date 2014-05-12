@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 import argparse
 
@@ -12,7 +12,7 @@ args = parser.parse_args()
 inp_filename = args.inp_filename
 out_filename = args.out_filename
 
-inp_file = open(inp_filename, 'r')
+inp_file = open(inp_filename, 'rb')
 inp_file_raw = inp_file.readlines()
 inp_file.close()
 
@@ -22,7 +22,7 @@ inp_file = [line for line in inp_file if line != []]
 inp_file = [line for line in inp_file if line[0] != '!']
 inp_file = [line for line in inp_file if line[0][0] != '$']
 
-out_file = open(out_filename, 'w')
+out_file = open(out_filename, 'wb')
 basis_name = inp_file_raw[0].split()[1]
 print >> out_file, basis_name
 
