@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-import argparse
-
 """orca.basis_conv.ext.py: Convert a GAMESS-US formatted basis file from EMSL
 into something usable by ORCA as an external basis."""
+
+import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument('inp_filename')
@@ -24,7 +24,7 @@ inp_file = [line for line in inp_file if line[0][0] != '$']
 
 out_file = open(out_filename, 'wb')
 basis_name = inp_file_raw[0].split()[1]
-print >> out_file, basis_name
+out_file.write(basis_name + '\n')
 
 for index, line in enumerate(inp_file):
     # There are 3 types of lines we must handle:
@@ -32,14 +32,14 @@ for index, line in enumerate(inp_file):
     # 2. Those that contain shell info (S 3, L 1, etc.) [length == 2]
     # 3. Those that contain primitives (3 columns, first is an integer) [length >= 3]
     if len(line) == 1:
-        print >> out_file, '{}'.format(*line)
+        out_file.write('{}\n'.format(*line))
     if len(line) == 2:
-        print >> out_file, ' {} {}'.format(*line)
+        out_file.write(' {} {}\n'.format(*line))
     if len(line) == 3:
-        print >> out_file, '  {} {} {}'.format(*line)
+        out_file.write('  {} {} {}\n'.format(*line))
     if len(line) == 4:
-        print >> out_file, '  {} {} {} {}'.format(*line)
+        out_file.write('  {} {} {} {}\n'.format(*line))
 
-print >> out_file, 'STOP'
+out_file.write('STOP\n')
 
 out_file.close()
