@@ -5,10 +5,10 @@ import os.path
 import subprocess
 
 """qcout2xyz.py: take a batch of Q-Chem output files and extract final geometries from them."""
-s = "obabel -iqcout {}.qcout -oxyz -O {}.xyz"
+s = 'obabel -iqcout {}.qcout -oxyz -O {}.xyz'
 
 parser = argparse.ArgumentParser()
-parser.add_argument(dest="filenames", nargs='+')
+parser.add_argument('filenames', nargs='+')
 args = parser.parse_args()
 filenames = args.filenames
 
