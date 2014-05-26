@@ -12,7 +12,7 @@ def pbsfile(inpfile, ppn, time, queue):
 #PBS -j oe
 #PBS -l qos=low
 #PBS -m abe
-#PBS -M ${{USER}}@pitt.edu}
+#PBS -M {username}@pitt.edu
 
 module purge
 module load intel/2013.0
@@ -30,7 +30,7 @@ run_on_exit() {{
 trap run_on_exit EXIT
 
 `which orca` {0}.in >& $PBS_O_WORKDIR/{0}.out
-""".format(inpfile, ppn, time, queue)
+""".format(inpfile, ppn, time, queue, username = os.environ['USER'])
 
 def pbsfile_coords(inpfile, ppn, time, queue, xyzfile):
     """
@@ -43,6 +43,8 @@ def pbsfile_coords(inpfile, ppn, time, queue, xyzfile):
 #PBS -l walltime={2}:00:00
 #PBS -j oe
 #PBS -l qos=low
+#PBS -m abe
+#PBS -M {username}@pitt.edu
 
 module purge
 module load intel/2013.0
@@ -61,7 +63,7 @@ run_on_exit() {{
 trap run_on_exit EXIT
 
 `which orca` {0}.in >& $PBS_O_WORKDIR/{0}.out
-""".format(inpfile, ppn, time, queue, xyzfile)
+""".format(inpfile, ppn, time, queue, xyzfile, username = os.environ['USER'])
 
 def pbsfile_ptchrg(inpfile, ppn, time, queue, ptchrgfile):
     """
@@ -74,6 +76,8 @@ def pbsfile_ptchrg(inpfile, ppn, time, queue, ptchrgfile):
 #PBS -l walltime={2}:00:00
 #PBS -j oe
 #PBS -l qos=low
+#PBS -m abe
+#PBS -M {username}@pitt.edu
 
 module purge
 module load intel/2013.0
@@ -92,7 +96,7 @@ run_on_exit() {{
 trap run_on_exit EXIT
 
 `which orca` {0}.in >& $PBS_O_WORKDIR/{0}.out
-""".format(inpfile, ppn, time, queue, ptchrgfile)
+""".format(inpfile, ppn, time, queue, ptchrgfile, username = os.environ['USER'])
 
 def pbsfile_coords_ptchrg(inpfile, ppn, time, queue, xyzfile, ptchrgfile):
     """
@@ -105,6 +109,8 @@ def pbsfile_coords_ptchrg(inpfile, ppn, time, queue, xyzfile, ptchrgfile):
 #PBS -l walltime={2}:00:00
 #PBS -j oe
 #PBS -l qos=low
+#PBS -m abe
+#PBS -M {username}@pitt.edu
 
 module purge
 module load intel/2013.0
@@ -124,11 +130,11 @@ run_on_exit() {{
 trap run_on_exit EXIT
 
 `which orca` {0}.in >& $PBS_O_WORKDIR/{0}.out
-""".format(inpfile, ppn, time, queue, xyzfile, ptchrgfile)
+""".format(inpfile, ppn, time, queue, xyzfile, ptchrgfile, username = os.environ['USER'])
 
 if __name__ == "__main__":
     import argparse
-    import os.path
+    import os
     import subprocess
 
     parser = argparse.ArgumentParser(description="")
