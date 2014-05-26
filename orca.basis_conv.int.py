@@ -1,47 +1,23 @@
 #!/usr/bin/env python
 
-"""orca.basis_conv.ext.py: Convert a GAMESS-US formatted basis file from EMSL
-into something usable by ORCA as an internal basis."""
+"""orca.basis_conv.int.py: Convert a GAMESS-US formatted basis file from
+EMSL into something usable by ORCA as an internal basis."""
 
-import argparse
-import sys
-from periodic_table import sym2num
+if __name__ == '__main__':
 
-parser = argparse.ArgumentParser()
-parser.add_argument('inp_filename')
-args = parser.parse_args()
-inp_filename = args.inp_filename
+    import argparse
+    import sys
 
-inp_file = open(inp_filename, 'rb')
-inp_file_raw = inp_file.readlines()
-inp_file.close()
+    from orcaparse.basis_utils import convert_basis_int
 
-# filter out unwanted lines
-inp_file = [line.split() for line in inp_file_raw]
-inp_file = [line for line in inp_file if line != []]
-inp_file = [line for line in inp_file if line[0] != '!']
-inp_file = [line for line in inp_file if line[0][0] != '$']
+    parser = argparse.ArgumentParser()
+    parser.add_argument('inp_filename')
+    args = parser.parse_args()
+    inp_filename = args.inp_filename
 
-out_file = sys.stdout
-basis_name = inp_file_raw[0].split()[1]
-out_file.write('# ' + basis_name + '\n')
+    inp_file = open(inp_filename, 'rb')
+    inp_file_contents = inp_file.read()
+    inp_file.close()
 
-for index, line in enumerate(inp_file):
-    # There are 3 types of lines we must handle:
-    # 1. Those that contain an element name (HYDROGEN, CARBON, COPPER, etc.) [length == 1]
-    # 2. Those that contain shell info (S 3, L 1, etc.) [length == 2]
-    # 3. Those that contain primitives (3 columns, first is an integer) [length >= 3]
-    if len(line) == 1:
-        if index > 0:
-            out_file.write(' end\n')
-        out_file.write('{} {}\n'.format('newgto', sym2num[line[0]]))
-    if len(line) == 2:
-        out_file.write(' {} {}\n'.format(*line))
-    if len(line) == 3:
-        out_file.write('  {} {} {}\n'.format(*line))
-    if len(line) == 4:
-        out_file.write('  {} {} {} {}\n'.format(*line))
-
-out_file.write(' end\n')
-
-out_file.close()
+    out_file = sys.stdout
+    out_file.write(convert_basis_int(inp_file_contents))
