@@ -1,15 +1,21 @@
 #!/usr/bin/env python
 
 import argparse
-import subprocess
-import os.path
+import subprocess as sp
 import os
 import socket
 import shutil
 
-parser = argparse.ArgumentParser(description='Compare Q-Chem test outputs with reference outputs. $QC, $QCREF, and $QCPLATFORM must be defined.')
-parser.add_argument('--copy', dest='copy', action='store_true', help='Copy the problem outputs to ~/qchem_test_outputs with the appropriate hostname.')
-parser.add_argument('--delim', dest='delim', default=socket.gethostname(), help='The (hopefully) unique delimiter added for the copied test outputs.')
+parser_description = '''Compare Q-Chem test outputs with reference outputs.
+$QC, $QCREF, and $QCPLATFORM must be defined.'''
+
+parser = argparse.ArgumentParser(description=parser_description)
+parser.add_argument('--copy', dest='copy', action='store_true',
+                    help='''Copy the problem outputs to ~/qchem_test_outputs
+                    with the appropriate hostname.''')
+parser.add_argument('--delim', dest='delim', default=socket.gethostname(),
+                    help='''The (hopefully) unique delimiter added for the
+                    copied test outputs.''')
 args = parser.parse_args()
 copy = args.copy
 delim = args.delim
@@ -19,7 +25,7 @@ os.chdir(os.path.expandvars('$QC/test'))
 command1 = os.path.expandvars('csh -f $QC/test/tablecompare.csh')
 tablecompare = subprocess.check_output(command1.split())
 
-print tablecompare
+print(tablecompare)
 
 command2_stub = os.path.expandvars('csh -f $QC/util/cronutil/monCompare.csh -v ')
 output_path = os.path.expandvars('$HOME/qchem_test_outputs')
@@ -33,14 +39,14 @@ for line in tablecompare.splitlines():
         # The monCompare script will return 1 if outputs differ; who cares,
         # we just want the output.
         try:
-            diff = subprocess.check_output(command2.split())
-        except subprocess.CalledProcessError as e:
-            diff = e.output
-        print '=========='
-        print 'job:', l[1]
-        print diff
-        print '=========='
-        print '\n'
+            diff = sp.check_output(command2.split()).decode()
+        except sp.CalledProcessError as e:
+            diff = e.output.decode()
+        print('=' * 78)
+        print('job:', l[1])
+        print(diff)
+        print('=' * 78)
+        print('\n')
         if copy:
             if not os.path.exists(output_path):
                 os.makedirs(output_path)
