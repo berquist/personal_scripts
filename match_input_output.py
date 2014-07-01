@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 
-"""match_input_output.py: Given input and output file extensions, determine
+'''match_input_output.py: Given input and output file extensions, determine
 which ones don't have matching partners (in the current directory),
 and print the result.
-"""
+'''
 
 import argparse
 import os
 import glob
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument('ext_inp')
@@ -29,7 +30,7 @@ outputs_stubs = [os.path.splitext(f)[0] for f in outputs]
 # Loop through each list of stubs separately.
 for iidx, istub in enumerate(inputs_stubs):
     if istub not in outputs_stubs:
-        print inputs[iidx]
+        print(inputs[iidx])
 for oidx, ostub in enumerate(outputs_stubs):
     if ostub not in inputs_stubs:
-        print outputs[oidx]
+        print(outputs[oidx])

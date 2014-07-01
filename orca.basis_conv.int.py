@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-"""orca.basis_conv.int.py: Convert a GAMESS-US formatted basis file from
-EMSL into something usable by ORCA as an internal basis."""
+'''orca.basis_conv.int.py: Convert a GAMESS-US formatted basis file from
+EMSL into something usable by ORCA as an internal basis.'''
 
 if __name__ == '__main__':
 
