@@ -3,7 +3,7 @@
 # Original script by Felix Plasser (http://www.chemical-quantum-images.blogspot.de)
 # Modified by Jan-Michael Mewes (http://workadayqc.blogspot.de)
 # Converted to Python by Eric Berquist (https://github.com/berquist)
-# 
+#
 # 0. $pointval mo 65-74 (Turbomole), plots (Q-Chem), %plots (ORCA), ...
 # 1. call this script (choose 2 or 3 surfaces)
 # 2. open the molecular structure file in VMD
@@ -22,19 +22,21 @@
 
 """
 
-ifmt = ['cube']
+from glob import glob
+
+ifmt = 'cube'
 ofmt = 'tga'
 
 out = 'load_all_plt.vmd'
 plot = 'plot_all.vmd'
 conv = 'convert.bash'
-html = 'vmd_plts.html'
+html = 'vmd_plots.html'
 ncol = 4
 
 import argparse
 parser = argparse.ArgumentParser()
-parser.add_argument('--nsurf', choices = [2, 3], default = 3, type = int)
-parser.add_argument('--maxiso', nargs = '?', type = float)
+parser.add_argument('--nsurf', choices=[2, 3], default=3, type=int)
+parser.add_argument('--maxiso', nargs='?', type=float)
 args = parser.parse_args()
 
 nsurf = args.nsurf
@@ -46,18 +48,17 @@ if not maxiso:
     if nsurf == 2:
         maxiso = 0.01
     elif nsurf == 3:
-        maxiso = 0.0128    
+        maxiso = 0.0128
 
 outfile = open(out, 'wb')
 plotfile = open(plot, 'wb')
 convfile = open(conv, 'wb')
 htmlfile = open(html, 'wb')
 
-print(args)
-
 # set the appropriate isovalues
 if nsurf == 2:
     print('Using 2 surfaces for isovalues:')
+    # an isovalue of 0.99 will produce no surface
     isov = [maxiso, maxiso/8.0, 0.99]
     print(isov[0], isov[1])
 elif nsurf == 3:
@@ -73,8 +74,9 @@ elif nsurf == 3:
     outfile.write('material change opacity Glass3 0.40\n')
 
 # write the main portion of the VMD display file
-vmdrenderfile = '''
-axes location Off
+color1id = 23
+color2id = 29
+vmdrenderfile = '''axes location Off
 display projection Orthographic
 display rendermode GLSL
 display depthcue off
@@ -90,8 +92,8 @@ mol addrep 0
 mol addrep 0
 mol addrep 0
 mol addrep 0
-mol modmaterial 1 0 Opaque
-mol modmaterial 2 0 Opaque
+mol modmaterial 1 0 HardPlastic
+mol modmaterial 2 0 HardPlastic
 mol modmaterial 3 0 Glass3
 mol modmaterial 4 0 Glass3
 mol modmaterial 5 0 Ghost
@@ -102,13 +104,14 @@ mol modstyle 3 0 Isosurface  {isov2} 0 0 0 1 1
 mol modstyle 4 0 Isosurface -{isov2} 0 0 0 1 1
 mol modstyle 5 0 Isosurface  {isov3} 0 0 0 1 1
 mol modstyle 6 0 Isosurface -{isov3} 0 0 0 1 1
-mol modcolor 1 0 ColorID 0
-mol modcolor 2 0 ColorID 1
-mol modcolor 3 0 ColorID 0
-mol modcolor 4 0 ColorID 1
-mol modcolor 5 0 ColorID 0
-mol modcolor 6 0 ColorID 1
-'''.format(isov1=isov[0], isov2=isov[1], isov3=isov[2])
+mol modcolor 1 0 ColorID {color1}
+mol modcolor 2 0 ColorID {color2}
+mol modcolor 3 0 ColorID {color1}
+mol modcolor 4 0 ColorID {color2}
+mol modcolor 5 0 ColorID {color1}
+mol modcolor 6 0 ColorID {color2}
+'''.format(isov1=isov[0], isov2=isov[1], isov3=isov[2],
+           color1=color1id, color2=color2id)
 outfile.write(vmdrenderfile)
 
 convfile.write('#!/bin/bash\n')
@@ -118,9 +121,9 @@ htmlfile.write('<html>\n<head></head>\n<body>\n')
 htmlfile.write('<table>\n<tr>\n')
 
 N = 0
-for I in ifmt:
+for I in sorted(glob('*{}'.format(ifmt))):
 
-    vmdrenderfile = '''mol addfile *{}\n'''.format(I)
+    vmdrenderfile = '''mol addfile {}\n'''.format(I)
     outfile.write(vmdrenderfile)
 
     vmdplotfile = '''
@@ -133,20 +136,19 @@ mol modstyle 6 0 Isosurface -{isov3} {N} 0 0 1 1
 render options POV3 "+W%w +H%h -I%s -O%s.{ofmt} -D +X +C +A +AM2 +R9 +FN10 +UA +Q11"
 render POV3 {I}.{ofmt}
 #render TachyonInternal {I}.{ofmt}
-'''.format(I = I, N = N, ofmt = ofmt,
-           isov1 = isov[0], isov2 = isov[1], isov3 = isov[2])
+'''.format(I=I, N=N, ofmt=ofmt,
+           isov1=isov[0], isov2=isov[1], isov3=isov[2])
     plotfile.write(vmdplotfile)
 
     imageconvfile = '''
 convert {I}.{ofmt} {I}.png
 rm {I}.{ofmt}
-'''.format(I = I, ofmt = ofmt)
+'''.format(I=I, ofmt=ofmt)
     convfile.write(imageconvfile)
 
-    htmlentry = '''
-<td><img src=\"{I}.png\" border=\"1\" width=\"400\">
+    htmlentry = '''<td><img src=\"{I}.png\" border=\"1\" width=\"400\">
 {I}<br></td>
-'''.format(I = I)
+'''.format(I=I)
     htmlfile.write(htmlentry)
 
     N += 1
