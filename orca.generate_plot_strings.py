@@ -3,7 +3,7 @@
 """Generate an ORCA input file specifically for plotting cube files.
 
 Usage:
-  generate_plot_strings.py [options] [--canon=canon_list] [--uno=uno_list]
+  orca.generate_plot_strings.py [options] [--canon=canon_list] [--uno=uno_list]
 
 Options:
   --prefix=PREFIX  Append a prefix to all generated files.
@@ -12,6 +12,27 @@ Options:
   --beta           Orbital file contains separate beta spins/orbitals.
   --dim=DIM        Number of points in each dimension. [default: 40]
   --print_args     Print the parsed argument block.
+
+Examples:
+  orca.generate_plot_strings.py --spindens --beta --uno=4,5,6,7 --prefix='example' --canon=1,2,10
+   outputs:
+    %plots
+     format gaussian_cube
+     dim1 40
+     dim2 40
+     dim3 40
+     spindens("example.density.spin.cube");
+     mo("example.mo.1a.cube", 1, 0);
+     mo("example.mo.1b.cube", 1, 1);
+     mo("example.mo.2a.cube", 2, 0);
+     mo("example.mo.2b.cube", 2, 1);
+     mo("example.mo.10a.cube", 10, 0);
+     mo("example.mo.10b.cube", 10, 1);
+     uno("example.uno.4.cube");
+     uno("example.uno.5.cube");
+     uno("example.uno.6.cube");
+     uno("example.uno.7.cube");
+     end
 """
 
 from docopt import docopt
