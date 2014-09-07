@@ -22,20 +22,23 @@
 
 """
 
+import argparse
+import os
 from glob import glob
 
+
 ifmt = 'cube'
-ofmt = 'tga'
+ofmt = 'png'
 
 out = 'load_all_plt.vmd'
 plot = 'plot_all.vmd'
-conv = 'convert.bash'
+# conv = 'convert.bash'
 html = 'vmd_plots.html'
+povrayscript = 'povray.bash'
 ncol = 4
 
-import argparse
 parser = argparse.ArgumentParser()
-parser.add_argument('--nsurf', choices=[2, 3], default=3, type=int)
+parser.add_argument('--nsurf', choices=[1, 2, 3], default=3, type=int)
 parser.add_argument('--maxiso', nargs='?', type=float)
 args = parser.parse_args()
 
@@ -52,8 +55,9 @@ if not maxiso:
 
 outfile = open(out, 'wb')
 plotfile = open(plot, 'wb')
-convfile = open(conv, 'wb')
+# convfile = open(conv, 'wb')
 htmlfile = open(html, 'wb')
+povrayfile = open(povrayscript, 'wb')
 
 # set the appropriate isovalues
 if nsurf == 2:
@@ -114,8 +118,10 @@ mol modcolor 6 0 ColorID {color2}
            color1=color1id, color2=color2id)
 outfile.write(vmdrenderfile)
 
-convfile.write('#!/bin/bash\n')
-# os.fchmod(convfile, )
+# convfile.write('#!/bin/bash\n\n')
+povrayfile.write('#!/bin/bash\n\n')
+# os.chmod(conv, 0755)
+os.chmod(povrayscript, 0755)
 
 htmlfile.write('<html>\n<head></head>\n<body>\n')
 htmlfile.write('<table>\n<tr>\n')
@@ -126,6 +132,10 @@ for I in sorted(glob('*{}'.format(ifmt))):
     vmdrenderfile = '''mol addfile {}\n'''.format(I)
     outfile.write(vmdrenderfile)
 
+    # generate the POV-Ray input files
+    povray_string_template = 'povray +W{{width}} +H{{height}} -I{{filename}}.pov -O{{filename}}.pov.{ofmt} -D +X +C +A +AM2 +R9 +FN10 +UA +Q11'.format(ofmt=ofmt)
+    povray_string = povray_string_template.format(width='%w', height='%h', filename='%s')
+    render_options_string = 'render options POV3 "{povray_string}"'.format(povray_string=povray_string)
     vmdplotfile = '''
 mol modstyle 1 0 Isosurface  {isov1} {N} 0 0 1 1
 mol modstyle 2 0 Isosurface -{isov1} {N} 0 0 1 1
@@ -133,18 +143,18 @@ mol modstyle 3 0 Isosurface  {isov2} {N} 0 0 1 1
 mol modstyle 4 0 Isosurface -{isov2} {N} 0 0 1 1
 mol modstyle 5 0 Isosurface  {isov3} {N} 0 0 1 1
 mol modstyle 6 0 Isosurface -{isov3} {N} 0 0 1 1
-render options POV3 "+W%w +H%h -I%s -O%s.{ofmt} -D +X +C +A +AM2 +R9 +FN10 +UA +Q11"
-render POV3 {I}.{ofmt}
-#render TachyonInternal {I}.{ofmt}
+{render_options_string}
+render POV3 {I}.pov
 '''.format(I=I, N=N, ofmt=ofmt,
-           isov1=isov[0], isov2=isov[1], isov3=isov[2])
+           isov1=isov[0], isov2=isov[1], isov3=isov[2],
+           render_options_string=render_options_string)
     plotfile.write(vmdplotfile)
 
-    imageconvfile = '''
-convert {I}.{ofmt} {I}.png
-rm {I}.{ofmt}
-'''.format(I=I, ofmt=ofmt)
-    convfile.write(imageconvfile)
+#     imageconvfile = '''
+# convert {I}.pov.{ofmt} {I}.png
+# rm {I}.{ofmt}
+# '''.format(I=I, ofmt=ofmt)
+#     convfile.write(imageconvfile)
 
     htmlentry = '''<td><img src=\"{I}.png\" border=\"1\" width=\"400\">
 {I}<br></td>
@@ -160,7 +170,8 @@ htmlfile.write('</body>\n</html>\n')
 
 outfile.close()
 plotfile.close()
-convfile.close()
+# convfile.close()
 htmlfile.close()
+povrayfile.close()
 
 print('... finished.')
