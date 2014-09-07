@@ -85,6 +85,7 @@ display projection Orthographic
 display rendermode GLSL
 display depthcue off
 color Display Background white
+color Element C gray
 menu graphics on
 material change diffuse Ghost 0.000000
 material change ambient Ghost 0.300000
@@ -96,6 +97,8 @@ mol addrep 0
 mol addrep 0
 mol addrep 0
 mol addrep 0
+mol modstyle 0 0 Licorice 0.200000 100.000000 100.000000
+mol modmaterial 0 0 HardPlastic
 mol modmaterial 1 0 HardPlastic
 mol modmaterial 2 0 HardPlastic
 mol modmaterial 3 0 Glass3
