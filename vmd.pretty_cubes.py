@@ -48,7 +48,9 @@ maxiso = args.maxiso
 # if the maximum isosurface value isn't set, define it based on the number
 # of desired surfaces:
 if not maxiso:
-    if nsurf == 2:
+    if nsurf == 1:
+        maxiso = 0.0128
+    elif nsurf == 2:
         maxiso = 0.01
     elif nsurf == 3:
         maxiso = 0.0128
@@ -60,18 +62,23 @@ htmlfile = open(html, 'wb')
 povrayfile = open(povrayscript, 'wb')
 
 # set the appropriate isovalues
-if nsurf == 2:
-    print('Using 2 surfaces for isovalues:')
+print('Using {} surfaces for isovalues:'.format(nsurf))
+if nsurf == 1:
+    # an isovalue of 0.99 will produce no surface
+    isov = [maxiso, 0.99, 0.99]
+    print(isov[0])
+elif nsurf == 2:
     # an isovalue of 0.99 will produce no surface
     isov = [maxiso, maxiso/8.0, 0.99]
     print(isov[0], isov[1])
 elif nsurf == 3:
-    print('Using 3 surfaces for isovalues:')
     isov = [maxiso, maxiso/4.0, maxiso/16.0]
     print(isov[0], isov[1], isov[2])
 
 # set opacity and diffuseness based on the number of isosurfaces
-if nsurf == 2:
+if nsurf == 1:
+    outfile.write('\n')
+elif nsurf == 2:
     outfile.write('material change opacity Glass3 0.15\n')
     outfile.write('material change diffuse Glass3 0.10\n')
 elif nsurf == 3:

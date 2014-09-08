@@ -4,6 +4,7 @@
 POV-Ray files in a directory.'''
 
 from glob import glob
+import os
 
 bashfilename = 'povray.bash'
 with open(bashfilename, 'wb') as bashfile:
@@ -18,3 +19,4 @@ with open(bashfilename, 'wb') as bashfile:
                     break
         runstring = 'povray +W{width} +H{height} -I{filename} -O{filename}.png -D +X +C +A +AM2 +R9 +FN10 +UA +Q11'
         bashfile.write(''.join([runstring.format(width=width, height=height, filename=povrayinputfilename), '\n']))
+os.chmod(bashfilename, 0755)
