@@ -27,17 +27,17 @@ Examples:
  dim2 40
  dim3 40
  spindens("example.density.spin.cube");
+ uno("example.uno.0.cube", 0);
+ uno("example.uno.4.cube", 4);
+ uno("example.uno.5.cube", 5);
+ uno("example.uno.6.cube", 6);
+ uno("example.uno.7.cube", 7);
  mo("example.mo.1a.cube", 1, 0);
  mo("example.mo.1b.cube", 1, 1);
  mo("example.mo.2a.cube", 2, 0);
  mo("example.mo.2b.cube", 2, 1);
  mo("example.mo.10a.cube", 10, 0);
  mo("example.mo.10b.cube", 10, 1);
- uno("example.uno.0.cube", 0);
- uno("example.uno.4.cube", 4);
- uno("example.uno.5.cube", 5);
- uno("example.uno.6.cube", 6);
- uno("example.uno.7.cube", 7);
  end
 """
 
@@ -122,17 +122,18 @@ def generate_block(args):
     if args['--spindens'] and args['--beta']:
         block_parts.append(' ' + spindens_string(prefix))
 
+    # plot the UNOs first due to an 'operator' bug in ORCA
+    if args['--uno']:
+        args['--uno'] = arg_to_list(args['--uno'])
+        for uno_num in args['--uno']:
+            block_parts.append(' ' + uno_string(prefix, uno_num))
+
     if args['--canon']:
         args['--canon'] = arg_to_list(args['--canon'])
         for mo_num in args['--canon']:
             block_parts.append(' ' + mo_string(prefix, mo_num, 0))
             if args['--beta']:
                 block_parts.append(' ' + mo_string(prefix, mo_num, 1))
-
-    if args['--uno']:
-        args['--uno'] = arg_to_list(args['--uno'])
-        for uno_num in args['--uno']:
-            block_parts.append(' ' + uno_string(prefix, uno_num))
 
     block_parts.append(' end')
 
