@@ -34,7 +34,6 @@ out = 'load_all_plt.vmd'
 plot = 'plot_all.vmd'
 # conv = 'convert.bash'
 html = 'vmd_plots.html'
-povrayscript = 'povray.bash'
 ncol = 4
 
 parser = argparse.ArgumentParser()
@@ -59,7 +58,6 @@ outfile = open(out, 'wb')
 plotfile = open(plot, 'wb')
 # convfile = open(conv, 'wb')
 htmlfile = open(html, 'wb')
-povrayfile = open(povrayscript, 'wb')
 
 # set the appropriate isovalues
 print('Using {} surfaces for isovalues:'.format(nsurf))
@@ -88,11 +86,13 @@ elif nsurf == 3:
 color1id = 23
 color2id = 29
 vmdrenderfile = '''axes location Off
+display resize 1050 1050
 display projection Orthographic
 display rendermode GLSL
 display depthcue off
 color Display Background white
 color Element C gray
+color Element Cu orange
 menu graphics on
 material change diffuse Ghost 0.000000
 material change ambient Ghost 0.300000
@@ -104,6 +104,7 @@ mol addrep 0
 mol addrep 0
 mol addrep 0
 mol addrep 0
+mol modcolor 0 0 Element
 mol modstyle 0 0 Licorice 0.200000 100.000000 100.000000
 mol modmaterial 0 0 HardPlastic
 mol modmaterial 1 0 HardPlastic
@@ -129,9 +130,7 @@ mol modcolor 6 0 ColorID {color2}
 outfile.write(vmdrenderfile)
 
 # convfile.write('#!/bin/bash\n\n')
-povrayfile.write('#!/bin/bash\n\n')
 # os.chmod(conv, 0755)
-os.chmod(povrayscript, 0755)
 
 htmlfile.write('<html>\n<head></head>\n<body>\n')
 htmlfile.write('<table>\n<tr>\n')
@@ -143,6 +142,7 @@ for I in sorted(glob('*{}'.format(ifmt))):
     outfile.write(vmdrenderfile)
 
     # generate the POV-Ray input files
+    # I don't think changing the default POV-Ray render options really makes a difference...
     povray_string_template = 'povray +W{{width}} +H{{height}} -I{{filename}}.pov -O{{filename}}.pov.{ofmt} -D +X +C +A +AM2 +R9 +FN10 +UA +Q11'.format(ofmt=ofmt)
     povray_string = povray_string_template.format(width='%w', height='%h', filename='%s')
     render_options_string = 'render options POV3 "{povray_string}"'.format(povray_string=povray_string)
@@ -182,6 +182,5 @@ outfile.close()
 plotfile.close()
 # convfile.close()
 htmlfile.close()
-povrayfile.close()
 
 print('... finished.')
