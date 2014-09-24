@@ -16,14 +16,14 @@ ncols = 6
 
 header_mo = 'LOEWDIN REDUCED ORBITAL POPULATIONS PER MO'
 header_uno = 'LOEWDIN REDUCED ORBITAL POPULATIONS PER UNO'
-header_unso = 'LOEWDIN REDUCED ORBITAL POPULATIONS PER UNSO'
+# header_unso = 'LOEWDIN REDUCED ORBITAL POPULATIONS PER UNSO'
 
 energies = list()
 occupations = list()
 orbitals = dict()
 
 
-def parse_line(line, max_mo_index):
+def parse_line(line, max_mo_index, spin):
     ''''''
     split = line.split()
     idx_atom = int(split[0])
@@ -32,7 +32,7 @@ def parse_line(line, max_mo_index):
     contribs = list(map(float, split[3:]))
     mo_indices = list(range(max_mo_index - len(contribs), max_mo_index))
     for i, contrib in enumerate(contribs):
-        entry = (idx_atom, element, orbital_name, contrib)
+        entry = (idx_atom, element, orbital_name, contrib, spin)
         try:
             orbitals[mo_indices[i]].append(entry)
         except KeyError:
@@ -41,18 +41,21 @@ def parse_line(line, max_mo_index):
 
 def parse_section(outputfile):
     ''''''
+    alpha, beta = 0, 1
     # skip the dashes and the threshold for printing
     next(outputfile)
     next(outputfile)
     # "SPIN UP"
     if has_beta and args['canon']:
         next(outputfile)
-    parse_block(outputfile)
+    parse_block(outputfile, alpha)
+    # "SPIN DOWN"
+    next(outputfile)
     if has_beta and args['canon']:
-        return
+        parse_block(outputfile, beta)
 
 
-def parse_block(outputfile):
+def parse_block(outputfile, spin):
     ''''''
     counter = 0
     while counter < (nmo - 1):
@@ -69,7 +72,7 @@ def parse_block(outputfile):
         line = next(outputfile)
         # an arbitrary (>= 1) number of lines contains 9 columns; this is the goods!
         while line != '\n':
-            parse_line(line, counter + 1)
+            parse_line(line, counter + 1, spin)
             line = next(outputfile)
 
 
@@ -87,13 +90,22 @@ def get_orbital_contribs_within_threshold(orbitals, threshold, max_orbital):
     return neworbitals
 
 
-def pretty_print_orbitals(orbitals):
+def pretty_print_orbitals(orbitals, has_beta):
     ''''''
-    contrib_template = ' {:3} {:2} {:5} {:5}'
+    spins = {0: 'alpha', 1: 'beta'}
+    if not has_beta:
+        header_template = ' {key} {en_alpha}'
+        contrib_template = '  {:3} {:2} {:5} {:5}'
+    else:
+        header_template = ' {key} {en_alpha} {en_beta}'
+        contrib_template = '  {:3} {:2} {:5} {:5} {spin:5}'
     for key in orbitals.iterkeys():
-        print(key)
+        header_dict = {'key': key,
+                       'en_alpha': energies[key],
+                       'en_beta': energies[key + (has_beta * nmo)]}
+        print(header_template.format(**header_dict))
         for contrib in orbitals[key]:
-            print(contrib_template.format(*contrib))
+            print(contrib_template.format(*contrib[0:4], spin=spins[contrib[4]]))
 
 
 if __name__ == '__main__':
@@ -135,4 +147,5 @@ if __name__ == '__main__':
 
     threshold = float(args['--threshold'])
     filtered_mos = get_orbital_contribs_within_threshold(orbitals, threshold, max_orbital)
-    pretty_print_orbitals(filtered_mos)
+    print(header)
+    pretty_print_orbitals(filtered_mos, has_beta)
