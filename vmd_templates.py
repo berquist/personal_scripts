@@ -12,7 +12,8 @@ display culling off
 display rendermode GLSL
 display projection orthographic
 display resize 1050 1050
-axes location Off
+axes location off
+menu graphics on
 
 # general color settings
 color Element C gray
@@ -34,53 +35,100 @@ material change transmode    GlassBubble2 1.000000
 
 
 def vmd_covp_load_xyzfile(xyzfilename):
+    color1 = 23 # blue2
+    color2 = 30 # red3
+    color3 = 21 # cyan2
+    color4 = 13 # mauve
     return '''
 # load the base XYZ file
 mol new {{{xyzfilename}}} type {{xyz}} first 0 last -1 step 1 waitfor 1
 mol modcolor 0 0 Element
 mol modmaterial 0 0 HardPlastic
 mol modstyle 0 0 CPK 1.000000 0.300000 100.000000 100.000000
-'''.format(xyzfilename=xyzfilename)
+
+# add representations for 4 isosurfaces: 1 COVP, 2 phases (opposite sign)
+mol addrep 0
+mol addrep 0
+mol addrep 0
+mol addrep 0
+
+mol modstyle 1 0 Isosurface  0.05 0 0 0 1 1
+mol modstyle 2 0 Isosurface -0.05 0 0 0 1 1
+mol modstyle 3 0 Isosurface  0.05 0 0 0 1 1
+mol modstyle 4 0 Isosurface -0.05 0 0 0 1 1
+
+mol modcolor 1 0 ColorID {color1}
+mol modcolor 2 0 ColorID {color2}
+mol modcolor 3 0 ColorID {color3}
+mol modcolor 4 0 ColorID {color4}
+
+mol modmaterial 1 0 GlassBubble2
+mol modmaterial 2 0 GlassBubble2
+mol modmaterial 3 0 GlassBubble2
+mol modmaterial 4 0 GlassBubble2
+
+'''.format(color1=color1, color2=color2, color3=color3, color4=color4,
+           xyzfilename=xyzfilename)
 
 
-def vmd_covp_plot_pair(moidx1, moidx2, vmdidx1, vmdidx2):
+## parameters for pair {moidx1}, {moidx2}
+#mol new {{mo.{moidx1}.cube}} type {{cube}} first 0 last -1 step 1 waitfor 1 volsets {{0 }}
+#mol new {{mo.{moidx2}.cube}} type {{cube}} first 0 last -1 step 1 waitfor 1 volsets {{0 }}
+
+
+def vmd_covp_pair_load(moidx1, moidx2, vmdidx1, vmdidx2):
     return '''
-# parameters for pair {moidx1},{moidx2}
-mol new {{mo.{moidx1}.cube}} type {{cube}} first 0 last -1 step 1 waitfor 1 volsets {{0 }}
-mol new {{mo.{moidx2}.cube}} type {{cube}} first 0 last -1 step 1 waitfor 1 volsets {{0 }}
-
-mol addrep {vmdidx1}
-mol addrep {vmdidx1}
-mol addrep {vmdidx2}
-mol addrep {vmdidx2}
-
-mol modstyle 1 {vmdidx1} Isosurface  0.05 0 0 0 1 1
-mol modstyle 2 {vmdidx1} Isosurface -0.05 0 0 0 1 1
-mol modstyle 1 {vmdidx2} Isosurface  0.05 0 0 0 1 1
-mol modstyle 2 {vmdidx2} Isosurface -0.05 0 0 0 1 1
-
-mol modcolor 1 {vmdidx1} ColorID 23 # blue2
-mol modcolor 2 {vmdidx1} ColorID 30 # red3
-mol modcolor 1 {vmdidx2} ColorID 21 # cyan2
-mol modcolor 2 {vmdidx2} ColorID 13 # mauve
-
-mol modmaterial 1 {vmdidx1} GlassBubble2
-mol modmaterial 2 {vmdidx1} GlassBubble2
-mol modmaterial 1 {vmdidx2} GlassBubble2
-mol modmaterial 2 {vmdidx2} GlassBubble2
+mol addfile mo.{moidx1}.cube
+mol addfile mo.{moidx2}.cube
 '''.format(moidx1=moidx1,
            moidx2=moidx2,
            vmdidx1=vmdidx1,
            vmdidx2=vmdidx2)
 
 
-def vmd_covp_write_file(vmdfile, xyzfilename, mo_pairs, width):
-    vmdfile.write(vmd_covp_base_template())
-    vmdfile.write(vmd_covp_load_xyzfile(xyzfilename))
+def vmd_covp_pair_render(moidx1, moidx2, vmdidx1, vmdidx2):
+    return '''
+mol modstyle 1 0 Isosurface  0.05 {vmdidx1} 0 0 1 1
+mol modstyle 2 0 Isosurface -0.05 {vmdidx1} 0 0 1 1
+mol modstyle 3 0 Isosurface  0.05 {vmdidx2} 0 0 1 1
+mol modstyle 4 0 Isosurface -0.05 {vmdidx2} 0 0 1 1
+render TachyonInternal COVP_{moidx1}_{moidx2}.tga
+'''.format(moidx1=moidx1,
+           moidx2=moidx2,
+           vmdidx1=vmdidx1,
+           vmdidx2=vmdidx2)
+
+
+def vmd_covp_write_file_load(loadfile, xyzfilename, mo_pairs, width):
+    loadfile.write(vmd_covp_base_template())
+    loadfile.write(vmd_covp_load_xyzfile(xyzfilename))
     for idx, mo_pair in enumerate(mo_pairs):
         moidx1 = pad_left_zeros(mo_pair[0], width)
         moidx2 = pad_left_zeros(mo_pair[1], width)
-        vmdfile.write(vmd_covp_plot_pair(moidx1, moidx2, (2*idx)+1, (2*idx)+2))
+        vmdidx1 = (2 * idx)
+        vmdidx2 = vmdidx1 + 1
+        loadfile.write(vmd_covp_pair_load(moidx1, moidx2, vmdidx1, vmdidx2))
+
+
+def vmd_covp_write_file_render(renderfile, mo_pairs, width):
+    for idx, mo_pair in enumerate(mo_pairs):
+        moidx1 = pad_left_zeros(mo_pair[0], width)
+        moidx2 = pad_left_zeros(mo_pair[1], width)
+        vmdidx1 = (2 * idx)
+        vmdidx2 = vmdidx1 + 1
+        renderfile.write(vmd_covp_pair_render(moidx1, moidx2, vmdidx1, vmdidx2))
+
+
+def vmd_covp_write_files(loadfile, renderfile, xyzfilename, mo_pairs, width):
+    loadfile.write(vmd_covp_base_template())
+    loadfile.write(vmd_covp_load_xyzfile(xyzfilename))
+    for idx, mo_pair in enumerate(mo_pairs):
+        moidx1 = pad_left_zeros(mo_pair[0], width)
+        moidx2 = pad_left_zeros(mo_pair[1], width)
+        vmdidx1 = (2 * idx)
+        vmdidx2 = vmdidx1 + 1
+        loadfile.write(vmd_covp_pair_load(moidx1, moidx2, vmdidx1, vmdidx2))
+        renderfile.write(vmd_covp_pair_render(moidx1, moidx2, vmdidx1, vmdidx2))
 
 
 def pad_left_zeros(num, maxwidth):
@@ -97,15 +145,4 @@ def pad_left_zeros(num, maxwidth):
 
 if __name__ == '__main__':
 
-    import argparse
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument('xyzfilename')
-    # args = parser.parse_args()
-    # xyzfilename = args.xyzfilename
-
-    # with open('vmd.load', 'w') as vmdfile:
-    #     with open('vmd.render', 'w') as renderfile:
-    #         vmdfile.write(vmd_covp_base_template())
-    #         vmdfile.write(vmd_covp_load_xyzfile(xyzfilename))
-    #         for idx, mo in enumerate(mos):
-    #             vmdfile.write(vmd_covp_plot_pair(mo[0], mo[1], (2*idx)+1, (2*idx)+2))
+    pass
