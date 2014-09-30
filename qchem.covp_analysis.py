@@ -77,23 +77,12 @@ def determine_fragment_indices(fragment_1_to_2, fragment_2_to_1):
     NOccT = idx_homo + 1
     NVirtT = nmo - NOccT
     NOrbT = NOccT + NVirtT
-    if NCOVP1 < NCOVP2:
-        NOcc1 = NCOVP1
-        NVirt1 = NCOVP2
-        NOrb1 = NOcc1 + NVirt1
-        NOcc2 = NOccT - NOcc1
-        NVirt2 = NVirtT - NVirt1
-        NOrb2 = NOcc2 + NVirt2
-    elif NCOVP2 < NCOVP1:
-        NOcc2 = NCOVP2
-        NVirt2 = NCOVP1
-        NOrb2 = NOcc2 + NVirt2
-        NOcc1 = NOccT - NOcc2
-        NVirt1 = NVirtT - NVirt2
-        NOrb1 = NOcc1 + NVirt1
-    else:
-        # not going to worry about this yet...
-        pass
+    NOcc1 = NCOVP1
+    NOcc2 = NCOVP2
+    NVirt1 = find_nvirt1(covpenergies, NOccT)
+    NVirt2 = NVirtT - NVirt1
+    NOrb1 = NOcc1 + NVirt1
+    NOrb2 = NOcc2 + NVirt2
     assert NOccT == NOcc1 + NOcc2
     assert NVirtT == NVirt1 + NVirt2
     assert NOrbT == NOrb1 + NOrb2
@@ -126,6 +115,24 @@ def determine_fragment_indices(fragment_1_to_2, fragment_2_to_1):
         entry['orb_virt'] = entry['index'] + NOcc1 + NOcc2
 
 
+def find_virt_1_index(covpenergies):
+    '''
+    '''
+    energylist = list(covpenergies)
+    energy_frag_1_occ = energylist[0]
+    # this is obviously not bulletproof...
+    idx_virt_1 = energylist.index(energy_frag_1_occ, 1)
+    print(idx_virt_1)
+    return idx_virt_1
+
+
+def find_nvirt1(covpenergies, nocc_t):
+    '''
+    '''
+    nvirt_1 = find_virt_1_index(covpenergies) - nocc_t
+    return nvirt_1
+
+
 if __name__ == '__main__':
 
     from docopt import docopt
@@ -147,6 +154,7 @@ if __name__ == '__main__':
     cclib_data = cclib_job.parse()
     nmo = cclib_data.nmo
     idx_homo = cclib_data.homos[0]
+    covpenergies = cclib_data.moenergies[-1]
 
     fragment_1_to_2 = []
     fragment_2_to_1 = []
@@ -199,7 +207,17 @@ if __name__ == '__main__':
     if args['--plot']:
         width = len(str(nmo))
         # Plot every COVP within the de% cutoff.
-        with open('vmd.load_fragment_1_to_2', 'w') as f12_file:
-            vmd_covp_write_file(f12_file, xyzfilename, fragment_1_to_2_pairs, width)
-        with open('vmd.load_fragment_2_to_1', 'w') as f21_file:
-            vmd_covp_write_file(f21_file, xyzfilename, fragment_2_to_1_pairs, width)
+        with open('vmd.fragment_1_to_2.load', 'w') as f12_file_load:
+            with open('vmd.fragment_1_to_2.render', 'w') as f12_file_render:
+                vmd_covp_write_files(f12_file_load,
+                                     f12_file_render,
+                                     xyzfilename,
+                                     fragment_1_to_2_pairs,
+                                     width)
+        with open('vmd.fragment_2_to_1.load', 'w') as f21_file_load:
+            with open('vmd.fragment_2_to_1.render', 'w') as f21_file_render:
+                vmd_covp_write_files(f21_file_load,
+                                     f21_file_render,
+                                     xyzfilename,
+                                     fragment_2_to_1_pairs,
+                                     width)
