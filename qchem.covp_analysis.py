@@ -51,46 +51,79 @@ def determine_fragment_indices(fragment_1_to_2, fragment_2_to_1):
     '''
     Determine the actual orbital indices each COVP corresponds to.
 
-    When dumping COVPs to cube files, the ordering is:
-    1. fragment 1 occupied        (len: f1 occ)
-    2. fragment 2 occupied        (len: f2 occ)
-    3. fragment 2 virtual         (len: f2 occ)
-    4. ??? (remainder of f. virt) (len: f2 occ)
-    5. fragment 1 virtual         (len: f1 occ)
-    6. ??? (remainder of f. virt) (len: ???)
+    We define an 'occupied' orbital as one charge is being donated from, and
+    a 'virtual' orbital as one charge is being donated to.
+
+    Example
+    =======
+    1 to 2:  1 -> 211
+    2 to 1: 42 ->  53
+
+    We consider 1 and 42 as being occupied, and 211 and 53 as being virtual.
+    211 and 53 are occupieds belonging to 1 and 2, respectively; this routine's
+    convention is to say occupied orbitals are on the *opposite* fragment. This
+    is to correspond with the "Orbital Energy" block in the output file.
+
+    When dumping COVPs to cube files, the ordering is then:
+    [lengths are of actual canonical orbitals]
+    1. fragment 1 "occupied"        (len: NOcc1)
+    2. fragment 2 "occupied"        (len: NOcc2)
+    3. fragment 2 "virtual"         (len: NVirt1)
+    4. fragment 1 "virtual"         (len: NVirt2)
     '''
-    num_frag1_occ = len(fragment_1_to_2)
-    num_frag2_occ = len(fragment_2_to_1)
-    f1_occ_lo = 1
-    f1_occ_hi = f1_occ_lo + num_frag1_occ
-    f2_occ_lo = f1_occ_hi
-    f2_occ_hi = f2_occ_lo + num_frag2_occ
-    f2_virt_lo = f2_occ_hi
-    f2_virt_hi = f2_virt_lo + num_frag2_occ
-    s1_lo = f2_virt_hi
-    s1_hi = s1_lo + num_frag2_occ
-    f1_virt_lo = s1_hi
-    f1_virt_hi = f1_virt_lo + num_frag1_occ
-    s2_lo = f1_virt_hi
-    s2_hi = s2_lo
-    print('f1 occ:')
-    print(list(range(f1_occ_lo, f1_occ_hi)))
-    print('f2 occ:')
-    print(list(range(f2_occ_lo, f2_occ_hi)))
-    print('f2 virt:')
-    print(list(range(f2_virt_lo, f2_virt_hi)))
-    print('???')
-    print(list(range(s1_lo, s1_hi)))
-    print('f1 virt:')
-    print(list(range(f1_virt_lo, f1_virt_hi)))
-    print('???')
-    print(list(range(s2_lo, s2_hi)))
+    NCOVP1 = len(fragment_1_to_2)
+    NCOVP2 = len(fragment_2_to_1)
+    NCOVPT = NCOVP1 + NCOVP2
+    NOccT = idx_homo + 1
+    NVirtT = nmo - NOccT
+    NOrbT = NOccT + NVirtT
+    if NCOVP1 < NCOVP2:
+        NOcc1 = NCOVP1
+        NVirt1 = NCOVP2
+        NOrb1 = NOcc1 + NVirt1
+        NOcc2 = NOccT - NOcc1
+        NVirt2 = NVirtT - NVirt1
+        NOrb2 = NOcc2 + NVirt2
+    elif NCOVP2 < NCOVP1:
+        NOcc2 = NCOVP2
+        NVirt2 = NCOVP1
+        NOrb2 = NOcc2 + NVirt2
+        NOcc1 = NOccT - NOcc2
+        NVirt1 = NVirtT - NVirt2
+        NOrb1 = NOcc1 + NVirt1
+    else:
+        # not going to worry about this yet...
+        pass
+    assert NOccT == NOcc1 + NOcc2
+    assert NVirtT == NVirt1 + NVirt2
+    assert NOrbT == NOrb1 + NOrb2
+    print('NCOVP1: {:3d} NCOVP2: {:3d} NCOVPT: {:3d}'.format(NCOVP1, NCOVP2, NCOVPT))
+    print(' NOcc1: {:3d} NVirt1: {:3d}  NOrb1: {:3d}'.format(NOcc1, NVirt1, NOrb1))
+    print(' NOcc2: {:3d} NVirt2: {:3d}  NOrb2: {:3d}'.format(NOcc2, NVirt2, NOrb2))
+    print(' NOccT: {:3d} NVirtT: {:3d}  NOrbT: {:3d}'.format(NOccT, NVirtT, NOrbT))
+    # Keep for posterity:
+    # f1_occ_lo = 1
+    # f1_occ_hi = NOcc1 + f1_occ_lo
+    # f2_occ_lo = f1_occ_hi
+    # f2_occ_hi = NOcc2 + f2_occ_lo
+    # f2_virt_lo = f2_occ_hi
+    # f2_virt_hi = NVirt1 + f2_virt_lo
+    # f1_virt_lo = f2_virt_hi
+    # f1_virt_hi = NVirt2 + f1_virt_lo
+    # print('f1 occ:')
+    # print(list(range(f1_occ_lo, f1_occ_hi)))
+    # print('f2 occ:')
+    # print(list(range(f2_occ_lo, f2_occ_hi)))
+    # print('f2 virt:')
+    # print(list(range(f2_virt_lo, f2_virt_hi)))
+    # print('f1 virt:')
+    # print(list(range(f1_virt_lo, f1_virt_hi)))
     for entry in fragment_1_to_2:
         entry['orb_occ'] = entry['index']
-        entry['orb_virt'] = entry['orb_occ'] + num_frag1_occ + (3 * num_frag2_occ)
+        entry['orb_virt'] = entry['index'] + NOcc1 + NOcc2 + NVirt1
     for entry in fragment_2_to_1:
-        entry['orb_occ'] = entry['index'] + num_frag1_occ
-        entry['orb_virt'] = entry['orb_occ'] + num_frag2_occ
+        entry['orb_occ'] = entry['index'] + NOcc1
+        entry['orb_virt'] = entry['index'] + NOcc1 + NOcc2
 
 
 if __name__ == '__main__':
