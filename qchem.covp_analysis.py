@@ -194,7 +194,7 @@ if __name__ == '__main__':
                             entry['dq_alph_pct']))
 
     if args['--plot']:
-        width = len(str(nmo))
+        width = len(str(n_mo))
         # Plot every COVP within the de% cutoff.
         with open('vmd.fragment_1_to_2.load', 'w') as f12_file_load:
             with open('vmd.fragment_1_to_2.render', 'w') as f12_file_render:
