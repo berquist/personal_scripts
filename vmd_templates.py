@@ -90,6 +90,8 @@ def pad_left_zeros(num, maxwidth):
     if numwidth < maxwidth:
         numzeros = maxwidth - numwidth
         numstr = (numzeros * '0') + str(num)
+    else:
+        numstr = str(num)
     return numstr
 
 
