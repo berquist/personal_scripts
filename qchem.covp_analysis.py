@@ -71,66 +71,55 @@ def determine_fragment_indices(fragment_1_to_2, fragment_2_to_1):
     3. fragment 2 "virtual"         (len: NVirt1)
     4. fragment 1 "virtual"         (len: NVirt2)
     '''
-    NCOVP1 = len(fragment_1_to_2)
-    NCOVP2 = len(fragment_2_to_1)
-    NCOVPT = NCOVP1 + NCOVP2
-    NOccT = idx_homo + 1
-    NVirtT = nmo - NOccT
-    NOrbT = NOccT + NVirtT
-    NOcc1 = NCOVP1
-    NOcc2 = NCOVP2
-    NVirt1 = find_nvirt1(covpenergies, NOccT)
-    NVirt2 = NVirtT - NVirt1
-    NOrb1 = NOcc1 + NVirt1
-    NOrb2 = NOcc2 + NVirt2
-    assert NOccT == NOcc1 + NOcc2
-    assert NVirtT == NVirt1 + NVirt2
-    assert NOrbT == NOrb1 + NOrb2
-    print('NCOVP1: {:3d} NCOVP2: {:3d} NCOVPT: {:3d}'.format(NCOVP1, NCOVP2, NCOVPT))
-    print(' NOcc1: {:3d} NVirt1: {:3d}  NOrb1: {:3d}'.format(NOcc1, NVirt1, NOrb1))
-    print(' NOcc2: {:3d} NVirt2: {:3d}  NOrb2: {:3d}'.format(NOcc2, NVirt2, NOrb2))
-    print(' NOccT: {:3d} NVirtT: {:3d}  NOrbT: {:3d}'.format(NOccT, NVirtT, NOrbT))
-    # Keep for posterity:
-    # f1_occ_lo = 1
-    # f1_occ_hi = NOcc1 + f1_occ_lo
-    # f2_occ_lo = f1_occ_hi
-    # f2_occ_hi = NOcc2 + f2_occ_lo
-    # f2_virt_lo = f2_occ_hi
-    # f2_virt_hi = NVirt1 + f2_virt_lo
-    # f1_virt_lo = f2_virt_hi
-    # f1_virt_hi = NVirt2 + f1_virt_lo
-    # print('f1 occ:')
-    # print(list(range(f1_occ_lo, f1_occ_hi)))
-    # print('f2 occ:')
-    # print(list(range(f2_occ_lo, f2_occ_hi)))
-    # print('f2 virt:')
-    # print(list(range(f2_virt_lo, f2_virt_hi)))
-    # print('f1 virt:')
-    # print(list(range(f1_virt_lo, f1_virt_hi)))
+    n_covp_1 = len(fragment_1_to_2)
+    n_covp_2 = len(fragment_2_to_1)
+    n_covp_t = n_covp_1 + n_covp_2
+    n_occ_t = idx_homo + 1
+    n_virt_t = n_mo - n_occ_t
+    n_orb_t = n_occ_t + n_virt_t
+    orbital_indices = parse_energy_block(covpenergies, n_occ_t)
+    n_occ_1, n_occ_2, n_virt_1, n_virt_2 = get_n_occ_virt_per_fragment(orbital_indices[0],
+                                                                       orbital_indices[1],
+                                                                       orbital_indices[2],
+                                                                       orbital_indices[3],
+                                                                       n_orb_t)
+    n_orb_1 = n_occ_1 + n_virt_1
+    n_orb_2 = n_occ_2 + n_virt_2
+    print('NCOVP1: {:3d} NCOVP2: {:3d} NCOVPT: {:3d}'.format(n_covp_1, n_covp_2, n_covp_t))
+    print(' NOcc1: {:3d} NVirt1: {:3d}  NOrb1: {:3d}'.format(n_occ_1, n_virt_1, n_orb_1))
+    print(' NOcc2: {:3d} NVirt2: {:3d}  NOrb2: {:3d}'.format(n_occ_2, n_virt_2, n_orb_2))
+    print(' NOccT: {:3d} NVirtT: {:3d}  NOrbT: {:3d}'.format(n_occ_t, n_virt_t, n_orb_t))
+    assert n_occ_t == n_occ_1 + n_occ_2
+    assert n_virt_t == n_virt_1 + n_virt_2
+    assert n_orb_t == n_orb_1 + n_orb_2
     for entry in fragment_1_to_2:
         entry['orb_occ'] = entry['index']
-        entry['orb_virt'] = entry['index'] + NOcc1 + NOcc2 + NVirt1
+        entry['orb_virt'] = entry['index'] + n_occ_1 + n_occ_2 + n_virt_1
     for entry in fragment_2_to_1:
-        entry['orb_occ'] = entry['index'] + NOcc1
-        entry['orb_virt'] = entry['index'] + NOcc1 + NOcc2
+        entry['orb_occ'] = entry['index'] + n_occ_1
+        entry['orb_virt'] = entry['index'] + n_occ_1 + n_occ_2
 
 
-def find_virt_1_index(covpenergies):
+def parse_energy_block(covpenergies, n_occ_t):
     '''
     '''
     energylist = list(covpenergies)
-    energy_frag_1_occ = energylist[0]
-    # this is obviously not bulletproof...
-    idx_virt_1 = energylist.index(energy_frag_1_occ, 1)
-    print(idx_virt_1)
-    return idx_virt_1
+    idx_occ_1 = 0
+    idx_virt_2 = n_occ_t
+    idx_virt_1 = energylist.index(energylist[idx_occ_1], 1)
+    idx_occ_2 = energylist.index(energylist[idx_virt_2])
+    return idx_occ_1, idx_occ_2, idx_virt_2, idx_virt_1
 
 
-def find_nvirt1(covpenergies, nocc_t):
+def get_n_occ_virt_per_fragment(idx_occ_1, idx_occ_2, idx_virt_2, idx_virt_1, n_mo):
     '''
     '''
-    nvirt_1 = find_virt_1_index(covpenergies) - nocc_t
-    return nvirt_1
+    n_occ_1 = idx_occ_2
+    n_occ_2 = idx_virt_2 - (n_occ_1)
+    n_virt_1 = idx_virt_1 - (n_occ_1 + n_occ_2)
+    n_virt_2 = n_mo - (n_occ_1 + n_occ_2 + n_virt_1)
+    assert n_occ_1 + n_occ_2 + n_virt_1 + n_virt_2 == n_mo
+    return n_occ_1, n_occ_2, n_virt_1, n_virt_2
 
 
 if __name__ == '__main__':
@@ -152,7 +141,7 @@ if __name__ == '__main__':
 
     cclib_job = ccopen(args['<outputfilename>'])
     cclib_data = cclib_job.parse()
-    nmo = cclib_data.nmo
+    n_mo = cclib_data.nmo
     idx_homo = cclib_data.homos[0]
     covpenergies = cclib_data.moenergies[-1]
 
