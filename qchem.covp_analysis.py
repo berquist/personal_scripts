@@ -97,7 +97,7 @@ if __name__ == '__main__':
 
     from docopt import docopt
     import os.path
-    # from cclib.parser import ccopen
+    from cclib.parser import ccopen
 
     args = docopt(__doc__)
 
@@ -110,10 +110,10 @@ if __name__ == '__main__':
     # The dE(pair)/dE(total) percentage cutoff for inclusion.
     pct_cutoff = int(args['--pct_cutoff'])
 
-    # cclib_job = ccopen(args['<outputfilename>'])
-    # cclib_data = cclib_job.parse()
-    # nmo = cclib_data.nmo
-    # idx_homo = cclib_data.homos[0]
+    cclib_job = ccopen(args['<outputfilename>'])
+    cclib_data = cclib_job.parse()
+    nmo = cclib_data.nmo
+    idx_homo = cclib_data.homos[0]
 
     fragment_1_to_2 = []
     fragment_2_to_1 = []
