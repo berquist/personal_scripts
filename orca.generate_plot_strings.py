@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Generate an ORCA input file specifically for plotting cube files.
+'''Generate an ORCA input file specifically for plotting cube files.
 
 Usage:
   orca.generate_plot_strings.py [options] [--canon=canon_list] [--uno=uno_list]
@@ -39,9 +39,7 @@ Examples:
  mo("example.mo.10a.cube", 10, 0);
  mo("example.mo.10b.cube", 10, 1);
  end
-"""
-
-from docopt import docopt
+'''
 
 
 def mo_string(prefix, mo_num, op_num):
@@ -143,6 +141,8 @@ def generate_block(args):
 
 
 if __name__ == '__main__':
+
+    from docopt import docopt
 
     args = docopt(__doc__)
 
