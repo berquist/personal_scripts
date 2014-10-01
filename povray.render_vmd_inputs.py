@@ -36,4 +36,4 @@ with open(bashfilename, 'wb') as bashfile:
                     break
         bashfile.write(''.join([runstring[quality].format(width=width, height=height, filename=povrayinputfilename), '\n']))
         bashfile.write(''.join([convertstring.format(filename=povrayinputfilename), '\n']))
-os.chmod(bashfilename, 0755)
+os.chmod(bashfilename, 0o755)
