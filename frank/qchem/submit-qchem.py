@@ -1,75 +1,78 @@
 #!/usr/bin/env python2
 
-def pbsfile(inpfile, ppn, time, queue):
-    """
-    """
-    return """#!/bin/bash
+def template_pbsfile(inpfile, ppn, time, queue, save):
+    if save:
+        save = '-save '
+        scratchdir = ' {inpfile}.${{PBS_JOBID}}'.format(inpfile=inpfile)
+    else:
+        save = ''
+        scratchdir = ''
+    return '''#!/bin/bash
 
-#PBS -N {0}
-#PBS -q {3}
-#PBS -l nodes=1:ppn={1}
-#PBS -l walltime={2}:00:00
+#PBS -N {inpfile}
+#PBS -q {queue}
+#PBS -l nodes=1:ppn={ppn}
+#PBS -l walltime={time}:00:00
 #PBS -j oe
 #PBS -l qos=low
+#PBS -m abe
+#PBS -M {username}@pitt.edu
 
 module purge
 module load intel/2013.0
-module load qchem/dlambrecht/4.1-trunk.20130919.omp.ccman2
+module load qchem/dlambrecht/4.2-trunk.20140824.omp.release
 
-cp $PBS_O_WORKDIR/{0}.qcin  $LOCAL
+cp $PBS_O_WORKDIR/{inpfile}.in $LOCAL
 cd $LOCAL
 
 run_on_exit() {{
     set -v
-    cp $LOCAL/* $PBS_O_WORKDIR
+    rm $LOCAL/pathtable
+    cp -v -R $LOCAL/* $PBS_O_WORKDIR
 }}
 
 trap run_on_exit EXIT
 
-`which qchem` -nt {1} {0}.qcin >& $PBS_O_WORKDIR/{0}.qcout
-""".format(inpfile, ppn, time, queue)
+`which qchem` {save}-nt {ppn} {inpfile}.in $PBS_O_WORKDIR/{inpfile}.out{scratchdir}
+'''.format(inpfile=inpfile,
+           ppn=ppn,
+           time=time,
+           queue=queue,
+           save=save,
+           scratchdir=scratchdir,
+           username=os.environ['USER'])
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
     import argparse
     import os.path
-    import subprocess
 
-    parser = argparse.ArgumentParser(description="")
-    parser.add_argument(dest="iname",
-                        metavar="<inpfile>",
-                        type=str,
-                        help="the Q-Chem input file to submit")
-    parser.add_argument("--ppn",
-                        dest="ppn",
-                        metavar="<ppn>",
+    parser = argparse.ArgumentParser()
+    parser.add_argument('inpfilename',
+                        help='the Q-Chem input file to submit')
+    parser.add_argument('--ppn',
                         type=int,
                         default=4,
-                        help="number of cores to run on (max shared=48, shared_large=16")
-    parser.add_argument("--time",
-                        dest="time",
-                        metavar="<time>",
+                        help='number of cores to run on (max shared=48, shared_large=16)')
+    parser.add_argument('--time',
                         type=int,
                         default=96,
-                        help="walltime to reserve (max 144 hours)")
-    parser.add_argument("--queue",
-                        dest="queue",
-                        metavar="<queue>",
-                        type=str,
-                        default="shared",
-                        help="queue to run in (typically shared or shared_large")
+                        help='walltime to reserve (max 144 hours)')
+    parser.add_argument('--queue',
+                        default='shared',
+                        help='queue to run in (typically shared or shared_large)')
+    parser.add_argument('--save',
+                        action='store_true',
+                        help='save the scratch directory')
     args = parser.parse_args()
-    inpfile = os.path.splitext(args.iname)[0]
+    inpfilename = os.path.splitext(args.inpfilename)[0]
     ppn = args.ppn
     time = args.time
     queue = args.queue
+    save = args.save
 
-    jobhandle = inpfile + ".pbs"
-    jobfile   = open(jobhandle, "w")
+    pbsfilename = inpfilename + '.pbs'        
+    with open(pbsfilename, 'wb') as pbsfile:
+        pbsfile.write(template_pbsfile(inpfilename, ppn, time, queue, save))
 
-    print >> jobfile, pbsfile(inpfile, ppn, time, queue)
-
-    jobfile.close()
-
-    subprocess.call(["echo", jobhandle])
-    # call manually: 'find . -name "*pbs" -exec qsub '{}' \;'
-    # subprocess.call(["qsub", jobhandle])
+    print(pbsfilename)
