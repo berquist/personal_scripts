@@ -28,12 +28,12 @@ from glob import glob
 
 
 ifmt = 'cube'
-ofmt = 'png'
+ofmt = 'tga'
 
-out = 'load_all_plt.vmd'
-plot = 'plot_all.vmd'
-# conv = 'convert.bash'
-html = 'vmd_plots.html'
+out = 'vmd.load_all_plt.vmd'
+plot = 'vmd.plot_all.vmd'
+conv = 'vmd.convert.bash'
+html = 'vmd.plots.html'
 ncol = 4
 
 parser = argparse.ArgumentParser()
@@ -54,10 +54,10 @@ if not maxiso:
     elif nsurf == 3:
         maxiso = 0.0128
 
-outfile = open(out, 'wb')
-plotfile = open(plot, 'wb')
-# convfile = open(conv, 'wb')
-htmlfile = open(html, 'wb')
+outfile = open(out, 'w')
+plotfile = open(plot, 'w')
+convfile = open(conv, 'w')
+htmlfile = open(html, 'w')
 
 # set the appropriate isovalues
 print('Using {} surfaces for isovalues:'.format(nsurf))
@@ -129,8 +129,8 @@ mol modcolor 6 0 ColorID {color2}
            color1=color1id, color2=color2id)
 outfile.write(vmdrenderfile)
 
-# convfile.write('#!/bin/bash\n\n')
-# os.chmod(conv, 0755)
+convfile.write('#!/bin/bash\n')
+os.chmod(conv, 0o755)
 
 htmlfile.write('<html>\n<head></head>\n<body>\n')
 htmlfile.write('<table>\n<tr>\n')
@@ -141,11 +141,6 @@ for I in sorted(glob('*{}'.format(ifmt))):
     vmdrenderfile = '''mol addfile {}\n'''.format(I)
     outfile.write(vmdrenderfile)
 
-    # generate the POV-Ray input files
-    # I don't think changing the default POV-Ray render options really makes a difference...
-    povray_string_template = 'povray +W{{width}} +H{{height}} -I{{filename}}.pov -O{{filename}}.pov.{ofmt} -D +X +C +A +AM2 +R9 +FN10 +UA +Q11'.format(ofmt=ofmt)
-    povray_string = povray_string_template.format(width='%w', height='%h', filename='%s')
-    render_options_string = 'render options POV3 "{povray_string}"'.format(povray_string=povray_string)
     vmdplotfile = '''
 mol modstyle 1 0 Isosurface  {isov1} {N} 0 0 1 1
 mol modstyle 2 0 Isosurface -{isov1} {N} 0 0 1 1
@@ -153,18 +148,17 @@ mol modstyle 3 0 Isosurface  {isov2} {N} 0 0 1 1
 mol modstyle 4 0 Isosurface -{isov2} {N} 0 0 1 1
 mol modstyle 5 0 Isosurface  {isov3} {N} 0 0 1 1
 mol modstyle 6 0 Isosurface -{isov3} {N} 0 0 1 1
-{render_options_string}
 render POV3 {I}.pov
+render TachyonInternal {I}.{ofmt}
 '''.format(I=I, N=N, ofmt=ofmt,
-           isov1=isov[0], isov2=isov[1], isov3=isov[2],
-           render_options_string=render_options_string)
+           isov1=isov[0], isov2=isov[1], isov3=isov[2])
     plotfile.write(vmdplotfile)
 
-#     imageconvfile = '''
-# convert {I}.pov.{ofmt} {I}.png
-# rm {I}.{ofmt}
-# '''.format(I=I, ofmt=ofmt)
-#     convfile.write(imageconvfile)
+    imageconvfile = '''
+convert {I}.{ofmt} {I}.png
+rm {I}.{ofmt}
+'''.format(I=I, ofmt=ofmt)
+    convfile.write(imageconvfile)
 
     htmlentry = '''<td><img src=\"{I}.png\" border=\"1\" width=\"400\">
 {I}<br></td>
@@ -180,7 +174,7 @@ htmlfile.write('</body>\n</html>\n')
 
 outfile.close()
 plotfile.close()
-# convfile.close()
+convfile.close()
 htmlfile.close()
 
 print('... finished.')
