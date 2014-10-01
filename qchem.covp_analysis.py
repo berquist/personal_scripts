@@ -133,13 +133,18 @@ if __name__ == '__main__':
     if args['--print_args']:
         print(args)
 
+    outputfilename = args['<outputfilename>']
+
+    print('-' * 78)
+    print(outputfilename)
+
     # Assume we have an appropriately-named XYZ file.
-    xyzfilename = os.path.splitext(args['<outputfilename>'])[0] + '.xyz'
+    xyzfilename = os.path.splitext(outputfilename)[0] + '.xyz'
 
     # The dE(pair)/dE(total) percentage cutoff for inclusion.
     pct_cutoff = int(args['--pct_cutoff'])
 
-    cclib_job = ccopen(args['<outputfilename>'])
+    cclib_job = ccopen(outputfilename)
     cclib_data = cclib_job.parse()
     n_mo = cclib_data.nmo
     idx_homo = cclib_data.homos[0]
@@ -153,7 +158,7 @@ if __name__ == '__main__':
     fragment_2_to_1_pairs = []
 
     # Parse the COVP fragment print block for each fragment.
-    with open(args['<outputfilename>']) as outputfile:
+    with open(outputfilename) as outputfile:
         for line in outputfile:
             if 'From fragment 1 to fragment 2' in line:
                 parse_fragment_block(outputfile, fragment_1_to_2, 1)
@@ -196,17 +201,23 @@ if __name__ == '__main__':
     if args['--plot']:
         width = len(str(n_mo))
         # Plot every COVP within the de% cutoff.
-        with open('vmd.fragment_1_to_2.load', 'w') as f12_file_load:
-            with open('vmd.fragment_1_to_2.render', 'w') as f12_file_render:
-                vmd_covp_write_files(f12_file_load,
-                                     f12_file_render,
-                                     xyzfilename,
-                                     fragment_1_to_2_pairs,
-                                     width)
-        with open('vmd.fragment_2_to_1.load', 'w') as f21_file_load:
-            with open('vmd.fragment_2_to_1.render', 'w') as f21_file_render:
-                vmd_covp_write_files(f21_file_load,
-                                     f21_file_render,
-                                     xyzfilename,
-                                     fragment_2_to_1_pairs,
-                                     width)
+        # with open('vmd.fragment_1_to_2.load', 'w') as f12_file_load:
+        #     with open('vmd.fragment_1_to_2.render', 'w') as f12_file_render:
+        #         vmd_covp_write_files(f12_file_load,
+        #                              f12_file_render,
+        #                              xyzfilename,
+        #                              fragment_1_to_2_pairs,
+        #                              width)
+        # with open('vmd.fragment_2_to_1.load', 'w') as f21_file_load:
+        #     with open('vmd.fragment_2_to_1.render', 'w') as f21_file_render:
+        #         vmd_covp_write_files(f21_file_load,
+        #                              f21_file_render,
+        #                              xyzfilename,
+        #                              fragment_2_to_1_pairs,
+        #                              width)
+        with open('vmd.covp.load', 'w') as loadfile:
+            with open('vmd.covp.render', 'w') as renderfile:
+                all_pairs = fragment_1_to_2_pairs + fragment_2_to_1_pairs
+                vmd_covp_write_files(loadfile, renderfile, xyzfilename, all_pairs, width)
+
+    print('-' * 78)
