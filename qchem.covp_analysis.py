@@ -7,7 +7,9 @@ Usage:
 
 Options:
   --pct_cutoff=CUTOFF  Energy percentage cutoff to include an orbital for printing/analysis. [Default: 2]
+                       Set this to 0 to see the entire COVP table.
   --plot               Generate VMD scripts to plot COVPs within the energy percentage cutoff.
+  --df                 Dump results to JSON and Excel files using Pandas.
   --print_args         Print the argument block.
 '''
 
@@ -102,6 +104,8 @@ def determine_fragment_indices(fragment_1_to_2, fragment_2_to_1):
 
 def parse_energy_block(covpenergies, n_occ_t):
     '''
+    Based on the whole COVP orbital energy block, determine the orbital indices
+    where each region starts (fragment 1 or 2, occupied or virtual).
     '''
     energylist = list(covpenergies)
     idx_occ_1 = 0
@@ -113,6 +117,8 @@ def parse_energy_block(covpenergies, n_occ_t):
 
 def get_n_occ_virt_per_fragment(idx_occ_1, idx_occ_2, idx_virt_2, idx_virt_1, n_mo):
     '''
+    Based on the starting indices for each COVP orbital block, determine the
+    number of occupied and virtual orbitals for each fragment.
     '''
     n_occ_1 = idx_occ_2
     n_occ_2 = idx_virt_2 - (n_occ_1)
@@ -120,6 +126,51 @@ def get_n_occ_virt_per_fragment(idx_occ_1, idx_occ_2, idx_virt_2, idx_virt_1, n_
     n_virt_2 = n_mo - (n_occ_1 + n_occ_2 + n_virt_1)
     assert n_occ_1 + n_occ_2 + n_virt_1 + n_virt_2 == n_mo
     return n_occ_1, n_occ_2, n_virt_1, n_virt_2
+
+
+def dump_vmd(fragment_1_to_2_pairs, fragment_2_to_1_pairs, n_mo):
+    '''
+    Write VMD scripts for plotting.
+    '''
+    width = len(str(n_mo))
+    # Plot every COVP within the de% cutoff.
+    # with open('vmd.fragment_1_to_2.load', 'w') as f12_file_load:
+    #     with open('vmd.fragment_1_to_2.render', 'w') as f12_file_render:
+    #         vmd_covp_write_files(f12_file_load,
+    #                              f12_file_render,
+    #                              xyzfilename,
+    #                              fragment_1_to_2_pairs,
+    #                              width)
+    # with open('vmd.fragment_2_to_1.load', 'w') as f21_file_load:
+    #     with open('vmd.fragment_2_to_1.render', 'w') as f21_file_render:
+    #         vmd_covp_write_files(f21_file_load,
+    #                              f21_file_render,
+    #                              xyzfilename,
+    #                              fragment_2_to_1_pairs,
+    #                              width)
+    with open('vmd.covp.load', 'w') as loadfile:
+        with open('vmd.covp.render', 'w') as renderfile:
+            all_pairs = fragment_1_to_2_pairs + fragment_2_to_1_pairs
+            vmd_covp_write_files(loadfile, renderfile, xyzfilename, all_pairs, width)
+
+
+def dump_pandas(fragment_1_to_2_entries, fragment_2_to_1_entries, prefix):
+    '''
+    Write results to JSON/Excel files using Pandas.
+    '''
+    results_1_to_2 = dict()
+    results_2_to_1 = dict()
+    for entry in fragment_1_to_2_entries:
+        results_1_to_2[entry['index']] = entry
+    for entry in fragment_2_to_1_entries:
+        results_2_to_1[entry['index']] = entry
+    results_1_to_2_df = pd.DataFrame(results_1_to_2).transpose()
+    results_2_to_1_df = pd.DataFrame(results_2_to_1).transpose()
+    results_1_to_2_df.to_json('{}.1_to_2.json'.format(prefix))
+    results_2_to_1_df.to_json('{}.2_to_1.json'.format(prefix))
+    results_1_to_2_df.to_excel('{}.1_to_2.xls'.format(prefix))
+    results_2_to_1_df.to_excel('{}.2_to_1.xls'.format(prefix))
+
 
 
 if __name__ == '__main__':
@@ -133,13 +184,18 @@ if __name__ == '__main__':
     if args['--print_args']:
         print(args)
 
+    if args['--df']:
+        # We're going to dump our results to JSON and Excel files.
+        import pandas as pd
+
     outputfilename = args['<outputfilename>']
+    stub = os.path.splitext(outputfilename)[0]
 
     print('-' * 78)
     print(outputfilename)
 
     # Assume we have an appropriately-named XYZ file.
-    xyzfilename = os.path.splitext(outputfilename)[0] + '.xyz'
+    xyzfilename = stub + '.xyz'
 
     # The dE(pair)/dE(total) percentage cutoff for inclusion.
     pct_cutoff = int(args['--pct_cutoff'])
@@ -199,25 +255,11 @@ if __name__ == '__main__':
                             entry['dq_alph_pct']))
 
     if args['--plot']:
-        width = len(str(n_mo))
-        # Plot every COVP within the de% cutoff.
-        # with open('vmd.fragment_1_to_2.load', 'w') as f12_file_load:
-        #     with open('vmd.fragment_1_to_2.render', 'w') as f12_file_render:
-        #         vmd_covp_write_files(f12_file_load,
-        #                              f12_file_render,
-        #                              xyzfilename,
-        #                              fragment_1_to_2_pairs,
-        #                              width)
-        # with open('vmd.fragment_2_to_1.load', 'w') as f21_file_load:
-        #     with open('vmd.fragment_2_to_1.render', 'w') as f21_file_render:
-        #         vmd_covp_write_files(f21_file_load,
-        #                              f21_file_render,
-        #                              xyzfilename,
-        #                              fragment_2_to_1_pairs,
-        #                              width)
-        with open('vmd.covp.load', 'w') as loadfile:
-            with open('vmd.covp.render', 'w') as renderfile:
-                all_pairs = fragment_1_to_2_pairs + fragment_2_to_1_pairs
-                vmd_covp_write_files(loadfile, renderfile, xyzfilename, all_pairs, width)
+        # Write VMD scripts for plotting.
+        dump_vmd(fragment_1_to_2_pairs, fragment_2_to_1_pairs, n_mo)
+
+    if args['--df']:
+        # Write results to JSON/Excel files using Pandas.
+        dump_pandas(fragment_1_to_2_cutoff, fragment_2_to_1_cutoff, stub)
 
     print('-' * 78)
