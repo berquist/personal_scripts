@@ -17,6 +17,7 @@ from __future__ import print_function
 if __name__ == '__main__':
 
     from docopt import docopt
+    from glob import glob
     import os
     import os.path
 
@@ -26,7 +27,7 @@ if __name__ == '__main__':
     maxlen = 0
 
     # Get the directory contents.
-    pwd_contents = os.listdir()
+    pwd_contents = glob('*.cube')
 
     # Unfortunately, two full traversals need to be performed.
     # 1. Find the maximum length of the internal number and store it.
