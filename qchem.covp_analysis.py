@@ -10,6 +10,7 @@ Options:
                        Set this to 0 to see the entire COVP table.
   --plot               Generate VMD scripts to plot COVPs within the energy percentage cutoff.
   --df                 Dump results to JSON and Excel files using Pandas.
+  --del                If the orbital is below the cutoff, delete its cube file.
   --print_args         Print the argument block.
 '''
 
@@ -172,12 +173,26 @@ def dump_pandas(fragment_1_to_2_entries, fragment_2_to_1_entries, prefix):
     results_2_to_1_df.to_excel('{}.2_to_1.xls'.format(prefix))
 
 
+def pad_zeros(num, maxlen):
+    '''
+    Pad the given number with zeros to left until the total length is maxlen.
+    '''
+    numstr = str(num)
+    numlen = len(numstr)
+    if numlen < maxlen:
+        numzeros = maxlen - numlen
+        padnum = (numzeros * '0') + numstr
+        return padnum
+    else:
+        return numstr
+
 
 if __name__ == '__main__':
 
     from docopt import docopt
     import os.path
     from cclib.parser import ccopen
+    import os
 
     args = docopt(__doc__)
 
@@ -261,5 +276,11 @@ if __name__ == '__main__':
     if args['--df']:
         # Write results to JSON/Excel files using Pandas.
         dump_pandas(fragment_1_to_2_cutoff, fragment_2_to_1_cutoff, stub)
+
+    if args['--del']:
+        template = 'mo.{}.cube'
+        for entry in fragment_1_to_2:
+            if entry['de_alph_pct'] < pct_cutoff:
+                print(entry['orb_occ'], entry['orb_virt'])
 
     print('-' * 78)
