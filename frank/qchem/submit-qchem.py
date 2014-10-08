@@ -1,12 +1,14 @@
 #!/usr/bin/env python2
 
-def template_pbsfile(inpfile, ppn, time, queue, save):
+def template_pbsfile(inpfile, ppn, time, queue, save, old):
+    save = ''
+    scratchdir = ''
     if save:
         save = '-save '
         scratchdir = ' {inpfile}.${{PBS_JOBID}}'.format(inpfile=inpfile)
-    else:
-        save = ''
-        scratchdir = ''
+    module = 'qchem/dlambrecht/4.2-trunk.20140824.omp.release'
+    if old:
+        module = 'qchem/dlambrecht/4.1-trunk.20130919.omp.ccman2'
     return '''#!/bin/bash
 
 #PBS -N {inpfile}
@@ -20,7 +22,7 @@ def template_pbsfile(inpfile, ppn, time, queue, save):
 
 module purge
 module load intel/2013.0
-module load qchem/dlambrecht/4.2-trunk.20140824.omp.release
+module load {module}
 
 cp $PBS_O_WORKDIR/{inpfile}.in $LOCAL
 cd $LOCAL
@@ -40,7 +42,8 @@ trap run_on_exit EXIT
            queue=queue,
            save=save,
            scratchdir=scratchdir,
-           username=os.environ['USER'])
+           username=os.environ['USER'],
+           module=module)
 
 
 if __name__ == '__main__':
@@ -64,15 +67,19 @@ if __name__ == '__main__':
     parser.add_argument('--save',
                         action='store_true',
                         help='save the scratch directory')
+    parser.add_argument('--old',
+                        action='store_true',
+                        help='Use an older (known good) version of Q-Chem.')
     args = parser.parse_args()
     inpfilename = os.path.splitext(args.inpfilename)[0]
     ppn = args.ppn
     time = args.time
     queue = args.queue
     save = args.save
+    old = args.old
 
-    pbsfilename = inpfilename + '.pbs'        
+    pbsfilename = inpfilename + '.pbs'
     with open(pbsfilename, 'wb') as pbsfile:
-        pbsfile.write(template_pbsfile(inpfilename, ppn, time, queue, save))
+        pbsfile.write(template_pbsfile(inpfilename, ppn, time, queue, save, old))
 
     print(pbsfilename)
