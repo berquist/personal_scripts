@@ -16,6 +16,8 @@ Options:
 
 from __future__ import print_function
 
+import numpy as np
+
 from vmd_templates import *
 
 
@@ -64,22 +66,25 @@ def determine_fragment_indices(fragment_1_to_2, fragment_2_to_1):
 
     We consider 1 and 42 as being occupied, and 211 and 53 as being virtual.
     211 and 53 are occupieds belonging to 1 and 2, respectively; this routine's
-    convention is to say occupied orbitals are on the *opposite* fragment. This
-    is to correspond with the "Orbital Energy" block in the output file.
+    convention is to say virtual orbitals are on the *opposite* fragment, which
+    fits more with the concept of COVPs than canonical orbitals. This is to
+    correspond with the "Orbital Energy" block in the output file.
 
     When dumping COVPs to cube files, the ordering is then:
     [lengths are of actual canonical orbitals]
-    1. fragment 1 "occupied"        (len: NOcc1)
-    2. fragment 2 "occupied"        (len: NOcc2)
-    3. fragment 2 "virtual"         (len: NVirt1)
-    4. fragment 1 "virtual"         (len: NVirt2)
+    1. fragment 1 "occupied"        (len: n_occ_1)
+    2. fragment 2 "occupied"        (len: n_occ_2)
+    3. fragment 2 "virtual"         (len: n_virt_1)
+    4. fragment 1 "virtual"         (len: n_virt_2)
     '''
+    # some args implicitly passed show up here...need to fix that
     n_covp_1 = len(fragment_1_to_2)
     n_covp_2 = len(fragment_2_to_1)
     n_covp_t = n_covp_1 + n_covp_2
     n_occ_t = idx_homo + 1
     n_virt_t = n_mo - n_occ_t
     n_orb_t = n_occ_t + n_virt_t
+    assert n_orb_t == n_mo
     orbital_indices = parse_energy_block(covpenergies, n_occ_t)
     n_occ_1, n_occ_2, n_virt_1, n_virt_2 = get_n_occ_virt_per_fragment(orbital_indices[0],
                                                                        orbital_indices[1],
@@ -107,13 +112,26 @@ def parse_energy_block(covpenergies, n_occ_t):
     '''
     Based on the whole COVP orbital energy block, determine the orbital indices
     where each region starts (fragment 1 or 2, occupied or virtual).
+
+    The start of the occupied block is always the first occupied MO for 1.
+    The start of the virtual block is always the first virtual MO for 2 (on 1).
+
+    The first virtual MO for 1 (on 2) can be found in the virtual block.
+    The first occupied MO for 2 can be found in the occupied block.
     '''
     energylist = list(covpenergies)
+    idx_occ, idx_virt = 0, n_occ_t
     idx_occ_1 = 0
-    idx_virt_2 = n_occ_t
-    idx_virt_1 = energylist.index(energylist[idx_occ_1], 1)
-    idx_occ_2 = energylist.index(energylist[idx_virt_2])
-    return idx_occ_1, idx_occ_2, idx_virt_2, idx_virt_1
+    idx_virt_2_on_1 = n_occ_t
+    fragment_1_indices = np.where(covpenergies == covpenergies[idx_occ_1])[0]
+    fragment_2_indices = np.where(covpenergies == covpenergies[idx_virt_2_on_1])[0]
+    idx_occ_2 = fragment_2_indices[0]
+    assert idx_occ_1 == fragment_1_indices[0]
+    idx_virt_1_on_2 = fragment_1_indices[1]
+    assert idx_virt_2_on_1 == fragment_2_indices[1]
+    template = 'idx_occ_1: {} idx_occ_2: {} idx_virt_2: {} idx_virt_1: {}'
+    print(template.format(idx_occ_1, idx_occ_2, idx_virt_2_on_1, idx_virt_1_on_2))
+    return idx_occ_1, idx_occ_2, idx_virt_2_on_1, idx_virt_1_on_2
 
 
 def get_n_occ_virt_per_fragment(idx_occ_1, idx_occ_2, idx_virt_2, idx_virt_1, n_mo):
@@ -134,21 +152,6 @@ def dump_vmd(fragment_1_to_2_pairs, fragment_2_to_1_pairs, n_mo):
     Write VMD scripts for plotting.
     '''
     width = len(str(n_mo))
-    # Plot every COVP within the de% cutoff.
-    # with open('vmd.fragment_1_to_2.load', 'w') as f12_file_load:
-    #     with open('vmd.fragment_1_to_2.render', 'w') as f12_file_render:
-    #         vmd_covp_write_files(f12_file_load,
-    #                              f12_file_render,
-    #                              xyzfilename,
-    #                              fragment_1_to_2_pairs,
-    #                              width)
-    # with open('vmd.fragment_2_to_1.load', 'w') as f21_file_load:
-    #     with open('vmd.fragment_2_to_1.render', 'w') as f21_file_render:
-    #         vmd_covp_write_files(f21_file_load,
-    #                              f21_file_render,
-    #                              xyzfilename,
-    #                              fragment_2_to_1_pairs,
-    #                              width)
     with open('vmd.covp.load', 'w') as loadfile:
         with open('vmd.covp.render', 'w') as renderfile:
             all_pairs = fragment_1_to_2_pairs + fragment_2_to_1_pairs
