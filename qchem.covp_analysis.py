@@ -278,9 +278,31 @@ if __name__ == '__main__':
         dump_pandas(fragment_1_to_2_cutoff, fragment_2_to_1_cutoff, stub)
 
     if args['--del']:
+        maxlen = 0
+        # first, find the maximum length of the number field
+        # (from Python objects, not the filesystem)
+        fragment_entries = fragment_1_to_2 + fragment_2_to_1
+        for entry in fragment_entries:
+            newlen = max(len(str(entry['orb_occ'])),
+                         len(str(entry['orb_virt'])))
+            if newlen > maxlen:
+                maxlen = newlen
         template = 'mo.{}.cube'
-        for entry in fragment_1_to_2:
+        for entry in fragment_entries:
             if entry['de_alph_pct'] < pct_cutoff:
-                print(entry['orb_occ'], entry['orb_virt'])
+                orb_occ = pad_zeros(entry['orb_occ'], maxlen)
+                orb_virt = pad_zeros(entry['orb_virt'], maxlen)
+                orb_occ_filename = template.format(orb_occ)
+                orb_virt_filename = template.format(orb_virt)
+                print('Deleting ' + orb_occ_filename)
+                print('Deleting ' + orb_virt_filename)
+                try:
+                    os.remove(orb_occ_filename)
+                except OSError:
+                    print("Can't remove " + orb_occ_filename)
+                try:
+                    os.remove(orb_virt_filename)
+                except OSError:
+                    print("Can't remove " + orb_virt_filename)
 
     print('-' * 78)
