@@ -6,7 +6,8 @@ Usage:
   orca.mrci_analysis.py [options] <outputfilename>
 
 Options:
-  --print_args  Print the argument block.
+  --cutoff_weight=CWEIGHT  Cutoff weight for printing a configuration. [Default: 0.5]
+  --print_args             Print the argument block.
 '''
 
 from __future__ import print_function
@@ -45,66 +46,95 @@ def parse_g_tensor(outputfile):
 
 
 def parse_state_block_cas(outputfile):
-    roots = []
-    configurations = []
+    """
+    """
     next(outputfile)
     next(outputfile)
     line = next(outputfile)
     t_root_g = 'ROOT {}: E= {} Eh'
     t_root_e = 'ROOT {}: E= {} Eh {} eV {} cm**-1'
-    while line.split() != []:
-        root = dict()
+    roots = []
+    root = dict()
+    configurations = []
+    while line.strip().split() != []:
         if 'ROOT' in line:
             root['configurations'] = configurations
             roots.append(root)
-            configurations = []
             root = dict()
+            configurations = []
             root['num'] = int(line.split()[1][:-1])
             root['energy_hartree'] = float(line.split()[3])
             # If not the ground state, parse excitation energies too.
             if root['num'] > 0:
                 root['energy_ev'] = float(line.split()[5])
                 root['energy_wavenumber'] = float(line.split()[7])
-            line = next(outputfile)
-        # coeff = float(line.split()[0])
-        # hole_idx = int(line.split()[2][:-2])
-        # occ = line.split()[-1]
-        # configuration = (coeff, hole_idx, occ)
-        # configurations.append(configuration)
-        # line = next(outputfile)
+        else:
+            coeff = float(line.split()[0])
+            occ = line.split()[-1]
+            configuration = (coeff, occ)
+            configurations.append(configuration)
+        line = next(outputfile)
+    del roots[0]
+    root['configurations'] = configurations
+    roots.append(root)
     for root in roots:
-        print(root)
-        # if root['num'] == 0:
-        #     print(t_root_g.format(root['num'],
-        #                           root['energy_hartree']))
-        # else:
-        #     print(t_root_e.format(root['num'],
-        #                           root['energy_hartree'],
-        #                           root['energy_ev'],
-        #                           root['energy_wavenumber']))
+        if root['num'] == 0:
+            print(t_root_g.format(root['num'],
+                                  root['energy_hartree']))
+        else:
+            print(t_root_e.format(root['num'],
+                                  root['energy_hartree'],
+                                  root['energy_ev'],
+                                  root['energy_wavenumber']))
+        for configuration in root['configurations']:
+            if configuration[0] > cutoff_weight:
+                print(configuration)
 
 
 def parse_state_block_ci(outputfile):
+    """
+    """
     line = next(outputfile)
     while 'STATE' not in line:
         line = next(outputfile)
-    states = []
-    while '------------------------------' not in line:
+    roots = []
+    root = dict()
+    configurations = []
+    while line.strip().split() != []:
         if 'STATE' in line:
-            state = dict()
-            state['num'] = int(line.split()[1][:-1])
-            state['refweight'] = float(line.split()[6])
-            state['energy_hartree'] = float(line.split()[3])
-            state['energy_ev'] = float(line.split()[7])
-            state['energy_wavenumber'] = float(line.split()[9])
-            states.append(state)
-            line = next(outputfile)
-    print(states)
+            root['configurations'] = configurations
+            roots.append(root)
+            root = dict()
+            configurations = []
+            root['num'] = int(line.split()[1][:-1])
+            root['refweight'] = float(line.split()[6])
+            root['energy_hartree'] = float(line.split()[3])
+            root['energy_ev'] = float(line.split()[7])
+            root['energy_wavenumber'] = float(line.split()[9])
+        else:
+            coeff = float(line.split()[0])
+            occ = re.search('\[(0|1|2)+\]', line).group()[1:-1]
+            configuration = (coeff, occ)
+            configurations.append(configuration)
+        line = next(outputfile)
+    del roots[0]
+    root['configurations'] = configurations
+    roots.append(root)
+    for root in roots:
+        if root['num'] == 0:
+            print(root)
+        else:
+            print(root)
+        for configuration in root['configurations']:
+            if configuration[0] > cutoff_weight:
+                print(configuration)
+
 
 if __name__ == '__main__':
 
     from docopt import docopt
     import os.path
+    import re
 
     args = docopt(__doc__)
 
@@ -114,6 +144,9 @@ if __name__ == '__main__':
     outputfilename = args['<outputfilename>']
     stub = os.path.splitext(outputfilename)[0]
 
+    cutoff_weight = float(args['--cutoff_weight'])
+    print('Using a cutoff weight of {}'.format(cutoff_weight))
+
     print('-' * 78)
     print(outputfilename)
 
@@ -122,7 +155,7 @@ if __name__ == '__main__':
             # Parse the state blocks after CASSCF but before the MRCI.
             if 'CAS-SCF STATES FOR BLOCK' in line:
                 print(line.strip())
-                # parse_state_block_cas(outputfile)
+                parse_state_block_cas(outputfile)
             # Parse the state block after the MRCI.
             if 'CI-RESULTS' in line:
                 print(line.strip())
