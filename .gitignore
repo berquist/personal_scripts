@@ -1,5 +1,10 @@
+# emacs
 *~
 
-*.pyc
+# Python
+*.py[co]
+__pycache__
+
+# C/C++
 *.o
 *.a
