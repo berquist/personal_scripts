@@ -13,6 +13,12 @@ Options:
 from __future__ import print_function
 
 
+t_root_g = ' ROOT {}: E= {:.8f} Eh'
+t_root_e = ' ROOT {}: E= {:.8f} Eh {:.2f} eV {:.1f} cm**-1'
+t_root = ' ROOT {}: E= {:.8f} Eh {:.2f} eV {:.1f} cm**-1'
+t_config = '  {:.4f} [{}]'
+
+
 def parse_absorption_spectrum(outputfile):
     line = next(outputfile)
     while 'ABSORPTION SPECTRUM' not in line:
@@ -51,8 +57,6 @@ def parse_state_block_cas(outputfile):
     next(outputfile)
     next(outputfile)
     line = next(outputfile)
-    t_root_g = 'ROOT {}: E= {} Eh'
-    t_root_e = 'ROOT {}: E= {} Eh {} eV {} cm**-1'
     roots = []
     root = dict()
     configurations = []
@@ -88,7 +92,7 @@ def parse_state_block_cas(outputfile):
                                   root['energy_wavenumber']))
         for configuration in root['configurations']:
             if configuration[0] > cutoff_weight:
-                print(configuration)
+                print(t_config.format(*configuration))
 
 
 def parse_state_block_ci(outputfile):
@@ -121,13 +125,13 @@ def parse_state_block_ci(outputfile):
     root['configurations'] = configurations
     roots.append(root)
     for root in roots:
-        if root['num'] == 0:
-            print(root)
-        else:
-            print(root)
+        print(t_root.format(root['num'],
+                            root['energy_hartree'],
+                            root['energy_ev'],
+                            root['energy_wavenumber']))
         for configuration in root['configurations']:
             if configuration[0] > cutoff_weight:
-                print(configuration)
+                print(t_config.format(*configuration))
 
 
 if __name__ == '__main__':
