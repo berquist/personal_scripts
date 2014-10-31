@@ -24,7 +24,7 @@ if __name__ == '__main__':
                     next(outputfile)
                     line = next(outputfile)
                     gprin_ppt = np.array(map(float, line.split()))
-                    gprin_full = (gprin_ppt / 1000) + 2.0023
+                    gprin_full = (gprin_ppt / 1000) + 2.002319
                     print('  ppt: {:>11.3f} {:>11.3f} {:>11.3f}'.format(*gprin_ppt))
                     print(' full: {:>11.3f} {:>11.3f} {:>11.3f}'.format(*gprin_full))
                     break

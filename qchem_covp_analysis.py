@@ -3,7 +3,7 @@
 '''Identify the indices of the complementary occupied-virtual pairs (COVPs).
 
 Usage:
-  qchem.covp_analysis.py [options] <outputfilename>
+  qchem_covp_analysis.py [options] <outputfilename>
 
 Options:
   --pct_cutoff=CUTOFF  Energy percentage cutoff to include an orbital for printing/analysis. [Default: 2]
@@ -17,6 +17,10 @@ Options:
 from __future__ import print_function
 
 import numpy as np
+from docopt import docopt
+import os.path
+from cclib.parser import ccopen
+import os
 
 from vmd_templates import *
 
@@ -50,9 +54,34 @@ def parse_fragment_block(outputfile, fragment_entries, fragment_idx):
         }
         fragment_entries.append(entry)
         line = next(outputfile)
+    # parse the 'total' line at the end of a block
+    if '-----' in line:
+        line = next(outputfile)
+        index = line[0:4].strip() + str(fragment_idx)
+        de_alph = float(line[4:13])
+        de_alph_pct = float(line[14:19])
+        de_beta = float(line[21:30])
+        de_beta_pct = float(line[31:36])
+        dq_alph = float(line[38:46])
+        dq_alph_pct = float(line[47:52])
+        dq_beta = float(line[54:62])
+        dq_beta_pct = float(line[63:68])
+        total = {
+            'index': index,
+            'de_alph': de_alph,
+            'de_alph_pct': de_alph_pct,
+            'de_beta': de_beta,
+            'de_beta_pct': de_beta_pct,
+            'dq_alph': dq_alph,
+            'dq_alph_pct': dq_alph_pct,
+            'dq_beta': dq_beta,
+            'dq_beta_pct': dq_beta_pct
+        }
+
+    return total
 
 
-def determine_fragment_indices(fragment_1_to_2, fragment_2_to_1):
+def determine_fragment_indices(fragment_1_to_2, fragment_2_to_1, covpenergies, n_mo, idx_homo):
     '''
     Determine the actual orbital indices each COVP corresponds to.
 
@@ -190,15 +219,7 @@ def pad_zeros(num, maxlen):
         return numstr
 
 
-if __name__ == '__main__':
-
-    from docopt import docopt
-    import os.path
-    from cclib.parser import ccopen
-    import os
-
-    args = docopt(__doc__)
-
+def main(args):
     if args['--print_args']:
         print(args)
 
@@ -235,12 +256,16 @@ if __name__ == '__main__':
     with open(outputfilename) as outputfile:
         for line in outputfile:
             if 'From fragment 1 to fragment 2' in line:
-                parse_fragment_block(outputfile, fragment_1_to_2, 1)
+                fragment_1_to_2_tot = parse_fragment_block(outputfile, fragment_1_to_2, 1)
             if 'From fragment 2 to fragment 1' in line:
-                parse_fragment_block(outputfile, fragment_2_to_1, 2)
+                fragment_2_to_1_tot = parse_fragment_block(outputfile, fragment_2_to_1, 2)
 
     # Determine the actual orbital indices each COVP corresponds to.
-    determine_fragment_indices(fragment_1_to_2, fragment_2_to_1)
+    determine_fragment_indices(fragment_1_to_2,
+                               fragment_2_to_1,
+                               covpenergies,
+                               n_mo,
+                               idx_homo)
 
     header = ' idx  occ virt      de   de%     dq   dq%'
     fs = ' {:3d} {:4d} {:4d} {:6} {:5} {:6} {:5}'
@@ -309,3 +334,16 @@ if __name__ == '__main__':
                     print("Can't remove " + orb_virt_filename)
 
     print('-' * 78)
+
+    return (fragment_1_to_2_cutoff,
+            fragment_2_to_1_cutoff,
+            fragment_1_to_2_tot,
+            fragment_2_to_1_tot)
+    # return fragment_1_to_2_cutoff, fragment_2_to_1_cutoff
+
+
+if __name__ == '__main__':
+
+    args = docopt(__doc__)
+
+    main(args)
