@@ -14,9 +14,10 @@
 # 5. "Load state" plot_all.vmd (play plot_all.vmd)
 # 6. Run convert.bash script to convert to PNG if desired
 
-# RB note:
-# Steps 2 and 3 can also be performed by launching vmd from the shell like this: vmd file.xyz -e load_all_plt.vmd
-# Step 6: convert.bash script requires Imagemagick convert utility. For Mac OS X, install through Homebrew: brew install imagemagick
+# RB note: Steps 2 and 3 can also be performed by launching vmd from
+# the shell like this: vmd file.xyz -e load_all_plt.vmd
+# Step 6: convert.bash script requires Imagemagick convert utility.
+# For Mac OS X, install through Homebrew: brew install imagemagick
 
 """Help generate a series of pretty pictures from cube files via VMD.
 
@@ -85,7 +86,8 @@ elif nsurf == 3:
 # write the main portion of the VMD display file
 color1id = 23
 color2id = 29
-vmdrenderfile = '''axes location Off
+vmdrenderfile = '''
+axes location off
 display resize 1050 1050
 display projection Orthographic
 display rendermode GLSL
@@ -98,14 +100,32 @@ material change diffuse Ghost 0.000000
 material change ambient Ghost 0.300000
 material change opacity Ghost 0.100000
 material change shininess Ghost 0.000000
+
+# add representations for up to 6 isosurfaces
 mol addrep 0
 mol addrep 0
 mol addrep 0
 mol addrep 0
 mol addrep 0
 mol addrep 0
+
 mol modcolor 0 0 Element
 mol modstyle 0 0 Licorice 0.200000 100.000000 100.000000
+
+mol modstyle 1 0 Isosurface  {isov1} 0 0 0 1 1
+mol modstyle 2 0 Isosurface -{isov1} 0 0 0 1 1
+mol modstyle 3 0 Isosurface  {isov2} 0 0 0 1 1
+mol modstyle 4 0 Isosurface -{isov2} 0 0 0 1 1
+mol modstyle 5 0 Isosurface  {isov3} 0 0 0 1 1
+mol modstyle 6 0 Isosurface -{isov3} 0 0 0 1 1
+
+mol modcolor 1 0 ColorID {color1}
+mol modcolor 2 0 ColorID {color2}
+mol modcolor 3 0 ColorID {color1}
+mol modcolor 4 0 ColorID {color2}
+mol modcolor 5 0 ColorID {color1}
+mol modcolor 6 0 ColorID {color2}
+
 mol modmaterial 0 0 HardPlastic
 mol modmaterial 1 0 HardPlastic
 mol modmaterial 2 0 HardPlastic
@@ -113,18 +133,6 @@ mol modmaterial 3 0 Glass3
 mol modmaterial 4 0 Glass3
 mol modmaterial 5 0 Ghost
 mol modmaterial 6 0 Ghost
-mol modstyle 1 0 Isosurface  {isov1} 0 0 0 1 1
-mol modstyle 2 0 Isosurface -{isov1} 0 0 0 1 1
-mol modstyle 3 0 Isosurface  {isov2} 0 0 0 1 1
-mol modstyle 4 0 Isosurface -{isov2} 0 0 0 1 1
-mol modstyle 5 0 Isosurface  {isov3} 0 0 0 1 1
-mol modstyle 6 0 Isosurface -{isov3} 0 0 0 1 1
-mol modcolor 1 0 ColorID {color1}
-mol modcolor 2 0 ColorID {color2}
-mol modcolor 3 0 ColorID {color1}
-mol modcolor 4 0 ColorID {color2}
-mol modcolor 5 0 ColorID {color1}
-mol modcolor 6 0 ColorID {color2}
 '''.format(isov1=isov[0], isov2=isov[1], isov3=isov[2],
            color1=color1id, color2=color2id)
 outfile.write(vmdrenderfile)
@@ -148,7 +156,7 @@ mol modstyle 3 0 Isosurface  {isov2} {N} 0 0 1 1
 mol modstyle 4 0 Isosurface -{isov2} {N} 0 0 1 1
 mol modstyle 5 0 Isosurface  {isov3} {N} 0 0 1 1
 mol modstyle 6 0 Isosurface -{isov3} {N} 0 0 1 1
-render POV3 {I}.pov
+# render POV3 {I}.pov
 render TachyonInternal {I}.{ofmt}
 '''.format(I=I, N=N, ofmt=ofmt,
            isov1=isov[0], isov2=isov[1], isov3=isov[2])
