@@ -132,7 +132,8 @@ def vmd_covp_write_files(loadfile, renderfile, xyzfilename, mo_pairs, width):
 
 
 def pad_left_zeros(num, maxwidth):
-    '''
+    '''Pad the given number with zeros on the left until the
+    total length is maxwidth.
     '''
     numwidth = len(str(num))
     if numwidth < maxwidth:
@@ -141,6 +142,23 @@ def pad_left_zeros(num, maxwidth):
     else:
         numstr = str(num)
     return numstr
+
+
+def pad_left_zeros_l(l):
+    '''Given a list of integers, appropriately pad the left with zeros and
+    return a list of the corresponding strings.
+    '''
+    # Find the maximum "length" of all the numbers and store it.
+    maxlen = 0
+    for num in l:
+        newlen = len(str(num))
+        if newlen > maxlen:
+            maxlen = newlen
+    # Pad each number if necessary.
+    nl = []
+    for num in l:
+        nl.append(pad_left_zeros(num, maxlen))
+    return nl
 
 
 if __name__ == '__main__':

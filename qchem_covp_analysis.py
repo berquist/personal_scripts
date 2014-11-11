@@ -205,20 +205,6 @@ def dump_pandas(fragment_1_to_2_entries, fragment_2_to_1_entries, prefix):
     results_2_to_1_df.to_excel('{}.2_to_1.xls'.format(prefix))
 
 
-def pad_zeros(num, maxlen):
-    '''
-    Pad the given number with zeros to left until the total length is maxlen.
-    '''
-    numstr = str(num)
-    numlen = len(numstr)
-    if numlen < maxlen:
-        numzeros = maxlen - numlen
-        padnum = (numzeros * '0') + numstr
-        return padnum
-    else:
-        return numstr
-
-
 def main(args):
     if args['--print_args']:
         print(args)
@@ -318,8 +304,8 @@ def main(args):
         template = 'mo.{}.cube'
         for entry in fragment_entries:
             if entry['de_alph_pct'] < pct_cutoff:
-                orb_occ = pad_zeros(entry['orb_occ'], maxlen)
-                orb_virt = pad_zeros(entry['orb_virt'], maxlen)
+                orb_occ = pad_left_zeros(entry['orb_occ'], maxlen)
+                orb_virt = pad_left_zeros(entry['orb_virt'], maxlen)
                 orb_occ_filename = template.format(orb_occ)
                 orb_virt_filename = template.format(orb_virt)
                 print('Deleting ' + orb_occ_filename)
@@ -339,7 +325,6 @@ def main(args):
             fragment_2_to_1_cutoff,
             fragment_1_to_2_tot,
             fragment_2_to_1_tot)
-    # return fragment_1_to_2_cutoff, fragment_2_to_1_cutoff
 
 
 if __name__ == '__main__':

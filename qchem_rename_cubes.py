@@ -11,20 +11,7 @@ Options:
 '''
 
 from __future__ import print_function
-
-
-def pad_zeros(num, maxlen):
-    '''
-    Pad the given number with zeros to left until the total length is maxlen.
-    '''
-    numstr = str(num)
-    numlen = len(numstr)
-    if numlen < maxlen:
-        numzeros = maxlen - numlen
-        padnum = (numzeros * '0') + numstr
-        return padnum
-    else:
-        return numstr
+from vmd_templates import pad_left_zeros
 
 
 if __name__ == '__main__':
