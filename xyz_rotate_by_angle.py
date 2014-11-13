@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from __future__ import print_function
 import numpy as np
 from math import sin, cos, sqrt
@@ -52,7 +54,7 @@ def rotation_matrix(angle, axis):
     s = sin(angle)
     c = cos(angle)
 
-    mag = sqrt( x*x + y*y + z*z )
+    mag = sqrt(x*x + y*y + z*z)
 
     small = 1.0e-10
     if abs(mag) < small:
@@ -76,9 +78,9 @@ def rotation_matrix(angle, axis):
     zs = z * s
     one_c = 1.0 - c
 
-    rotmat = [[ (one_c * xx) + c , (one_c * xy) - zs, (one_c * zx) + ys ],
-              [ (one_c * xy) + zs, (one_c * yy) + c , (one_c * yz) - xs ],
-              [ (one_c * zx) - ys, (one_c * yz) + xs, (one_c * zz) + c  ]]
+    rotmat = [[(one_c * xx) + c , (one_c * xy) - zs, (one_c * zx) + ys],
+              [(one_c * xy) + zs, (one_c * yy) + c , (one_c * yz) - xs],
+              [(one_c * zx) - ys, (one_c * yz) + xs, (one_c * zz) + c ]]
 
     return np.array(rotmat)
 
