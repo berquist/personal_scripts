@@ -3,7 +3,7 @@
 '''Parse the reduced MO blocks for ...
 
 Usage:
-  orca.significant_mos.py [options] (canon | uno) <outputfilename>
+  orca_significant_mos.py [options] (canon | uno) <outputfilename>
 
 Options:
   --threshold=THRESH  Set the printing threshold. [default: 2.0]
@@ -14,9 +14,11 @@ Options:
 # ORCA prints 6 columns at a time for these blocks
 ncols = 6
 
-header_mo = 'LOEWDIN REDUCED ORBITAL POPULATIONS PER MO'
-header_uno = 'LOEWDIN REDUCED ORBITAL POPULATIONS PER UNO'
-# header_unso = 'LOEWDIN REDUCED ORBITAL POPULATIONS PER UNSO'
+header_mo = 'LOEWDIN ORBITAL POPULATIONS PER MO'
+header_reduced_mo = 'LOEWDIN REDUCED ORBITAL POPULATIONS PER MO'
+header_reduced_uno = 'LOEWDIN REDUCED ORBITAL POPULATIONS PER UNO'
+# header_reduced_unso = 'LOEWDIN REDUCED ORBITAL POPULATIONS PER UNSO'
+header_mo2 = 'LOEWDIN ORBITAL-COMPOSITIONS'
 
 energies = list()
 occupations = list()
@@ -129,14 +131,16 @@ if __name__ == '__main__':
         has_beta = True
 
     if args['canon']:
-        header = header_mo
+        headers = [header_mo, header_mo2, header_reduced_mo]
     if args['uno']:
-        header = header_uno
+        headers = [header_reduced_uno]
 
     with open(outputfilename) as outputfile:
         for line in outputfile:
-            if header in line:
-                parse_section(outputfile)
+            for header in headers:
+                if header in line:
+                    parsed_header = header
+                    parse_section(outputfile)
 
     # determine the last orbital we should be printing information about
     if not args['--max_orbital']:
@@ -147,5 +151,5 @@ if __name__ == '__main__':
 
     threshold = float(args['--threshold'])
     filtered_mos = get_orbital_contribs_within_threshold(orbitals, threshold, max_orbital)
-    print(header)
+    print(parsed_header)
     pretty_print_orbitals(filtered_mos, has_beta)
