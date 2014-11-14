@@ -11,6 +11,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
     outputfilenames = args.outputfilename
 
+    t = 'g_1: {:<11.8f} g_2: {:<11.8f} g_3: {:<11.8f} g_para: {:<11.8f} g_perp: {:<11.8f} g_iso: {:<11.8f}'
+
     for outputfilename in outputfilenames:
         with open(outputfilename) as outputfile:
             match = False
@@ -33,5 +35,4 @@ if __name__ == '__main__':
             if match:
                 g_perp = (g_1 + g_2) / 2
                 g_para = g_3
-                print(' {:<11.8f} {:<11.8f} {:<11.8f}'.format(g_1, g_2, g_3))
-                print(' g_para: {:<11.8f} g_perp: {:<11.8f} g_iso: {:<11.8f}'.format(g_para, g_perp, g_iso))
+                print(t.format(g_1, g_2, g_3, g_para, g_perp, g_iso))
