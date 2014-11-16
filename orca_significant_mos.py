@@ -3,29 +3,22 @@
 '''Parse the reduced MO blocks for ...
 
 Usage:
-  orca_significant_mos.py [options] (canon | uno) <outputfilename>
+  orca_significant_mos.py [options] <outputfilename>
 
 Options:
-  --threshold=THRESH  Set the printing threshold. [default: 2.0]
-  --max_orbital=MAX   Don't print anything above this orbital index. Default to 2*NOcc, can also specify 'all'.
-  --print_args        Print the parsed argument block.
+  --threshold=THRESH      Set the printing threshold. [default: 2.0]
+  --max_orbital=MAX       Don't print anything above this orbital index. Default to 2*NOcc, can also specify 'all'.
+  --dual=outputfilename2  Optionally compare two files.
+  --print_args            Print the parsed argument block.
 '''
 
-# ORCA prints 6 columns at a time for these blocks
-ncols = 6
+from __future__ import print_function
 
-header_mo = 'LOEWDIN ORBITAL POPULATIONS PER MO'
-header_reduced_mo = 'LOEWDIN REDUCED ORBITAL POPULATIONS PER MO'
-header_reduced_uno = 'LOEWDIN REDUCED ORBITAL POPULATIONS PER UNO'
-# header_reduced_unso = 'LOEWDIN REDUCED ORBITAL POPULATIONS PER UNSO'
-header_mo2 = 'LOEWDIN ORBITAL-COMPOSITIONS'
-
-energies = list()
-occupations = list()
-orbitals = dict()
+from docopt import docopt
+from cclib.parser import ccopen
 
 
-def parse_line(line, max_mo_index, spin):
+def parse_line(line, max_mo_index, orbitals, spin):
     ''''''
     split = line.split()
     idx_atom = int(split[0])
@@ -41,23 +34,23 @@ def parse_line(line, max_mo_index, spin):
             orbitals[mo_indices[i]] = [entry]
 
 
-def parse_section(outputfile):
+def parse_section(outputfile, nmo, energies, occupations, orbitals, has_beta):
     ''''''
     alpha, beta = 0, 1
-    # skip the dashes and the threshold for printing
+    # Skip the dashes and the threshold for printing.
     next(outputfile)
     next(outputfile)
     # "SPIN UP"
-    if has_beta and args['canon']:
+    if has_beta:
         next(outputfile)
-    parse_block(outputfile, alpha)
+    parse_block(outputfile, nmo, energies, occupations, orbitals, alpha)
     # "SPIN DOWN"
     next(outputfile)
-    if has_beta and args['canon']:
-        parse_block(outputfile, beta)
+    if has_beta:
+        parse_block(outputfile, nmo, energies, occupations, orbitals, beta)
 
 
-def parse_block(outputfile, spin):
+def parse_block(outputfile, nmo, energies, occupations, orbitals, spin):
     ''''''
     counter = 0
     while counter < (nmo - 1):
@@ -74,7 +67,7 @@ def parse_block(outputfile, spin):
         line = next(outputfile)
         # an arbitrary (>= 1) number of lines contains 9 columns; this is the goods!
         while line != '\n':
-            parse_line(line, counter + 1, spin)
+            parse_line(line, counter + 1, orbitals, spin)
             line = next(outputfile)
 
 
@@ -92,7 +85,7 @@ def get_orbital_contribs_within_threshold(orbitals, threshold, max_orbital):
     return neworbitals
 
 
-def pretty_print_orbitals(orbitals, has_beta):
+def pretty_print_orbitals(energies, orbitals, nmo, has_beta):
     ''''''
     spins = {0: 'alpha', 1: 'beta'}
     if not has_beta:
@@ -110,15 +103,24 @@ def pretty_print_orbitals(orbitals, has_beta):
             print(contrib_template.format(*contrib[0:4], spin=spins[contrib[4]]))
 
 
-if __name__ == '__main__':
+def main(args):
+    ''''''
+    # ORCA prints 6 columns at a time for these types of blocks.
+    ncols = 6
 
-    from docopt import docopt
-    from cclib.parser import ccopen
+    headers = [
+        'LOEWDIN ORBITAL POPULATIONS PER MO',
+        'LOEWDIN REDUCED ORBITAL POPULATIONS PER MO',
+        'LOEWDIN REDUCED ORBITAL POPULATIONS PER UNO',
+        # 'LOEWDIN REDUCED ORBITAL POPULATIONS PER UNSO',
+        # This is equivalent to the reduced orbital population per MO, but
+        # named differently within CASSCF/MRCI jobs.
+        'LOEWDIN ORBITAL-COMPOSITIONS'
+    ]
 
-    args = docopt(__doc__)
-
-    if args['--print_args']:
-        print(args)
+    energies = list()
+    occupations = list()
+    orbitals = dict()
 
     # pre-determine the number of MOs present and whether or not
     # there are two sets of canonical MOs
@@ -130,17 +132,12 @@ if __name__ == '__main__':
     if len(data.homos) == 2:
         has_beta = True
 
-    if args['canon']:
-        headers = [header_mo, header_mo2, header_reduced_mo]
-    if args['uno']:
-        headers = [header_reduced_uno]
-
     with open(outputfilename) as outputfile:
         for line in outputfile:
             for header in headers:
                 if header in line:
                     parsed_header = header
-                    parse_section(outputfile)
+                    parse_section(outputfile, nmo, energies, occupations, orbitals, has_beta)
 
     # determine the last orbital we should be printing information about
     if not args['--max_orbital']:
@@ -152,4 +149,14 @@ if __name__ == '__main__':
     threshold = float(args['--threshold'])
     filtered_mos = get_orbital_contribs_within_threshold(orbitals, threshold, max_orbital)
     print(parsed_header)
-    pretty_print_orbitals(filtered_mos, has_beta)
+    pretty_print_orbitals(energies, filtered_mos, nmo, has_beta)
+
+
+if __name__ == '__main__':
+
+    args = docopt(__doc__)
+
+    if args['--print_args']:
+        print(args)
+
+    main(args)
