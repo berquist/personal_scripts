@@ -3,7 +3,7 @@
 '''Generate an ORCA input file specifically for plotting cube files.
 
 Usage:
-  orca.generate_plot_strings.py [options] [--canon=canon_list] [--uno=uno_list]
+  orca_generate_plot_strings.py [options] [--canon=canon_list] [--uno=uno_list]
 
 If canon_list or uno_list consists of two numbers, all cubes in that range
 (inclusive) will be generated.
@@ -19,7 +19,7 @@ Options:
   --print_args     Print the parsed argument block.
 
 Examples:
-  orca.generate_plot_strings.py --spindens --beta --uno=0,4,5,6,7 --prefix='example' --canon=1,2,10
+  orca_generate_plot_strings.py --spindens --beta --uno=0,4,5,6,7 --prefix='example' --canon=1,2,10
    outputs:
 %plots
  format gaussian_cube
@@ -32,14 +32,16 @@ Examples:
  uno("example.uno.5.cube", 5);
  uno("example.uno.6.cube", 6);
  uno("example.uno.7.cube", 7);
- mo("example.mo.1a.cube", 1, 0);
- mo("example.mo.1b.cube", 1, 1);
- mo("example.mo.2a.cube", 2, 0);
- mo("example.mo.2b.cube", 2, 1);
+ mo("example.mo.01a.cube", 1, 0);
+ mo("example.mo.01b.cube", 1, 1);
+ mo("example.mo.02a.cube", 2, 0);
+ mo("example.mo.02b.cube", 2, 1);
  mo("example.mo.10a.cube", 10, 0);
  mo("example.mo.10b.cube", 10, 1);
  end
 '''
+
+from vmd_templates import *
 
 
 def mo_string(prefix, mo_num, op_num):
@@ -73,7 +75,8 @@ def spindens_string(prefix):
     return 'spindens("{prefix}density.spin.cube");'.format(prefix=prefix)
 
 def arg_to_list(arg):
-    ''''''
+    '''Convert the given argument to a list of a single element if it's an atom,
+    '''
     if isinstance(arg, str):
         newarg = eval(arg)
         if isinstance(newarg, int):
@@ -87,7 +90,8 @@ def arg_to_list(arg):
 
 def generate_block(args):
     '''Create the %plots block based upon command-line arguments passed in
-    through the args dictionary.'''
+    through the args dictionary.
+    '''
     if args['--prefix'] is None:
         prefix = ''
     else:
@@ -122,12 +126,12 @@ def generate_block(args):
 
     # plot the UNOs first due to an 'operator' bug in ORCA
     if args['--uno']:
-        args['--uno'] = arg_to_list(args['--uno'])
+        args['--uno'] = pad_left_zeros_l(arg_to_list(args['--uno']))
         for uno_num in args['--uno']:
             block_parts.append(' ' + uno_string(prefix, uno_num))
 
     if args['--canon']:
-        args['--canon'] = arg_to_list(args['--canon'])
+        args['--canon'] = pad_left_zeros_l(arg_to_list(args['--canon']))
         for mo_num in args['--canon']:
             block_parts.append(' ' + mo_string(prefix, mo_num, 0))
             if args['--beta']:
