@@ -89,10 +89,10 @@ def pretty_print_orbitals(energies, orbitals, nmo, has_beta):
     ''''''
     spins = {0: 'alpha', 1: 'beta'}
     if not has_beta:
-        header_template = ' {key} {en_alpha}'
+        header_template  = ' {key} {en_alpha}'
         contrib_template = '  {:3} {:2} {:5} {:5}'
     else:
-        header_template = ' {key} {en_alpha} {en_beta}'
+        header_template  = ' {key} {en_alpha} {en_beta}'
         contrib_template = '  {:3} {:2} {:5} {:5} {spin:5}'
     for key in orbitals.iterkeys():
         header_dict = {'key': key,
@@ -103,7 +103,28 @@ def pretty_print_orbitals(energies, orbitals, nmo, has_beta):
             print(contrib_template.format(*contrib[0:4], spin=spins[contrib[4]]))
 
 
-def main(args):
+def pretty_print_orbitals_dual(energies1, energies2, orbitals1, orbitals2, nmo1, nmo2, has_beta):
+    ''''''
+    spins = {0: 'alpha', 1: 'beta'}
+    # Handle the restricted case.
+    if not has_beta:
+        # header_template_full
+        # contrib_template_full
+        header_template_left   = ' {key} {en_alpha}'
+        contrib_template_left  = '  {:3} {:2} {:5} {:5}'
+        # header_template_right
+        # contrib_template_right
+    # Handle the unrestricted case.
+    else:
+        # header_template_full
+        # contrib_template_full
+        header_template_left   = ' {key} {en_alpha} {en_beta}'
+        contrib_template_left  = '  {:3} {:2} {:5} {:5} {spin:5}'
+        # header_template_right
+        # contrib_template_right
+
+
+def open_and_parse_outputfile(args, outputfilename):
     ''''''
     # ORCA prints 6 columns at a time for these types of blocks.
     ncols = 6
@@ -124,7 +145,6 @@ def main(args):
 
     # pre-determine the number of MOs present and whether or not
     # there are two sets of canonical MOs
-    outputfilename = args['<outputfilename>']
     job = ccopen(outputfilename)
     data = job.parse()
     nmo = data.nmo
@@ -150,6 +170,30 @@ def main(args):
     filtered_mos = get_orbital_contribs_within_threshold(orbitals, threshold, max_orbital)
     print(parsed_header)
     pretty_print_orbitals(energies, filtered_mos, nmo, has_beta)
+
+    return energies, occupations, orbitals
+
+
+def main(args):
+    ''''''
+
+    outputfilename1 = args['<outputfilename>']
+    energies1, occupations1, orbitals1 = open_and_parse_outputfile(args, outputfilename1)
+    if args['--dual']:
+        outputfilename2 = args['--dual']
+        energies2, occupations2, orbitals2 = open_and_parse_outputfile(args, outputfilename2)
+
+    results = {
+        'energies1'    : energies1,
+        'occupations1' : occupations1,
+        'orbitals1'    : orbitals1
+    }
+    if args['--dual']:
+        results['energies2']    = energies2
+        results['occupations2'] = occupations2
+        results['orbitals2']    = orbitals2
+
+    return results
 
 
 if __name__ == '__main__':
