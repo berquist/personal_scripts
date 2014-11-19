@@ -12,6 +12,10 @@ Options:
 
 from __future__ import print_function
 
+from docopt import docopt
+import os.path
+import re
+
 
 t_root_g = ' ROOT {}: E= {:.8f} Eh'
 t_root_e = ' ROOT {}: E= {:.8f} Eh {:.2f} eV {:.1f} cm**-1'
@@ -20,6 +24,8 @@ t_config = '  {:.4f} [{}]'
 
 
 def parse_absorption_spectrum(outputfile):
+    """Parse an absorption spectrum block, printing it to stdout.
+    """
     line = next(outputfile)
     while 'ABSORPTION SPECTRUM' not in line:
         line = next(outputfile)
@@ -40,19 +46,23 @@ def parse_absorption_spectrum(outputfile):
 
 
 def parse_g_tensor(outputfile):
+    """Parse the g-tensor block, printing the principal values to stdout.
+    """
     line = next(outputfile)
     while 'g-factors' not in line:
         line = next(outputfile)
     line = next(outputfile)
-    g_xx, g_yy, g_zz = list(map(float, line.split()[:3]))
-    g_perp = (g_xx + g_yy) / 2
-    g_para = g_zz
+    g_1, g_2, g_3 = list(map(float, line.split()[:3]))
+    g_perp = (g_1 + g_2) / 2
+    g_para = g_3
+    print(' g_1: {} g_2: {} g_3: {}'.format(g_1, g_2, g_3))
     print(' g_perp: {}'.format(g_perp))
     print(' g_para: {}'.format(g_para))
 
 
-def parse_state_block_cas(outputfile):
-    """
+def parse_state_block_cas(outputfile, cutoff_weight):
+    """Parse an entire MCSCF state block, printing it to
+    stdout.
     """
     next(outputfile)
     next(outputfile)
@@ -95,8 +105,9 @@ def parse_state_block_cas(outputfile):
                 print(t_config.format(*configuration))
 
 
-def parse_state_block_ci(outputfile):
-    """
+def parse_state_block_ci(outputfile, cutoff_weight):
+    """Parse an entire MRCI state block, printing it to
+    stdout.
     """
     line = next(outputfile)
     while 'STATE' not in line:
@@ -134,17 +145,7 @@ def parse_state_block_ci(outputfile):
                 print(t_config.format(*configuration))
 
 
-if __name__ == '__main__':
-
-    from docopt import docopt
-    import os.path
-    import re
-
-    args = docopt(__doc__)
-
-    if args['--print_args']:
-        print(args)
-
+def main(args):
     outputfilename = args['<outputfilename>']
     stub = os.path.splitext(outputfilename)[0]
 
@@ -159,11 +160,13 @@ if __name__ == '__main__':
             # Parse the state blocks after CASSCF but before the MRCI.
             if 'CAS-SCF STATES FOR BLOCK' in line:
                 print(line.strip())
-                parse_state_block_cas(outputfile)
-            # Parse the state block after the MRCI.
+                parse_state_block_cas(outputfile, cutoff_weight)
+            # Parse the state block(s) after the MRCI. There might be
+            # more than one, especially if doing SORCI/SORCP (which
+            # are two-step jobs).
             if 'CI-RESULTS' in line:
                 print(line.strip())
-                parse_state_block_ci(outputfile)
+                parse_state_block_ci(outputfile, cutoff_weight)
             # Parse the absorption spectrum block.
             if 'CI-EXCITATION SPECTRA' in line:
                 print(line.strip(), '(no SOC correction)')
@@ -172,5 +175,14 @@ if __name__ == '__main__':
             if 'ELECTRONIC G-MATRIX' in line:
                 parse_g_tensor(outputfile)
 
-
     print('-' * 78)
+
+
+if __name__ == '__main__':
+
+    args = docopt(__doc__)
+
+    if args['--print_args']:
+        print(args)
+
+    main(args)
