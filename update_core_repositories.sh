@@ -12,6 +12,6 @@ echo "pulling $HOME/modules..."
 cd $HOME/modules
 git pull
 
-echo ""
+echo "pulling $HOME/buildscripts..."
 cd $HOME/buildscripts
 git pull
