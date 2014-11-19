@@ -1,12 +1,24 @@
 #!/usr/bin/env python2
 
-def template_pbsfile(inpfile, ppn, time, queue):
+
+def template_pbsfile(inpfile, ppn, time, queue, extrafiles):
+    copy_string_template = "cp $PBS_O_WORKDIR/{} $LOCAL\n"
+    if extrafiles is None:
+        joined_extrafiles = ""
+    elif isinstance(extrafiles, list):
+        copy_strings = []
+        for extrafile in extrafiles:
+            copy_string = copy_string_template.format(extrafile)
+            copy_strings.append(copy_string)
+        joined_extrafiles = "".join(copy_strings)
+    else:
+        joined_extrafiles = copy_string_template.format(extrafiles)
     return """#!/bin/bash
 
-#PBS -N {0}
-#PBS -q {3}
-#PBS -l nodes=1:ppn={1}
-#PBS -l walltime={2}:00:00
+#PBS -N {inpfile}
+#PBS -q {queue}
+#PBS -l nodes=1:ppn={ppn}
+#PBS -l walltime={time}:00:00
 #PBS -j oe
 #PBS -l qos=low
 #PBS -m abe
@@ -15,106 +27,24 @@ def template_pbsfile(inpfile, ppn, time, queue):
 module purge
 module load orca/3.0.2
 
-cp $PBS_O_WORKDIR/{0}.in  $LOCAL
-cd $LOCAL
+cp $PBS_O_WORKDIR/{inpfile}.in $LOCAL
+{extrafiles}cd $LOCAL
 
 run_on_exit() {{
     set -v
-    cp $LOCAL/* $PBS_O_WORKDIR
+    cp -R $LOCAL/* $PBS_O_WORKDIR
 }}
 
 trap run_on_exit EXIT
 
-`which orca` {0}.in >& $PBS_O_WORKDIR/{0}.out
-""".format(inpfile, ppn, time, queue, username=os.environ['USER'])
+`which orca` {inpfile}.in >& $PBS_O_WORKDIR/{inpfile}.out
+""".format(inpfile=inpfile,
+           ppn=ppn,
+           time=time,
+           queue=queue,
+           username=os.environ['USER'],
+           extrafiles=joined_extrafiles)
 
-def template_pbsfile_coords(inpfile, ppn, time, queue, xyzfile):
-    return """#!/bin/bash
-
-#PBS -N {0}
-#PBS -q {3}
-#PBS -l nodes=1:ppn={1}
-#PBS -l walltime={2}:00:00
-#PBS -j oe
-#PBS -l qos=low
-#PBS -m abe
-#PBS -M {username}@pitt.edu
-
-module purge
-module load orca/3.0.2
-
-cp $PBS_O_WORKDIR/{0}.in  $LOCAL
-cp $PBS_O_WORKDIR/{4}.xyz $LOCAL
-cd $LOCAL
-
-run_on_exit() {{
-    set -v
-    cp $LOCAL/* $PBS_O_WORKDIR
-}}
-
-trap run_on_exit EXIT
-
-`which orca` {0}.in >& $PBS_O_WORKDIR/{0}.out
-""".format(inpfile, ppn, time, queue, xyzfile, username = os.environ['USER'])
-
-def template_pbsfile_ptchrg(inpfile, ppn, time, queue, ptchrgfile):
-    return """#!/bin/bash
-
-#PBS -N {0}
-#PBS -q {3}
-#PBS -l nodes=1:ppn={1}
-#PBS -l walltime={2}:00:00
-#PBS -j oe
-#PBS -l qos=low
-#PBS -m abe
-#PBS -M {username}@pitt.edu
-
-module purge
-module load orca/3.0.2
-
-cp $PBS_O_WORKDIR/{0}.in  $LOCAL
-cp $PBS_O_WORKDIR/{4}.xyz $LOCAL
-cd $LOCAL
-
-run_on_exit() {{
-    set -v
-    cp $LOCAL/* $PBS_O_WORKDIR
-}}
-
-trap run_on_exit EXIT
-
-`which orca` {0}.in >& $PBS_O_WORKDIR/{0}.out
-""".format(inpfile, ppn, time, queue, ptchrgfile, username = os.environ['USER'])
-
-def template_pbsfile_coords_ptchrg(inpfile, ppn, time, queue, xyzfile, ptchrgfile):
-    return """#!/bin/bash
-
-#PBS -N {0}
-#PBS -q {3}
-#PBS -l nodes=1:ppn={1}
-#PBS -l walltime={2}:00:00
-#PBS -j oe
-#PBS -l qos=low
-#PBS -m abe
-#PBS -M {username}@pitt.edu
-
-module purge
-module load orca/3.0.2
-
-cp $PBS_O_WORKDIR/{0}.in  $LOCAL
-cp $PBS_O_WORKDIR/{4}.xyz $LOCAL
-cp $PBS_O_WORKDIR/{5}.xyz $LOCAL
-cd $LOCAL
-
-run_on_exit() {{
-    set -v
-    cp $LOCAL/* $PBS_O_WORKDIR
-}}
-
-trap run_on_exit EXIT
-
-`which orca` {0}.in >& $PBS_O_WORKDIR/{0}.out
-""".format(inpfile, ppn, time, queue, xyzfile, ptchrgfile, username = os.environ['USER'])
 
 if __name__ == "__main__":
     import argparse
@@ -123,10 +53,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('inpfilename',
                         help='the ORCA input file to submit')
-    parser.add_argument('--xyzfile',
-                        help='XYZ file containing molecular coordinates')
-    parser.add_argument('--ptchrgfile',
-                        help='XYZ file containing point charges (element as charge magnitude)')
     parser.add_argument('--ppn',
                         type=int,
                         default=4,
@@ -138,26 +64,18 @@ if __name__ == "__main__":
     parser.add_argument('--queue',
                         default='shared',
                         help='queue to run in (typically shared or shared_large')
+    parser.add_argument('--extrafiles',
+                        help='An arbitrary number of files to copy to $LOCAL.',
+                        nargs='*')
     args = parser.parse_args()
     inpfilename = os.path.splitext(args.inpfilename)[0]
-    xyzfile = args.xyzfile
-    ptchrgfile = args.ptchrgfile
     ppn = args.ppn
     time = args.time
     queue = args.queue
-
-    if xyzfile is not None: xyzfile = os.path.splitext(xyzfile)[0]
-    if ptchrgfile is not None: ptchrgfile = os.path.splitext(ptchrgfile)[0]
+    extrafiles = args.extrafiles
 
     pbsfilename = inpfilename + '.pbs'
     with open(pbsfilename, 'wb') as pbsfile:
-        if xyzfile and ptchrgfile:
-            pbsfile.write(template_pbsfile_coords_ptchrg(inpfilename, ppn, time, queue, xyzfile, ptchrgfile))
-        elif xyzfile:
-            pbsfile.write(template_pbsfile_coords(inpfilename, ppn, time, queue, xyzfile))
-        elif ptchrgfile:
-            pbsfile.write(template_pbsfile_ptchrg(inpfilename, ppn, time, queue, ptchrgfile))
-        else:
-            pbsfile.write(template_pbsfile(inpfilename, ppn, time, queue))
+        pbsfile.write(template_pbsfile(inpfilename, ppn, time, queue, extrafiles))
 
     print(pbsfilename)
