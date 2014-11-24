@@ -6,7 +6,7 @@ Usage:
   orca_generate_plot_strings.py [options] [--canon=canon_list] [--uno=uno_list]
 
 If canon_list or uno_list consists of two numbers, all cubes in that range
-(inclusive) will be generated.
+(inclusive) will be generated. [NOT IMPLEMENTED YET]
 
 Options:
   --prefix=PREFIX  Append a prefix to all generated files.
@@ -15,7 +15,7 @@ Options:
   --beta           Orbital file contains separate beta spins/orbitals.
   --dim=DIM        Number of points in each dimension. [default: 40]
   --cclib=OUTFILE  Use cclib to determine occupied/virtual MO ranges from output file. Generate 2*NOcc cubes.
-  --max=MAX        Don't generate any cube files after MAX orbital.
+  --max=MAX        Don't generate any cube files after MAX orbital. Takes highest precedence.
   --print_args     Print the parsed argument block.
 
 Examples:
@@ -40,6 +40,8 @@ Examples:
  mo("example.mo.10b.cube", 10, 1);
  end
 '''
+
+from __future__ import print_function
 
 from vmd_templates import *
 
@@ -92,11 +94,15 @@ def generate_block(args):
     '''Create the %plots block based upon command-line arguments passed in
     through the args dictionary.
     '''
+    # Handle the file prefix first.
     if args['--prefix'] is None:
         prefix = ''
     else:
         prefix = args['--prefix'] + '.'
 
+    # The "block" will be formed by generating bunch of strings,
+    # appending them to this list, then calling list.join once
+    # everything's done.
     block_parts = ['%plots']
 
     block_parts.append(' format gaussian_cube')
@@ -109,9 +115,6 @@ def generate_block(args):
         from cclib.parser import ccopen
         job = ccopen(args['--cclib'])
         data = job.parse()
-        if len(data.homos) == 2:
-            # Don't set spindens by default, though
-            args['--beta'] = True
         plot_range = data.homos[0] * 2
         # cclib-discovered values take precedence
         if args['--canon']:
@@ -124,7 +127,15 @@ def generate_block(args):
     if args['--spindens'] and args['--beta']:
         block_parts.append(' ' + spindens_string(prefix))
 
-    # plot the UNOs first due to an 'operator' bug in ORCA
+    # Limit the number of orbitals we're going to generate.
+    if args['--max']:
+        maxorb = int(args['--max'])
+        if args['--canon']:
+            args['--canon'] = [i for i in args['--canon'] if i <= maxorb]
+        if args['--uno']:
+            args['--uno'] = [i for i in args['--uno'] if i <= maxorb]
+
+    # Plot the UNOs first due to an 'operator' bug in ORCA.
     if args['--uno']:
         args['--uno'] = pad_left_zeros_l(arg_to_list(args['--uno']))
         for uno_num in args['--uno']:
