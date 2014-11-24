@@ -63,6 +63,8 @@ def parse_g_tensor(outputfile):
 def parse_state_block_cas(outputfile, cutoff_weight):
     """Parse an entire MCSCF state block, printing it to
     stdout.
+
+    The sum of the coefficients == 1.
     """
     next(outputfile)
     next(outputfile)

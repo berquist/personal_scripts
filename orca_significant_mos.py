@@ -16,6 +16,7 @@ from __future__ import print_function
 
 from docopt import docopt
 from cclib.parser import ccopen
+from itertools import izip_longest
 
 
 def parse_line(line, max_mo_index, orbitals, spin):
@@ -103,8 +104,20 @@ def pretty_print_orbitals(energies, orbitals, nmo, has_beta):
             print(contrib_template.format(*contrib[0:4], spin=spins[contrib[4]]))
 
 
-def pretty_print_orbitals_dual(energies1, energies2, orbitals1, orbitals2, nmo1, nmo2, has_beta):
+def pretty_print_orbitals_dual(results):
     ''''''
+    energies1 = results['energies1']
+    energies2 = results['energies2']
+    occupations1 = results['occupations1']
+    occupations2 = results['occupations2']
+    orbitals1 = results['orbitals1']
+    orbitals2 = results['orbitals2']
+    nmo1 = len(orbitals1)
+    nmo2 = len(orbitals2)
+    if len(energies1) == 2*len(orbitals1):
+        has_beta = True
+    else:
+        has_beta = False
     spins = {0: 'alpha', 1: 'beta'}
     # Handle the restricted case.
     if not has_beta:
@@ -122,6 +135,18 @@ def pretty_print_orbitals_dual(energies1, energies2, orbitals1, orbitals2, nmo1,
         contrib_template_left  = '  {:3} {:2} {:5} {:5} {spin:5}'
         # header_template_right
         # contrib_template_right
+    for key1, key2 in izip_longest(orbitals1.iterkeys(), orbitals2.iterkeys()):
+        header_dict = {
+            'key1': key1,
+            'en_alpha1': energies1[key1],
+            'en_beta1': energies1[key1 + (has_beta * nmo1)],
+            'key2': key2,
+            'en_alpha2': energies2[key2],
+            'en_beta2': energies2[key2 + (has_beta * nmo2)]
+        }
+        print(header_template.format(**header_dict))
+        for contrib in orbitals[key]:
+            print(contrib_template.format(*contrib[0:4], spin=spins[contrib[4]]))
 
 
 def open_and_parse_outputfile(args, outputfilename):
@@ -132,7 +157,7 @@ def open_and_parse_outputfile(args, outputfilename):
     headers = [
         'LOEWDIN ORBITAL POPULATIONS PER MO',
         'LOEWDIN REDUCED ORBITAL POPULATIONS PER MO',
-        'LOEWDIN REDUCED ORBITAL POPULATIONS PER UNO',
+        #'LOEWDIN REDUCED ORBITAL POPULATIONS PER UNO',
         # 'LOEWDIN REDUCED ORBITAL POPULATIONS PER UNSO',
         # This is equivalent to the reduced orbital population per MO, but
         # named differently within CASSCF/MRCI jobs.
@@ -143,8 +168,8 @@ def open_and_parse_outputfile(args, outputfilename):
     occupations = list()
     orbitals = dict()
 
-    # pre-determine the number of MOs present and whether or not
-    # there are two sets of canonical MOs
+    # Pre-determine the number of MOs present and whether or not there
+    # are two sets of canonical MOs.
     job = ccopen(outputfilename)
     data = job.parse()
     nmo = data.nmo
@@ -157,6 +182,7 @@ def open_and_parse_outputfile(args, outputfilename):
             for header in headers:
                 if header in line:
                     parsed_header = header
+                    print(parsed_header)
                     parse_section(outputfile, nmo, energies, occupations, orbitals, has_beta)
 
     # determine the last orbital we should be printing information about
@@ -192,6 +218,9 @@ def main(args):
         results['energies2']    = energies2
         results['occupations2'] = occupations2
         results['orbitals2']    = orbitals2
+        # If we parse two outputs, clearly we want to print their results
+        # side-by-side.
+        pretty_print_orbitals_dual(results)
 
     return results
 
