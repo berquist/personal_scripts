@@ -8,10 +8,13 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('outputfilename', nargs='+')
+    parser.add_argument('--pydict', action='store_true')
     args = parser.parse_args()
     outputfilenames = args.outputfilename
+    pydict = args.pydict
 
     t = 'g_1: {:<11.8f} g_2: {:<11.8f} g_3: {:<11.8f} g_para: {:<11.8f} g_perp: {:<11.8f} g_iso: {:<11.8f}'
+    t_pydict = "{{'g1': {:<f}, 'g2': {:<f}, 'g3': {:<f}, 'giso': {:<f}, 'gpara': {:<f}, 'gperp': {:<f}}}"
 
     for outputfilename in outputfilenames:
         with open(outputfilename) as outputfile:
@@ -35,4 +38,7 @@ if __name__ == '__main__':
             if match:
                 g_perp = (g_1 + g_2) / 2
                 g_para = g_3
-                print(t.format(g_1, g_2, g_3, g_para, g_perp, g_iso))
+                if pydict:
+                    print(t_pydict.format(g_1, g_2, g_3, g_iso, g_para, g_perp))
+                else:
+                    print(t.format(g_1, g_2, g_3, g_para, g_perp, g_iso))
