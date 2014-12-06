@@ -6,7 +6,7 @@ Usage:
   orca_generate_plot_strings.py [options] [--canon=canon_list] [--uno=uno_list]
 
 If canon_list or uno_list consists of two numbers, all cubes in that range
-(inclusive) will be generated. [NOT IMPLEMENTED YET]
+(inclusive) will be generated.
 
 Options:
   --prefix=PREFIX  Append a prefix to all generated files.
@@ -15,7 +15,8 @@ Options:
   --beta           Orbital file contains separate beta spins/orbitals.
   --dim=DIM        Number of points in each dimension. [default: 40]
   --cclib=OUTFILE  Use cclib to determine occupied/virtual MO ranges from output file. Generate 2*NOcc cubes.
-  --max=MAX        Don't generate any cube files after MAX orbital. Takes highest precedence.
+  --cclib_all      If `--cclib`, plot all possible MOs.
+  --max=MAX        Don't generate any cube files after MAX orbital.
   --print_args     Print the parsed argument block.
 
 Examples:
@@ -116,6 +117,8 @@ def generate_block(args):
         job = ccopen(args['--cclib'])
         data = job.parse()
         plot_range = data.homos[0] * 2
+        if args['--cclib_all']:
+            plot_range = data.nmo
         # cclib-discovered values take precedence
         if args['--canon']:
             args['--canon'] = list(range(plot_range))
@@ -124,7 +127,7 @@ def generate_block(args):
 
     if args['--eldens']:
         block_parts.append(' ' + eldens_string(prefix))
-    if args['--spindens'] and args['--beta']:
+    if args['--spindens']:
         block_parts.append(' ' + spindens_string(prefix))
 
     # Limit the number of orbitals we're going to generate.
@@ -137,12 +140,20 @@ def generate_block(args):
 
     # Plot the UNOs first due to an 'operator' bug in ORCA.
     if args['--uno']:
-        args['--uno'] = pad_left_zeros_l(arg_to_list(args['--uno']))
+        splitstr = args['--uno'].split(',')
+        if len(splitstr) == 2:
+            args['--uno'] = pad_left_zeros_l(range(int(splitstr[0]), int(splitstr[1]) + 1))
+        else:
+            args['--uno'] = pad_left_zeros_l(arg_to_list(args['--uno']))
         for uno_num in args['--uno']:
             block_parts.append(' ' + uno_string(prefix, uno_num))
 
     if args['--canon']:
-        args['--canon'] = pad_left_zeros_l(arg_to_list(args['--canon']))
+        splitstr = args['--canon'].split(',')
+        if len(splitstr) == 2:
+            args['--canon'] = pad_left_zeros_l(range(int(splitstr[0]), int(splitstr[1]) + 1))
+        else:
+            args['--canon'] = pad_left_zeros_l(arg_to_list(args['--canon']))
         for mo_num in args['--canon']:
             block_parts.append(' ' + mo_string(prefix, mo_num, 0))
             if args['--beta']:
