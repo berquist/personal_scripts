@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 '''symmol_generate_input.py: Generate an input appropriate for the
 Fortran 77 program SYMMOL. Send the input to stdout.
 
@@ -13,7 +15,7 @@ Options:
 from __future__ import print_function
 
 from docopt import docopt
-from xyz_rotate_by_angle import read_xyz_file
+from scripts.xyz_rotate_by_angle import read_xyz_file
 from itertools import count
 
 
