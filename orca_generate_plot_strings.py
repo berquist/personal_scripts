@@ -140,7 +140,11 @@ def generate_block(args):
 
     # Plot the UNOs first due to an 'operator' bug in ORCA.
     if args['--uno']:
-        splitstr = args['--uno'].split(',')
+        # We're always either a string or a list.
+        if isinstance(args['--uno'], str):
+            splitstr = args['--uno'].split(',')
+        else:
+            splitstr = args['--uno']
         if len(splitstr) == 2:
             args['--uno'] = pad_left_zeros_l(range(int(splitstr[0]), int(splitstr[1]) + 1))
         else:
@@ -149,7 +153,11 @@ def generate_block(args):
             block_parts.append(' ' + uno_string(prefix, uno_num))
 
     if args['--canon']:
-        splitstr = args['--canon'].split(',')
+        # We're always either a string or a list.
+        if isinstance(args['--canon'], str):
+            splitstr = args['--canon'].split(',')
+        else:
+            splitstr = args['--canon']
         if len(splitstr) == 2:
             args['--canon'] = pad_left_zeros_l(range(int(splitstr[0]), int(splitstr[1]) + 1))
         else:
