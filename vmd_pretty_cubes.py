@@ -163,7 +163,9 @@ render TachyonInternal {I}.{ofmt}
     plotfile.write(vmdplotfile)
 
     imageconvfile = '''
+echo "convert {I}.{ofmt} {I}.png"
 convert {I}.{ofmt} {I}.png
+echo "rm {I}.{ofmt}"
 rm {I}.{ofmt}
 '''.format(I=I, ofmt=ofmt)
     convfile.write(imageconvfile)
