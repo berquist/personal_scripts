@@ -3,7 +3,7 @@
 '''
 
 Usage:
-  orca.mrci_analysis.py [options] <outputfilename>
+  orca_mrci_analysis.py [options] <outputfilename>
 
 Options:
   --cutoff_weight=CWEIGHT  Cutoff weight for printing a configuration. [Default: 0.5]
