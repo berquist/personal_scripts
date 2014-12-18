@@ -25,7 +25,7 @@ def template_pbsfile(inpfile, ppn, time, queue, extrafiles):
 #PBS -M {username}@pitt.edu
 
 module purge
-module load orca/3.0.2
+module load orca/3.0.3
 
 cp $PBS_O_WORKDIR/{inpfile}.in $LOCAL
 {extrafiles}cd $LOCAL

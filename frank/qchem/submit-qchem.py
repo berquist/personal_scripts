@@ -6,9 +6,11 @@ def template_pbsfile(inpfile, ppn, time, queue, save, old):
     if save:
         save = '-save '
         scratchdir = ' {inpfile}.${{PBS_JOBID}}'.format(inpfile=inpfile)
-    module = 'qchem/dlambrecht/4.2-trunk.20140824.omp.release'
+    # module = 'qchem/dlambrecht/4.2-trunk.20140824.omp.release'
+    module = 'qchem/dlambrecht/4.2-trunk.20141216.omp.release'
     if old:
-        module = 'qchem/dlambrecht/4.1-trunk.20130919.omp.ccman2'
+        # module = 'qchem/dlambrecht/4.1-trunk.20130919.omp.ccman2'
+        module = 'qchem/dlambrecht/4.2-trunk.20140824.omp.release'
     return '''#!/bin/bash
 
 #PBS -N {inpfile}
