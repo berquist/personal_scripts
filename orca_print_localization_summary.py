@@ -15,6 +15,27 @@ from __future__ import print_function
 from docopt import docopt
 
 
+def _parse_strongly_localized_orbitals(outputfile):
+    line = next(outputfile)
+    while 'MO ' in line:
+        print(line.strip())
+        line = next(outputfile)
+
+
+def _parse_bond_like_orbitals(outputfile):
+    line = next(outputfile)
+    while 'MO ' in line:
+        print(line.strip())
+        line = next(outputfile)
+
+
+def _parse_delocalized_orbitals(outputfile):
+    line = next(outputfile)
+    while 'MO ' in line:
+        print(line.strip())
+        line = next(outputfile)
+
+
 def parse_orbital_localization_block(outputfile, args):
     ''''''
     spin_map = {
@@ -57,16 +78,23 @@ def parse_orbital_localization_block(outputfile, args):
     print(line.strip())
     while 'FOUND' not in line:
         line = next(outputfile)
-    while 'Rather strongly localized orbitals' not in line:
-        line = next(outputfile)
-    # Print the summary of strongly localized orbitals.
-    while 'Bond-like localized orbitals' not in line:
-        if not args['--only-bond-like']:
-            print(line.strip())
-        line = next(outputfile)
-    # Print the summary of bond-like localized orbitals.
+    num_strongly_localized = int(line.strip().split()[2])
+    line = next(outputfile)
+    num_bonding = int(line.strip().split()[1])
+    line = next(outputfile)
+    num_delocalized = int(line.strip().split()[1])
+    line = next(outputfile)
     while "Localized MO's were stored in" not in line:
-        print(line.strip())
+        # Parse the strongly localized orbitals.
+        if 'Rather strongly localized orbitals' in line:
+            if not args['--only-bond-like']:
+                _parse_strongly_localized_orbitals(outputfile)
+        # Parse the bond-like localized orbitals.
+        if 'Bond-like localized orbitals' in line:
+            _parse_bond_like_orbitals(outputfile)
+        # Parse the delocalized orbitals.
+        if 'More delocalized orbitals' in line:
+            _parse_delocalized_orbitals(outputfile)
         line = next(outputfile)
 
 
