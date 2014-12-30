@@ -8,7 +8,7 @@ Usage:
 Options:
   --pct_cutoff=CUTOFF  Energy percentage cutoff to include an orbital for printing/analysis. [Default: 2]
                        Set this to 0 to see the entire COVP table.
-  --plot               Generate VMD scripts to plot COVPs within the energy percentage cutoff.
+  --plot=XYZFILENAME   Generate VMD scripts to plot COVPs within the energy percentage cutoff.
   --df                 Dump results to JSON and Excel files using Pandas.
   --del                If the orbital is below the cutoff, delete its cube file.
   --print_args         Print the argument block.
@@ -175,7 +175,7 @@ def get_n_occ_virt_per_fragment(idx_occ_1, idx_occ_2, idx_virt_2, idx_virt_1, n_
     return n_occ_1, n_occ_2, n_virt_1, n_virt_2
 
 
-def dump_vmd(fragment_1_to_2_pairs, fragment_2_to_1_pairs, n_mo):
+def dump_vmd(fragment_1_to_2_pairs, fragment_2_to_1_pairs, n_mo, xyzfilename):
     '''
     Write VMD scripts for plotting.
     '''
@@ -350,7 +350,8 @@ def main(args):
 
     if args['--plot']:
         # Write VMD scripts for plotting.
-        dump_vmd(fragment_1_to_2_pairs, fragment_2_to_1_pairs, n_mo)
+        xyzfilename = args['--plot']
+        dump_vmd(fragment_1_to_2_pairs, fragment_2_to_1_pairs, n_mo, xyzfilename)
 
     if args['--df']:
         # Write results to JSON/Excel files using Pandas.

@@ -99,6 +99,16 @@ render TachyonInternal COVP_{moidx1}_{moidx2}.tga
            vmdidx2=vmdidx2)
 
 
+def bash_covp_tga_convert_delete(moidx1, moidx2):
+    return '''
+echo "convert COVP_{moidx1}_{moidx2}.tga COVP_{moidx1}_{moidx2}.png"
+convert COVP_{moidx1}_{moidx2}.tga COVP_{moidx1}_{moidx2}.png
+echo "rm -f COVP_{moidx1}_{moidx2}.tga"
+rm -f COVP_{moidx1}_{moidx2}.tga
+'''.format(moidx1=moidx1,
+           moidx2=moidx2)
+
+
 def vmd_covp_write_file_load(loadfile, xyzfilename, mo_pairs, width):
     loadfile.write(vmd_covp_base_template())
     loadfile.write(vmd_covp_load_xyzfile(xyzfilename))
@@ -111,15 +121,21 @@ def vmd_covp_write_file_load(loadfile, xyzfilename, mo_pairs, width):
 
 
 def vmd_covp_write_file_render(renderfile, mo_pairs, width):
+    bashfile = open('vmd.covp.bash', 'w')
+    bashfile.write('#!/bin/bash\n')
     for idx, mo_pair in enumerate(mo_pairs):
         moidx1 = pad_left_zeros(mo_pair[0], width)
         moidx2 = pad_left_zeros(mo_pair[1], width)
         vmdidx1 = (2 * idx)
         vmdidx2 = vmdidx1 + 1
         renderfile.write(vmd_covp_pair_render(moidx1, moidx2, vmdidx1, vmdidx2))
+        bashfile.write(bash_covp_tga_convert_delete(moidx1, moidx2))
+    bashfile.close()
 
 
 def vmd_covp_write_files(loadfile, renderfile, xyzfilename, mo_pairs, width):
+    bashfile = open('vmd.covp.bash', 'w')
+    bashfile.write('#!/bin/bash\n')
     loadfile.write(vmd_covp_base_template())
     loadfile.write(vmd_covp_load_xyzfile(xyzfilename))
     for idx, mo_pair in enumerate(mo_pairs):
@@ -129,6 +145,8 @@ def vmd_covp_write_files(loadfile, renderfile, xyzfilename, mo_pairs, width):
         vmdidx2 = vmdidx1 + 1
         loadfile.write(vmd_covp_pair_load(moidx1, moidx2, vmdidx1, vmdidx2))
         renderfile.write(vmd_covp_pair_render(moidx1, moidx2, vmdidx1, vmdidx2))
+        bashfile.write(bash_covp_tga_convert_delete(moidx1, moidx2))
+    bashfile.close()
 
 
 def pad_left_zeros(num, maxwidth):
