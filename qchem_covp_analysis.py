@@ -255,6 +255,7 @@ def main(args):
 
     header = ' idx  occ virt      de   de%     dq   dq%'
     fs = ' {:3d} {:4d} {:4d} {:6} {:5} {:6} {:5}'
+    fst = '{:4}           {:6} {:5} {:6} {:5}'
 
     print('Fragment 1 -> 2:')
     print(header)
@@ -269,6 +270,11 @@ def main(args):
                             entry['de_alph_pct'],
                             entry['dq_alph'],
                             entry['dq_alph_pct']))
+    print(fst.format(fragment_1_to_2_tot['index'],
+                     fragment_1_to_2_tot['de_alph'],
+                     fragment_1_to_2_tot['de_alph_pct'],
+                     fragment_1_to_2_tot['dq_alph'],
+                     fragment_1_to_2_tot['dq_alph_pct']))
     print('Fragment 2 -> 1:')
     print(header)
     for entry in fragment_2_to_1:
@@ -282,6 +288,11 @@ def main(args):
                             entry['de_alph_pct'],
                             entry['dq_alph'],
                             entry['dq_alph_pct']))
+    print(fst.format(fragment_2_to_1_tot['index'],
+                     fragment_2_to_1_tot['de_alph'],
+                     fragment_2_to_1_tot['de_alph_pct'],
+                     fragment_2_to_1_tot['dq_alph'],
+                     fragment_2_to_1_tot['dq_alph_pct']))
 
     if args['--plot']:
         # Write VMD scripts for plotting.
