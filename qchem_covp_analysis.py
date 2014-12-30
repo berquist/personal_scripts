@@ -6,12 +6,13 @@ Usage:
   qchem_covp_analysis.py [options] <outputfilename>
 
 Options:
-  --pct_cutoff=CUTOFF  Energy percentage cutoff to include an orbital for printing/analysis. [Default: 2]
-                       Set this to 0 to see the entire COVP table.
-  --plot=XYZFILENAME   Generate VMD scripts to plot COVPs within the energy percentage cutoff.
-  --df                 Dump results to JSON and Excel files using Pandas.
-  --del                If the orbital is below the cutoff, delete its cube file.
-  --print_args         Print the argument block.
+  --pct_cutoff=CUTOFF          Energy percentage cutoff to include an orbital for printing/analysis. [Default: 2]
+                               Set this to 0 to see the entire COVP table.
+  --plot-separate=XYZFILENAME  Generate VMD scripts to plot COVPs within the energy percentage cutoff.
+  --plot-combined=XYZFILENAME  Generate a single VMD script to plot COVPs within the energy percentage cutoff.
+  --df                         Dump results to JSON and Excel files using Pandas.
+  --del                        If the orbital is below the cutoff, delete its cube file.
+  --print_args                 Print the argument block.
 '''
 
 from __future__ import print_function
@@ -175,7 +176,7 @@ def get_n_occ_virt_per_fragment(idx_occ_1, idx_occ_2, idx_virt_2, idx_virt_1, n_
     return n_occ_1, n_occ_2, n_virt_1, n_virt_2
 
 
-def dump_vmd(fragment_1_to_2_pairs, fragment_2_to_1_pairs, n_mo, xyzfilename):
+def dump_vmd_separate(fragment_1_to_2_pairs, fragment_2_to_1_pairs, n_mo, xyzfilename):
     '''
     Write VMD scripts for plotting.
     '''
@@ -184,6 +185,16 @@ def dump_vmd(fragment_1_to_2_pairs, fragment_2_to_1_pairs, n_mo, xyzfilename):
         with open('vmd.covp.render', 'w') as renderfile:
             all_pairs = fragment_1_to_2_pairs + fragment_2_to_1_pairs
             vmd_covp_write_files(loadfile, renderfile, xyzfilename, all_pairs, width)
+
+
+def dump_vmd_combined(fragment_1_to_2_pairs, fragment_2_to_1_pairs, n_mo, xyzfilename):
+    '''
+    Write a single VMD script for plotting.
+    '''
+    width = len(str(n_mo))
+    with open('vmd.covp.load_render', 'w') as vmdfile:
+        all_pairs = fragment_1_to_2_pairs + fragment_2_to_1_pairs
+        vmd_covp_write_files(vmdfile, vmdfile, xyzfilename, all_pairs, width)
 
 
 def dump_pandas(fragment_1_to_2_entries, fragment_2_to_1_entries, prefix):
@@ -348,10 +359,15 @@ def main(args):
                                    fragment_1_to_2_net['de_alph'],
                                    fragment_1_to_2_net['dq_alph']))
 
-    if args['--plot']:
+    if args['--plot-separate']:
         # Write VMD scripts for plotting.
-        xyzfilename = args['--plot']
-        dump_vmd(fragment_1_to_2_pairs, fragment_2_to_1_pairs, n_mo, xyzfilename)
+        xyzfilename = args['--plot-separate']
+        dump_vmd_separate(fragment_1_to_2_pairs, fragment_2_to_1_pairs, n_mo, xyzfilename)
+
+    if args['--plot-combined']:
+        # Write a VMD script for plotting.
+        xyzfilename = args['--plot-combined']
+        dump_vmd_combined(fragment_1_to_2_pairs, fragment_2_to_1_pairs, n_mo, xyzfilename)
 
     if args['--df']:
         # Write results to JSON/Excel files using Pandas.
