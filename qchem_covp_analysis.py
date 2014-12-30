@@ -253,9 +253,10 @@ def main(args):
                                n_mo,
                                idx_homo)
 
-    header = ' idx  occ virt      de   de%     dq   dq%'
-    fs = ' {:3d} {:4d} {:4d} {:6} {:5} {:6} {:5}'
-    fst = '{:4}           {:6} {:5} {:6} {:5}'
+    fheader = ' {:>5} {:>4} {:>4} {:>7} {:>5} {:>6} {:>5}'
+    header = fheader.format('idx', 'occ', 'virt', 'de', 'de%', 'dq', 'dq%')
+    fs = ' {:5d} {:4d} {:4d} {:6.4f} {:5.1f} {:6.3f} {:5.1f}'
+    fst = ' {:5}           {:6.4f} {:5.1f} {:6.3f} {:5.1f}'
 
     print('Fragment 1 -> 2:')
     print(header)
@@ -270,6 +271,22 @@ def main(args):
                             entry['de_alph_pct'],
                             entry['dq_alph'],
                             entry['dq_alph_pct']))
+    # Print out the total for all COVPs within the cutoff.
+    fragment_1_to_2_cutoff_totals = {
+        'de_alph': 0.0, 'de_alph_pct': 0.0, 'dq_alph': 0.0, 'dq_alph_pct': 0.0
+    }
+    for entry in fragment_1_to_2_cutoff:
+        fragment_1_to_2_cutoff_totals['de_alph'] += entry['de_alph']
+        fragment_1_to_2_cutoff_totals['de_alph_pct'] += entry['de_alph_pct']
+        fragment_1_to_2_cutoff_totals['dq_alph'] += entry['dq_alph']
+        fragment_1_to_2_cutoff_totals['dq_alph_pct'] += entry['dq_alph_pct']
+    print(fst.format('Tot1C',
+                     fragment_1_to_2_cutoff_totals['de_alph'],
+                     fragment_1_to_2_cutoff_totals['de_alph_pct'],
+                     fragment_1_to_2_cutoff_totals['dq_alph'],
+                     fragment_1_to_2_cutoff_totals['dq_alph_pct']))
+    # Print out the total line at the end of the block, which is for
+    # *all* COVPs.
     print(fst.format(fragment_1_to_2_tot['index'],
                      fragment_1_to_2_tot['de_alph'],
                      fragment_1_to_2_tot['de_alph_pct'],
@@ -288,6 +305,22 @@ def main(args):
                             entry['de_alph_pct'],
                             entry['dq_alph'],
                             entry['dq_alph_pct']))
+    # Print out the total for all COVPs within the cutoff.
+    fragment_2_to_1_cutoff_totals = {
+        'de_alph': 0.0, 'de_alph_pct': 0.0, 'dq_alph': 0.0, 'dq_alph_pct': 0.0
+    }
+    for entry in fragment_2_to_1_cutoff:
+        fragment_2_to_1_cutoff_totals['de_alph'] += entry['de_alph']
+        fragment_2_to_1_cutoff_totals['de_alph_pct'] += entry['de_alph_pct']
+        fragment_2_to_1_cutoff_totals['dq_alph'] += entry['dq_alph']
+        fragment_2_to_1_cutoff_totals['dq_alph_pct'] += entry['dq_alph_pct']
+    print(fst.format('Tot2C',
+                     fragment_2_to_1_cutoff_totals['de_alph'],
+                     fragment_2_to_1_cutoff_totals['de_alph_pct'],
+                     fragment_2_to_1_cutoff_totals['dq_alph'],
+                     fragment_2_to_1_cutoff_totals['dq_alph_pct']))
+    # Print out the total line at the end of the block, which is for
+    # *all* COVPs.
     print(fst.format(fragment_2_to_1_tot['index'],
                      fragment_2_to_1_tot['de_alph'],
                      fragment_2_to_1_tot['de_alph_pct'],
