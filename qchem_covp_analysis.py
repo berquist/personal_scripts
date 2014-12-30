@@ -106,7 +106,6 @@ def determine_fragment_indices(fragment_1_to_2, fragment_2_to_1, covpenergies, n
     3. fragment 2 "virtual"         (len: n_virt_1)
     4. fragment 1 "virtual"         (len: n_virt_2)
     '''
-    # some args implicitly passed show up here...need to fix that
     n_covp_1 = len(fragment_1_to_2)
     n_covp_2 = len(fragment_2_to_1)
     n_covp_t = n_covp_1 + n_covp_2
@@ -257,6 +256,7 @@ def main(args):
     header = fheader.format('idx', 'occ', 'virt', 'de', 'de%', 'dq', 'dq%')
     fs = ' {:5d} {:4d} {:4d} {:6.4f} {:5.1f} {:6.3f} {:5.1f}'
     fst = ' {:5}           {:6.4f} {:5.1f} {:6.3f} {:5.1f}'
+    format_string_net = ' {:5}           {:6.4f}     {:6.3f}'
 
     print('Fragment 1 -> 2:')
     print(header)
@@ -326,6 +326,27 @@ def main(args):
                      fragment_2_to_1_tot['de_alph_pct'],
                      fragment_2_to_1_tot['dq_alph'],
                      fragment_2_to_1_tot['dq_alph_pct']))
+
+    # Now that we've printed out the totals for each fragment, print
+    # out the net values for each direction.
+    fragment_1_to_2_net = {
+        'de_alph': 0.0, 'de_alph_pct': 0.0, 'dq_alph': 0.0, 'dq_alph_pct': 0.0
+    }
+    fragment_2_to_1_net = {
+        'de_alph': 0.0, 'de_alph_pct': 0.0, 'dq_alph': 0.0, 'dq_alph_pct': 0.0
+    }
+    fragment_1_to_2_net['de_alph'] = fragment_1_to_2_tot['de_alph'] - fragment_2_to_1_tot['de_alph']
+    fragment_1_to_2_net['dq_alph'] = fragment_1_to_2_tot['dq_alph'] - fragment_2_to_1_tot['dq_alph']
+    fragment_2_to_1_net['de_alph'] = fragment_2_to_1_tot['de_alph'] - fragment_1_to_2_tot['de_alph']
+    fragment_2_to_1_net['dq_alph'] = fragment_2_to_1_tot['dq_alph'] - fragment_1_to_2_tot['dq_alph']
+    print('Net CT into Fragment 1:')
+    print(format_string_net.format('',
+                                   fragment_2_to_1_net['de_alph'],
+                                   fragment_2_to_1_net['dq_alph']))
+    print('Net CT into Fragment 2:')
+    print(format_string_net.format('',
+                                   fragment_1_to_2_net['de_alph'],
+                                   fragment_1_to_2_net['dq_alph']))
 
     if args['--plot']:
         # Write VMD scripts for plotting.
