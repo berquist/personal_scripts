@@ -41,7 +41,7 @@ if __name__ == '__main__':
         splitname = pwd_file.split('.')
         filenumlen = len(splitname[1])
         if filenumlen < maxlen:
-            splitname[1] = pad_zeros(splitname[1], maxlen)
+            splitname[1] = pad_left_zeros(splitname[1], maxlen)
             newfilename = '.'.join(splitname)
             os.rename(pwd_file, newfilename)
             print(pwd_file + ' -> ' + newfilename)
