@@ -18,10 +18,13 @@ Options:
 from __future__ import print_function
 
 import numpy as np
-from docopt import docopt
 import os.path
-from cclib.parser import ccopen
 import os
+import json
+
+from docopt import docopt
+
+from cclib.parser import ccopen
 
 from vmd_templates import *
 
@@ -135,6 +138,34 @@ def determine_fragment_indices(fragment_1_to_2, fragment_2_to_1, covpenergies, n
     for entry in fragment_2_to_1:
         entry['orb_occ'] = entry['index'] + n_occ_1
         entry['orb_virt'] = entry['index'] + n_occ_1 + n_occ_2
+
+    # Be able to access these indices from the outside.
+    orb_indices = dict()
+    orb_indices['f1_occ'] = orbital_indices[0]
+    orb_indices['f2_occ'] = orbital_indices[1]
+    orb_indices['f2_virt'] = orbital_indices[2]
+    orb_indices['f1_virt'] = orbital_indices[3]
+    fragment_indices = dict()
+    fragment_indices['1'] = {'NCOVP': n_covp_1, 'NOcc': n_occ_1, 'NVirt': n_virt_1, 'NOrb': n_orb_1}
+    fragment_indices['2'] = {'NCOVP': n_covp_2, 'NOcc': n_occ_2, 'NVirt': n_virt_2, 'NOrb': n_orb_2}
+    fragment_indices['T'] = {'NCOVP': n_covp_t, 'NOcc': n_occ_t, 'NVirt': n_virt_t, 'NOrb': n_orb_t}
+    fragment_indices['map_idx_to_covp'] = dict()
+    for idx in range(n_orb_t):
+        if (idx >= orb_indices['f1_occ']) and (idx < orb_indices['f2_occ']):
+            fragment_indices['map_idx_to_covp'][idx] = '1 -> 2 occ'
+        elif (idx >= orb_indices['f2_occ']) and (idx < orb_indices['f2_virt']):
+            fragment_indices['map_idx_to_covp'][idx] = '2 -> 1 occ'
+        elif (idx >= orb_indices['f2_virt']) and (idx < orb_indices['f1_virt']):
+            fragment_indices['map_idx_to_covp'][idx] = '2 -> 1 virt'
+        else:
+            fragment_indices['map_idx_to_covp'][idx] = '1 -> 2 virt'
+
+    with open('orbital_indices.json', 'w') as orbital_indices_file:
+        json.dump(orb_indices, orbital_indices_file)
+    with open('fragment_indices.json', 'w') as fragment_indices_file:
+        json.dump(fragment_indices, fragment_indices_file)
+
+    return fragment_indices
 
 
 def parse_energy_block(covpenergies, n_occ_t):
@@ -257,11 +288,11 @@ def main(args):
                 fragment_2_to_1_tot = parse_fragment_block(outputfile, fragment_2_to_1, 2)
 
     # Determine the actual orbital indices each COVP corresponds to.
-    determine_fragment_indices(fragment_1_to_2,
-                               fragment_2_to_1,
-                               covpenergies,
-                               n_mo,
-                               idx_homo)
+    fragment_indices = determine_fragment_indices(fragment_1_to_2,
+                                                  fragment_2_to_1,
+                                                  covpenergies,
+                                                  n_mo,
+                                                  idx_homo)
 
     fheader = ' {:>5} {:>4} {:>4} {:>7} {:>5} {:>6} {:>5}'
     header = fheader.format('idx', 'occ', 'virt', 'de', 'de%', 'dq', 'dq%')
