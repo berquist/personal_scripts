@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
-from __future__ import print_function
+"""xyz_rotate_by_angle.py: Tools for rotating coordinates around
+Cartesian axes using Euler rotation matrices.
+"""
+
 import numpy as np
 from math import sin, cos, sqrt
 import sys
@@ -16,6 +19,7 @@ def rotation(theta):
     sy = sin(ty)
     cz = cos(tz)
     sz = sin(tz)
+    # pylint: disable=W0612
     Rx = np.array([[1, 0, 0], [0, cx, -sx], [0, sx, cx]])
     Ry = np.array([[cy, 0, -sy], [0, 1, 0], [sy, 0, cy]])
     Rz = np.array([[cz, -sz, 0], [sz, cz, 0], [0, 0, 1]])
@@ -23,6 +27,7 @@ def rotation(theta):
     return np.dot(Rz, np.dot(Ry, Rz))
 
 
+# This is an alternative way of ding it.
 # def rotation(theta, R=np.zeros(shape=(3, 3))):
 #     """Generate a rotation matrix from theta = (alpha, beta, gamma).
 #     """
@@ -78,6 +83,7 @@ def rotation_matrix(angle, axis):
     zs = z * s
     one_c = 1.0 - c
 
+    # pylint: disable=C0326
     rotmat = [[(one_c * xx) + c , (one_c * xy) - zs, (one_c * zx) + ys],
               [(one_c * xy) + zs, (one_c * yy) + c , (one_c * yz) - xs],
               [(one_c * zx) - ys, (one_c * yz) + xs, (one_c * zz) + c ]]
@@ -104,7 +110,7 @@ def rotate_structure(structure, theta):
 
 
 def read_xyz_file(xyzfilename):
-    """Read in an XYZ file.
+    """Reads in an XYZ file.
     """
     atoms = []
     with open(xyzfilename) as xyzfile:
@@ -112,34 +118,42 @@ def read_xyz_file(xyzfilename):
         comment = xyzfile.readline().strip()
         for line in xyzfile:
             sline = line.split()
-            sline[1:] = map(float, sline[1:])
+            # pylint: disable=W0141
+            sline[1:] = list(map(float, sline[1:]))
             atoms.append(sline)
     return natoms, comment, atoms
 
 
 def write_xyz_file(natoms, comment, structure, outfilename):
-    """Write out an XYZ file.
+    """Writes out an XYZ file to a file on disk.
     """
     s = '{:3s} {:15.10f} {:15.10f} {:15.10f}'
     with open(outfilename) as outfile:
         outfile.write(str(natoms) + '\n')
         outfile.write(comment + '\n')
         for atom in structure:
+            # pylint: disable=W0142
             outfile.write(s.format(*atom) + '\n')
 
 
 def write_xyz_stdout(natoms, comment, structure):
-    """Write out an XYZ file.
+    """Writes out an XYZ file to standard out.
     """
     s = '{:3s} {:15.10f} {:15.10f} {:15.10f}'
     outfile = sys.stdout
     outfile.write(str(natoms) + '\n')
     outfile.write(comment + '\n')
     for atom in structure:
+        # pylint: disable=W0142
         outfile.write(s.format(*atom) + '\n')
 
 
 def main():
+    """Rotate a structure contained in an XYZ file by alpha, beta, and
+    gamma (in degrees) around the x, y, and z axes,
+    respectively. Writes the rotated structure to stdout.
+    """
+
     import argparse
 
     parser = argparse.ArgumentParser()
