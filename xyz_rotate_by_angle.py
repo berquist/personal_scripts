@@ -170,5 +170,4 @@ def main():
     write_xyz_stdout(natoms, comment, rotated_structure)
 
 if __name__ == "__main__":
-
     main()

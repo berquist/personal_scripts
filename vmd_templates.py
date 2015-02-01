@@ -190,6 +190,6 @@ def pad_left_zeros_l(numlist):
     return newnumlist
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Don't use this file as a standalone script.
     pass
