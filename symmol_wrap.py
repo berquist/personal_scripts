@@ -15,8 +15,9 @@ Options:
 from __future__ import print_function
 
 from docopt import docopt
-from scripts.xyz_rotate_by_angle import read_xyz_file
 from itertools import count
+
+from .xyz_rotate_by_angle import read_xyz_file
 
 
 def create_formatted_symmol_input(structure, tol1, tol2, comment=''):
@@ -32,8 +33,8 @@ def create_formatted_symmol_input(structure, tol1, tol2, comment=''):
       CHARACTER*6 NAME
       COMMON/AT4/NAME(NMA)
     """
-    header = ''' 1 1 1 90 90 90\n 1 1 {tol1:4.3f} {tol2:4.3f}'''.format(tol1=tol1,
-                                                                        tol2=tol2)
+    header_template = ''' 1 1 1 90 90 90\n 1 1 {tol1:4.3f} {tol2:4.3f}'''
+    header = header_template.format(tol1=tol1, tol2=tol2)
     comment_line = '# ' + comment
     formatted_atoms = [comment_line, header]
     template = '{symbol:<6}{derp:2d}{x:9.5f}{y:9.5f}{z:9.5f}'

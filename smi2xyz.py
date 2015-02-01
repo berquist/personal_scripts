@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-'''smi2xyz.py: take a batch of SMILES files and generate
-3D geometries from them.'''
+"""smi2xyz.py: take a batch of SMILES files and generate
+3D geometries from them."""
 
 import argparse
 import os

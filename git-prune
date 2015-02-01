@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # This grabs a clean list of branches. I remove formatting spaces at the
 # beginning of each line, and I'm ignoring tags for now:
@@ -15,6 +15,6 @@ diff -u git-branch-list svn-branch-list | grep '^-' | sed 's|^-||' | grep -v '^t
 
 # Now I just perform standard branch removal procedures for git-svn:
 for i in `cat old-branch-list`;
-do git branch -d -r "$i"; 
+do git branch -d -r "$i";
     rm -rf .git/svn/refs/remotes/"$i";
 done

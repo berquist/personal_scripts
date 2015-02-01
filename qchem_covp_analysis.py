@@ -26,7 +26,8 @@ from docopt import docopt
 
 from cclib.parser import ccopen
 
-from vmd_templates import *
+from vmd_templates import pad_left_zeros
+from vmd_templates import vmd_covp_write_files
 
 
 def parse_fragment_block(outputfile, fragment_entries, fragment_idx):
@@ -266,6 +267,7 @@ def main(args):
     # The dE(pair)/dE(total) percentage cutoff for inclusion.
     pct_cutoff = int(args['--pct_cutoff'])
 
+    # pylint: disable=E1101
     cclib_job = ccopen(outputfilename)
     cclib_data = cclib_job.parse()
     n_mo = cclib_data.nmo
@@ -401,6 +403,7 @@ def main(args):
         dump_vmd_combined(fragment_1_to_2_pairs, fragment_2_to_1_pairs, n_mo, xyzfilename)
 
     if args['--df']:
+        import pandas as pd
         # Write results to JSON/Excel files using Pandas.
         dump_pandas(fragment_1_to_2_cutoff, fragment_2_to_1_cutoff, stub)
 

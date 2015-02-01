@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 module purge
 module load python/anaconda

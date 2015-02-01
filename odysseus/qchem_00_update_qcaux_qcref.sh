@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # qchem_00_update_qcaux_qcref.sh
 # Run this script (usually via cron) to update all the

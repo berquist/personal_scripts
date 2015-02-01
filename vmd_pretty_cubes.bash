@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Original script by Felix Plasser (http://www.chemical-quantum-images.blogspot.de)
 # Modified by Jan-Michael Mewes (http://workadayqc.blogspot.de)
 # 

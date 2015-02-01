@@ -9,8 +9,8 @@ fi
 # Density Matrix: To recognize the density matrix,
 # Eigenvalues: To visualize the MOs,
 # Atom AN: To see spectra
-cat $1 | 
-sed "s/Gaussian 09/Gaussian 03/" | 
-sed "s/Eigenvalues -- /EIGENVALUES -- /" | 
-sed "s/Density Matrix:/DENSITY MATRIX./"  | 
+cat $1 |
+sed "s/Gaussian 09/Gaussian 03/" |
+sed "s/Eigenvalues -- /EIGENVALUES -- /" |
+sed "s/Density Matrix:/DENSITY MATRIX./"  |
 sed "s/ Atom  AN/Atom AN/" > $2

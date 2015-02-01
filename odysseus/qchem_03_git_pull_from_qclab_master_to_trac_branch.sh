@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # qchem_03_git_pull_from_qclab_master_to_trac_branch.sh
 # Run this script (manually) to load the git-svn Q-Chem repository
@@ -22,7 +22,7 @@ rm -rf ./.git/svn/refs/remotes/svn/lambrecht
 
 # Make a clean local copy of the branch:
 git checkout -B lambrecht --no-track
-# Pull from qclab/master: 
+# Pull from qclab/master:
 git pull qclab master
 
 # This will create the SVN branch.

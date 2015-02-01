@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 
-'''
-qchem.diff_tests.py: Given two test directories with output files, perform a
-raw UNIX diff between matching files.
-'''
+"""qchem_diff_tests.py: Given two test directories with output files,
+perform a raw UNIX diff between matching files.
+"""
 
 import argparse
-import os
+import os.path
 import filecmp
 import subprocess as sp
 
