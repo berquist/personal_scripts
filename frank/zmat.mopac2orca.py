@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 """Given a MOPAC-style z-matrix created by Molden, reformat it for use by ORCA."""
 

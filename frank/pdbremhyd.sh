@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # $1: pdbinputfile
 # $2: pdbfile_nohydrogens

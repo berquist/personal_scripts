@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 # Given a file of ORCA point charges, calculate their collective dipole moment.
 

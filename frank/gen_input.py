@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 def geomopt_bp86_def2svp(nprocs, xyzfile):
     pass

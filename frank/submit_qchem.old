@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 IN=$1
 OUT=${IN/.qcin/.out}
 OUT=${OUT/.in/.out}
@@ -10,7 +12,7 @@ echo "#!/bin/bash
 #PBS -j oe
 #PBS -m ae
 #PBS -M ${USER}@pitt.edu
- 
+
 cd \$PBS_O_WORKDIR
 . /home/dlambrecht/software/qchem4.release.O2/qcrc
 " > ${RUN}

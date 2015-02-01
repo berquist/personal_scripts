@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 """qdel.py: For deleting all PBS jobs within a given set of ids (including those)."""
 

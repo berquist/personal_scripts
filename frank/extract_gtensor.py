@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 def main():
     pass
@@ -26,12 +26,12 @@ if __name__ == "__main__":
         # -------------------
         # ELECTRONIC G-MATRIX
         # -------------------
-        
+
         #  The g-matrix:
         #               2.1766588   -0.0419455    0.0785780
         #              -0.0456024    2.1503399    0.0062106
         #               0.0803984    0.0063831    2.0695626
-        
+
         #  gel          2.0023193    2.0023193    2.0023193
         #  gRMC         2.0012821    2.0012821    2.0012821
         #  gDSO(1el)    0.0005885    0.0007469    0.0008681
@@ -47,17 +47,17 @@ if __name__ == "__main__":
         #   X          -0.4921117    0.2594594   -0.8309675
         #   Y          -0.2090765    0.8913857    0.4021425
         #   Z           0.8450521    0.3716348   -0.3844145
-        
+
         # fast-forward a bit and gather the orientation-dependent g-matrix
         s.read(60)
         xx, xy, xz = s.readline().split()
         yx, yy, yz = s.readline().split()
         zx, zy, zz = s.readline().split()
-        
+
         gmatrix = np.array([[xx, xy, xz],
                             [yx, yy, yz],
                             [zx, zy, zz]], dtype=np.float64)
-        
+
         # this should just be a newline character
         s.readline()
 
@@ -70,7 +70,7 @@ if __name__ == "__main__":
         gpso1el = np.asanyarray(s.readline().split()[1:], dtype=np.float64)
         gpso2el = np.asanyarray(s.readline().split()[1:], dtype=np.float64)
         gpsotot = np.asanyarray(s.readline().split()[1:], dtype=np.float64)
-        
+
         # this should just be the dashes separating the sections
         s.readline()
         gtottmp = s.readline().split()[1:]
@@ -79,10 +79,10 @@ if __name__ == "__main__":
         dx, dy, dz, dgiso = delgtmp[0], delgtmp[1], delgtmp[2], float(delgtmp[4])
         gtensor    = np.array([x,  y,  z], dtype=np.float64)
         delgtensor = np.array([dx, dy, dz], dtype=np.float64)
-        
+
         # "Orientation:"
         s.readline()
-        
+
         gorix = np.asanyarray(s.readline().split()[1:], dtype=np.float64)
         goriy = np.asanyarray(s.readline().split()[1:], dtype=np.float64)
         goriz = np.asanyarray(s.readline().split()[1:], dtype=np.float64)

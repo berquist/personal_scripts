@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 def template_pbsfile(inpfile, ppn, time, queue, save, old):
     save = ''

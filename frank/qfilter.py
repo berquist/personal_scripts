@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 """
 qfilter.py
@@ -14,4 +14,3 @@ stream = sp.check_output(["qstat", "-a"])
 job_lines = [line for line in stream.split('\n') if line.find("vriesjk") == -1]
 for line in job_lines:
     print line
-

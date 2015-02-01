@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 # Given a file of numbers, extract those (atoms|residues) from a PDB file
 # and create an XYZ file from them.

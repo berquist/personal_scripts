@@ -1,10 +1,10 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
-"""
-Goal: extract the hyperfine information from the the histidine ring nitrogen
-*closest* to the copper. So, we're going to cheat and calculate some distances
-to figure it out., It's probably going to be the nitrogen closest to the copper
-period, so don't worry about other residues.
+"""Goal: extract the hyperfine information from the the histidine
+ring nitrogen *closest* to the copper. So, we're going to cheat and
+calculate some distances to figure it out., It's probably going to be
+the nitrogen closest to the copper period, so don't worry about other
+residues.
 """
 
 def get_gtensor():

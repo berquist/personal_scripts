@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 """rst2pdb.py: Convert a series of Amber restart files into a PDB trajectory, so a geometry optimization can be observed."""
 

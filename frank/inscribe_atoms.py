@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 # Given an XYZ file, find the radius of the smallest sphere that will
 # surround all the atoms.

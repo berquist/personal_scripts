@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 """cfull.py: For displaying each of the given user's jobs in the full format
 (like a combination of 'qstat -u <user>' and 'checkjob <job id>)"""

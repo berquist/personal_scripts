@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ "$#" -ne 3 ]; then 
+if [ "$#" -ne 3 ]; then
     echo "Usage: submit-orca <input file> <ppn> <walltime (in hrs)>"
     exit 1
 fi

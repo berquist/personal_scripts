@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 # Given a PDB file (ambpdb output) and an atom number, find the
 # "maximum internal distance" inside the protein.
@@ -45,5 +45,3 @@ for atom in atoms:
         match = atom
 
 print "end:", idx, match, maxdist
-
-
