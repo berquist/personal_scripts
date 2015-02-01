@@ -20,7 +20,7 @@ from itertools import izip_longest
 
 
 def parse_line(line, max_mo_index, orbitals, spin):
-    ''''''
+    """Parse a single line of an orbital composition section."""
     split = line.split()
     idx_atom = int(split[0])
     element = split[1]
@@ -36,13 +36,16 @@ def parse_line(line, max_mo_index, orbitals, spin):
 
 
 def parse_section(outputfile, nmo, energies, occupations, orbitals, has_beta):
-    ''''''
+    """Parse an entire orbital composition section. There are at most two
+    blocks within each section, one each for alpha and beta spin.
+    """
     alpha, beta = 0, 1
     # Skip the dashes and the threshold for printing.
     next(outputfile)
     next(outputfile)
     # "SPIN UP"
     if has_beta:
+        # Blank line only for unrestricted calculations.
         next(outputfile)
     parse_block(outputfile, nmo, energies, occupations, orbitals, alpha)
     # "SPIN DOWN"
@@ -52,7 +55,9 @@ def parse_section(outputfile, nmo, energies, occupations, orbitals, has_beta):
 
 
 def parse_block(outputfile, nmo, energies, occupations, orbitals, spin):
-    ''''''
+    """Parse an entire block (alpha or beta spin) of an orbital
+    composition section
+    ."""
     counter = 0
     while counter < (nmo - 1):
         line = next(outputfile)
@@ -73,7 +78,9 @@ def parse_block(outputfile, nmo, energies, occupations, orbitals, spin):
 
 
 def get_orbital_contribs_within_threshold(orbitals, threshold, max_orbital):
-    ''''''
+    """Return the AOs that fall within a certain contribution to a single
+    MO.
+    """
     neworbitals = dict()
     for mo_index in orbitals.iterkeys():
         if mo_index <= max_orbital:
@@ -87,7 +94,7 @@ def get_orbital_contribs_within_threshold(orbitals, threshold, max_orbital):
 
 
 def pretty_print_orbitals(energies, orbitals, nmo, has_beta):
-    ''''''
+    """Pretty-print a set of orbitals and their energies."""
     spins = {0: 'alpha', 1: 'beta'}
     if not has_beta:
         header_template  = ' {key} {en_alpha}'
@@ -105,7 +112,7 @@ def pretty_print_orbitals(energies, orbitals, nmo, has_beta):
 
 
 def pretty_print_orbitals_dual(results):
-    ''''''
+    """From two sets of results, print them side-by-side."""
     energies1 = results['energies1']
     energies2 = results['energies2']
     occupations1 = results['occupations1']
@@ -150,7 +157,7 @@ def pretty_print_orbitals_dual(results):
 
 
 def open_and_parse_outputfile(args, outputfilename):
-    ''''''
+    """The main routine for opening and parsing each output file."""
     # ORCA prints 6 columns at a time for these types of blocks.
     ncols = 6
 
@@ -177,6 +184,7 @@ def open_and_parse_outputfile(args, outputfilename):
     if len(data.homos) == 2:
         has_beta = True
 
+    # For each possible header, parse the section.
     with open(outputfilename) as outputfile:
         for line in outputfile:
             for header in headers:
@@ -185,7 +193,8 @@ def open_and_parse_outputfile(args, outputfilename):
                     print(parsed_header)
                     parse_section(outputfile, nmo, energies, occupations, orbitals, has_beta)
 
-    # determine the last orbital we should be printing information about
+    # determine the last orbital we should be printing information
+    # about
     if not args['--max_orbital']:
         args['--max_orbital'] = data.homos[0] * 2
     if args['--max_orbital'] == 'all':
@@ -201,10 +210,13 @@ def open_and_parse_outputfile(args, outputfilename):
 
 
 def main(args):
-    ''''''
+    """The main routine for determining whether we parse/print one or two
+    output files
+    ."""
 
     outputfilename1 = args['<outputfilename>']
     energies1, occupations1, orbitals1 = open_and_parse_outputfile(args, outputfilename1)
+    # If we're going to compare two output files side-by-side...
     if args['--dual']:
         outputfilename2 = args['--dual']
         energies2, occupations2, orbitals2 = open_and_parse_outputfile(args, outputfilename2)
@@ -225,7 +237,7 @@ def main(args):
     return results
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     args = docopt(__doc__)
 

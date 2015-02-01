@@ -44,7 +44,7 @@ Examples:
 
 from __future__ import print_function
 
-from vmd_templates import *
+from vmd_templates import pad_left_zeros_l
 
 
 def mo_string(prefix, mo_num, op_num):
@@ -55,27 +55,30 @@ def mo_string(prefix, mo_num, op_num):
         spin = 'b'
     else:
         return
-    # pylint: disable=C0301
-    return 'mo("{prefix}mo.{mo_num}{spin}.cube", {mo_num}, {op_num});'.format(prefix=prefix,
-                                                                              mo_num=mo_num,
-                                                                              op_num=op_num,
-                                                                              spin=spin)
+    template = 'mo("{prefix}mo.{mo_num}{spin}.cube", {mo_num}, {op_num});'
+    return template.format(prefix=prefix,
+                           mo_num=mo_num,
+                           op_num=op_num,
+                           spin=spin)
 
 
 def uno_string(prefix, uno_num):
     '''Create the string for generating a cube of a UHF natural orbital.'''
-    return 'uno("{prefix}uno.{uno_num}.cube", {uno_num});'.format(prefix=prefix,
-                                                                  uno_num=uno_num)
+    template = 'uno("{prefix}uno.{uno_num}.cube", {uno_num});'
+    return template.format(prefix=prefix,
+                           uno_num=uno_num)
 
 
 def eldens_string(prefix):
     '''Create the string for generating a cube of the electron density.'''
-    return 'eldens("{prefix}density.el.cube");'.format(prefix=prefix)
+    template = 'eldens("{prefix}density.el.cube");'
+    return template.format(prefix=prefix)
 
 
 def spindens_string(prefix):
     '''Create the string for generating a cube of the spin density.'''
-    return 'spindens("{prefix}density.spin.cube");'.format(prefix=prefix)
+    template = 'spindens("{prefix}density.spin.cube");'
+    return template.format(prefix=prefix)
 
 def arg_to_list(arg):
     '''Convert the given argument to a list of a single element if it's an atom,
@@ -113,6 +116,7 @@ def generate_block(args):
 
     # If we desire to use cclib and automate some things...
     if args['--cclib']:
+        # pylint: disable=E1101
         from cclib.parser import ccopen
         job = ccopen(args['--cclib'])
         data = job.parse()
@@ -178,6 +182,7 @@ if __name__ == '__main__':
 
     from docopt import docopt
 
+    # pylint: disable=C0103
     args = docopt(__doc__)
 
     if args['--print_args']:

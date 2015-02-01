@@ -1,18 +1,21 @@
 #!/usr/bin/env python
 
-'''match_input_output.py: Given input and output file extensions, determine
+"""match_input_output.py: Given input and output file extensions, determine
 which ones don't have matching partners (in the current directory),
 and print the result.
-'''
+"""
+
+from __future__ import print_function
 
 import argparse
 import os
 import glob
 
 
+# pylint: disable=C0103
 parser = argparse.ArgumentParser()
-parser.add_argument('ext_inp')
-parser.add_argument('ext_out')
+parser.add_argument('ext_inp', help='the extension for input files')
+parser.add_argument('ext_out', help='the extension for output files')
 args = parser.parse_args()
 ext_inp = args.ext_inp
 ext_out = args.ext_out

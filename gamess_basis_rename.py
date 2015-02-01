@@ -1,7 +1,12 @@
 #!/usr/bin/env python
 
+"""gamess_basis_rename.py: Rename all the element labels in the given
+basis set file from symbols from full names to symbols.
+"""
+
 from __future__ import print_function
-from periodic_table import Name as s2n
+
+from .periodic_table import Name as s2n
 
 
 def invert_dict(d):
@@ -25,6 +30,7 @@ if __name__ == '__main__':
 
     import argparse
 
+    # pylint: disable=C0103
     parser = argparse.ArgumentParser()
     parser.add_argument('basfilename')
     args = parser.parse_args()
