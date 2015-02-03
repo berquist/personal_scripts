@@ -5,6 +5,8 @@
 # library files Q-Chem needs to run, as well as the reference outputs
 # used for testing.
 
+set -xv
+
 trap 'exit' ERR
 
 source /etc/profile.d/modules.sh
@@ -18,6 +20,8 @@ svn update .
 
 cd $QCREF
 
-git checkout trunk
+# We don't checkout the 'trunk' branch here, because we only cloned
+# the SVN trunk, not the whole tree.
+git checkout master
 git svn fetch
 git svn rebase

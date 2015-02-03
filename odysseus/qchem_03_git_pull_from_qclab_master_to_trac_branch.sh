@@ -4,6 +4,8 @@
 # Run this script (manually) to load the git-svn Q-Chem repository
 # (the "gatekeeper" repository) [...]
 
+set -xv
+
 trap 'exit' ERR
 
 source /etc/profile.d/modules.sh

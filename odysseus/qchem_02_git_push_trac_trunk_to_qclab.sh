@@ -4,7 +4,9 @@
 # Run this script (usually via cron) to load the git-svn Q-Chem repository
 # (the "gatekeeper" repository) and push its (updated) trunk to our group's
 # "working" git repository (called "qclab", stored in
-# `/home/git/github/qchem.git`).
+# `odysseus:/home/git/github/qchem.git`).
+
+set -xv
 
 trap 'exit' ERR
 

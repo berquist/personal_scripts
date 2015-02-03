@@ -5,6 +5,8 @@
 # (the "gatekeeper" repository) and update it from Q-Chem HQ's trunk
 # via `git svn rebase`.
 
+set -xv
+
 trap 'exit' ERR
 
 source /etc/profile.d/modules.sh
@@ -14,6 +16,7 @@ module load qchem/gatekeeper
 
 cd $QC
 
+# Update the gatekeeper's copy of the trunk.
 git checkout trunk
 git svn fetch
 git svn rebase
