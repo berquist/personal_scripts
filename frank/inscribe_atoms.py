@@ -33,5 +33,5 @@ for i in range(0, n):
             maxdist = dist
             origin = (ivec + jvec)/2
 
-print "radius:", maxdist/2
-print "origin:", origin
+print("radius:", maxdist/2)
+print("origin:", origin)

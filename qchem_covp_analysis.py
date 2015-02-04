@@ -22,6 +22,11 @@ import os.path
 import os
 import json
 
+try:
+    import pandas as pd
+except ImportError:
+    pass
+
 from docopt import docopt
 
 from cclib.parser import ccopen
@@ -250,10 +255,6 @@ def dump_pandas(fragment_1_to_2_entries, fragment_2_to_1_entries, prefix):
 def main(args):
     if args['--print_args']:
         print(args)
-
-    if args['--df']:
-        # We're going to dump our results to JSON and Excel files.
-        import pandas as pd
 
     outputfilename = args['<outputfilename>']
     stub = os.path.splitext(outputfilename)[0]

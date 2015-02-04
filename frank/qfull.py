@@ -8,8 +8,6 @@ import re
 import argparse
 import subprocess as sp
 
-# signature:
-# qfull.py -u <username>
 
 parser = argparse.ArgumentParser(description='Drink Coffee: Do Stupid Things Faster With More Energy')
 parser.add_argument('-u', dest='username', type=str, metavar='<username>', help='')

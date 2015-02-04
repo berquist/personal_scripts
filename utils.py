@@ -2,6 +2,8 @@
 
 """utils.py: Utility functions and classes shared by other scripts."""
 
+import re
+
 
 def read_binary(binaryfilename):
     """Return the bytes present in the given binary file name."""

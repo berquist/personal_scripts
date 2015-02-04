@@ -59,7 +59,7 @@ class AmberRestart(file):
       if not hasattr(self, 'header_written'):
          raise RestartError('Write the header before writing coordinates!')
       if not hasattr(self, 'crd_num'): self.crd_num = 0
-      self.write('%12.7F%12.7F%12.7F' % (x,y,z))
+      self.write('%12.7F%12.7F%12.7F' % (x, y, z))
       self.crd_num += 1
       # Add a new line after every even coordinate
       if not self.crd_num % 2: self.write(os.linesep)
@@ -73,7 +73,7 @@ class AmberRestart(file):
       if not hasattr(self, 'crd_num') or self.crd_num != self.natom:
          raise RestartError('Write all coordinates before writing velocities!')
       if not hasattr(self, 'vel_num'): self.vel_num = 0
-      self.write('%12.7F%12.7F%12.7F' % (x,y,z))
+      self.write('%12.7F%12.7F%12.7F' % (x, y, z))
       self.vel_num += 1
       # Add a new line after every even velocity
       if not self.vel_num % 2: self.write(os.linesep)
@@ -139,45 +139,45 @@ files and preserve any velocity information that may be present."""
    opt, arg = parser.parse_args()
 
    if arg:
-      print 'Unrecognized command-line arguments!'
+      print('Unrecognized command-line arguments!')
       parser.print_help()
       sys.exit(1)
 
    if not opt.inptraj:
-      print 'No trajectory file given!'
+      print('No trajectory file given!')
       parser.print_help()
       sys.exit(1)
 
    # Make sure inptraj file exists
    if not os.path.exists(opt.inptraj):
-      print 'Could not find NetCDF file %s!' % opt.inptraj
+      print('Could not find NetCDF file %s!' % opt.inptraj)
       sys.exit(1)
 
    # Make sure it's a NetCDF file
    try:
       traj = NetCDFFile(opt.inptraj)
    except IOError:
-      print 'Cannot recognize %s! Is it a NetCDF File?' % opt.inptraj
+      print('Cannot recognize %s! Is it a NetCDF File?' % opt.inptraj)
       sys.exit(1)
 
    # Make sure no options are < 0 -- illegal options!
    for item in (opt.frame, opt.start, opt.end, opt.interval):
       if item < 0:
-         print 'Illegal input options! All frames/intervals must be > 0!'
+         print('Illegal input options! All frames/intervals must be > 0!')
          sys.exit(1)
 
    # Make sure we didn't specify a single frame and a frame range
    if opt.frame > 0 and opt.start + opt.end + opt.interval > 0:
-      print 'Single Frame selection and Frame range selection are'
-      print 'mutually exclusive!'
+      print('Single Frame selection and Frame range selection are')
+      print('mutually exclusive!')
       sys.exit(1)
 
    # Now do the single frame case
    if opt.frame:
       # Make sure we have enough frames...
       if opt.frame > len(traj.variables['coordinates']):
-         print 'You asked for frame %d, but I can only find %d frames!' % (
-               opt.frame, len(traj.variables['coordinates']))
+         print('You asked for frame %d, but I can only find %d frames!' % (
+               opt.frame, len(traj.variables['coordinates'])))
          sys.exit(1)
       # Python indexes from 0 -- just subtract 1 now and save the headache
       # of doing it every time below...
@@ -194,24 +194,24 @@ files and preserve any velocity information that may be present."""
                                    traj.variables['coordinates'][idx][it][1],
                                    traj.variables['coordinates'][idx][it][2])
       # Now write the velocities
-      if 'velocities' in traj.variables.keys():
+      if 'velocities' in list(traj.variables.keys()):
          vels = traj.variables['velocities'][idx]
       else:
-         print ('Warning: %s does not contain velocities. Setting all ' +
-                'velocities to 0!') % opt.inptraj
-         vels = numpy.zeros((traj.dimensions['atom'],3))
+         print(('Warning: %s does not contain velocities. Setting all ' +
+                'velocities to 0!') % opt.inptraj)
+         vels = numpy.zeros((traj.dimensions['atom'], 3))
 
       # Now write the velocities
       for it in range(traj.dimensions['atom']):
          rst_file.write_velocity(vels[it][0], vels[it][1], vels[it][2])
 
       # Now write the box information if it's present
-      if 'cell_lengths' in traj.variables.keys():
+      if 'cell_lengths' in list(traj.variables.keys()):
          a = traj.variables['cell_lengths'][idx][0]
          b = traj.variables['cell_lengths'][idx][1]
          c = traj.variables['cell_lengths'][idx][2]
          alpha, beta, gamma = None, None, None
-         if 'cell_angles' in traj.variables.keys():
+         if 'cell_angles' in list(traj.variables.keys()):
             alpha = traj.variables['cell_angles'][idx][0]
             beta = traj.variables['cell_angles'][idx][1]
             gamma = traj.variables['cell_angles'][idx][2]
@@ -219,22 +219,22 @@ files and preserve any velocity information that may be present."""
 
       # Now we're done with our restart file -- close it
       rst_file.close()
-      print 'Done creating restart file %s' % opt.restrt
+      print('Done creating restart file %s' % opt.restrt)
       sys.exit(0)
 
    # Now, if we want to do multiple frames, check that our options are legal
    if opt.start > opt.end:
-      print 'Illegal start and end. Start must be less than End!'
+      print('Illegal start and end. Start must be less than End!')
       sys.exit(1)
    if opt.start > len(traj.variables['coordinates']):
-      print 'Start frame is %d but there are only %d frames in %s!' % (
-         opt.start, len(traj.variables['coordinates']), opt.traj)
+      print('Start frame is %d but there are only %d frames in %s!' % (
+         opt.start, len(traj.variables['coordinates']), opt.traj))
       sys.exit(1)
 
    # Print out our warnings about missing velocities only once
-   if not 'velocities' in traj.variables.keys():
-      print ('Warning: %s does not contain velocities. Setting all ' +
-             'velocities to 0!') % opt.inptraj
+   if not 'velocities' in list(traj.variables.keys()):
+      print(('Warning: %s does not contain velocities. Setting all ' +
+             'velocities to 0!') % opt.inptraj)
 
    # Print out all of the restart files
    for idx in range(opt.start-1, opt.end, opt.interval):
@@ -250,22 +250,22 @@ files and preserve any velocity information that may be present."""
                                    traj.variables['coordinates'][idx][it][1],
                                    traj.variables['coordinates'][idx][it][2])
       # Now write the velocities
-      if 'velocities' in traj.variables.keys():
+      if 'velocities' in list(traj.variables.keys()):
          vels = traj.variables['velocities'][idx]
       else:
-         vels = numpy.zeros((traj.dimensions['atom'],3))
+         vels = numpy.zeros((traj.dimensions['atom'], 3))
 
       # Now write the velocities
       for it in range(traj.dimensions['atom']):
          rst_file.write_velocity(vels[it][0], vels[it][1], vels[it][2])
 
       # Now write the box information if it's present
-      if 'cell_lengths' in traj.variables.keys():
+      if 'cell_lengths' in list(traj.variables.keys()):
          a = traj.variables['cell_lengths'][idx][0]
          b = traj.variables['cell_lengths'][idx][1]
          c = traj.variables['cell_lengths'][idx][2]
          alpha, beta, gamma = None, None, None
-         if 'cell_angles' in traj.variables.keys():
+         if 'cell_angles' in list(traj.variables.keys()):
             alpha = traj.variables['cell_angles'][idx][0]
             beta = traj.variables['cell_angles'][idx][1]
             gamma = traj.variables['cell_angles'][idx][2]
@@ -274,7 +274,7 @@ files and preserve any velocity information that may be present."""
       # Now we're done with our restart file -- close it
       rst_file.close()
 
-      print 'Done writing restart file %s.%d' % (opt.restrt, idx+1)
+      print('Done writing restart file %s.%d' % (opt.restrt, idx+1))
 
 
 #~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+~+#

@@ -1,13 +1,17 @@
 #!/usr/bin/env python
 
-# Given a file of ORCA point charges, calculate their collective dipole moment.
+"""ptchrg_dipole.py: Given a file of ORCA point charges, calculate
+their collective dipole moment."""
+
+from __future__ import print_function
 
 import numpy as np
 
+
 def ptchrg_dipole(namein):
 
-    handle = open(namein, 'r')
-    contents = handle.readlines()
+    with open(namein) as handle:
+        contents = handle.readlines()
 
     # the format is similar to a real XYZ file,
     # where the element symbol is instead the charge in a.u.
@@ -22,7 +26,7 @@ def ptchrg_dipole(namein):
         centroid[1] += float(charge[2])
         centroid[2] += float(charge[3])
     centroid /= n
-    print "centroid:", centroid
+    print("centroid:", centroid)
 
     # find the relative position of each charge to the centroid,
     # then calculate the dipole
@@ -35,12 +39,12 @@ def ptchrg_dipole(namein):
         rel = position - centroid
         dipole += (float(charge[0]) * rel)
 
-    print "total charge:", total
-    print "dipole:", dipole
+    print("total charge:", total)
+    print("dipole:", dipole)
     norm = np.linalg.norm(dipole)
-    print "||dipole||:", norm
+    print("||dipole||:", norm)
     dipolenorm = dipole/norm
-    print "dipole (unit):", dipolenorm
+    print("dipole (unit):", dipolenorm)
 
     return (total, dipole, norm, dipolenorm)
 

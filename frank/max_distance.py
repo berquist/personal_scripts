@@ -29,7 +29,7 @@ atoms = list(iterator)
 for atom in atoms:
     if (atom[1] == startid):
         startcoords = np.array([float(atom[5]), float(atom[6]), float(atom[7])])
-        print "start:", startid, patom
+        print("start:", startid, patom)
 
 maxdist = 0.0
 idx = 0
@@ -44,4 +44,4 @@ for atom in atoms:
         idx = currentid
         match = atom
 
-print "end:", idx, match, maxdist
+print("end:", idx, match, maxdist)

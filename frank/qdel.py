@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 
-"""qdel.py: For deleting all PBS jobs within a given set of ids (including those)."""
+"""qdel.py: For deleting all PBS jobs within a given set of ids
+(including those).
+"""
 
 import argparse
 import subprocess as sp
+
 
 parser = argparse.ArgumentParser(description='Drink Coffee: Do Stupid Things Faster With More Energy')
 parser.add_argument('start')
@@ -14,4 +17,3 @@ end = int(args.end)
 
 for jobid in range(start, end+1):
     sp.call("qdel {}".format(jobid), shell=True)
-

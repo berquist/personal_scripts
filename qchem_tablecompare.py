@@ -6,6 +6,7 @@ import os
 import socket
 import shutil
 
+
 parser_description = '''Compare Q-Chem test outputs with reference outputs.
 $QC, $QCREF, and $QCPLATFORM must be defined.'''
 
@@ -23,7 +24,7 @@ delim = args.delim
 os.chdir(os.path.expandvars('$QC/test'))
 
 command1 = os.path.expandvars('csh -f $QC/test/tablecompare.csh')
-tablecompare = subprocess.check_output(command1.split())
+tablecompare = sp.check_output(command1.split())
 
 print(tablecompare)
 

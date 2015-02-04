@@ -42,7 +42,7 @@ for line in pdbclean:
     pdbmasked.append(line_temp)
 pdbclean[:] = pdbmasked[:]
 # 4
-for i in xrange(len(pdbclean)):
+for i in range(len(pdbclean)):
     pdbclean[i][1] = i+1
 # 5
 pdbclean.append(['END'])
@@ -57,5 +57,5 @@ inhandle.close()
 outhandle.close()
 
 if __name__ == '__main__':
-    print 'namein:', namein
-    print 'nameout:', nameout
+    print('namein:', namein)
+    print('nameout:', nameout)

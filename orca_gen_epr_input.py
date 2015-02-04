@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
+
 def eprfile(charge, multiplicity, xyzfile):
     """A default template for running ORCA EPR calculations, finding the
     g-tensor and copper/nitrogen hyperfine/nuclear quadrupole tensors.
@@ -22,6 +24,7 @@ def eprfile(charge, multiplicity, xyzfile):
  end
 
 """.format(charge, multiplicity, xyzfile)
+
 
 def eprfile_ptchrg(charge, multiplicity, xyzfile, ptchrgfile):
     """A default template for running ORCA EPR calculations, finding the
@@ -49,6 +52,7 @@ def eprfile_ptchrg(charge, multiplicity, xyzfile, ptchrgfile):
  end
 
 """.format(charge, multiplicity, xyzfile, ptchrgfile)
+
 
 def eprfile_dft(charge, xyzfile, functional):
     """A default template for running ORCA EPR calculations, finding the

@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
+
 import argparse
 import re
 import subprocess as sp
+
 
 parser = argparse.ArgumentParser(description='Drink Coffee: Do Stupid Things Faster With More Energy')
 parser.add_argument('-u', dest='username', type=str, metavar='<username>', help='')
@@ -27,4 +30,4 @@ for idx, line in enumerate(short_output):
 
     short_output[2] = queue
     short_output[3] = jobname
-    print short_output
+    print(short_output)

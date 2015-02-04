@@ -1,16 +1,20 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
+
+from __future__ import print_function
+
+from itertools import zip_longest
+
 
 def grouper(n, iterable, fillvalue=None):
-    """
-    grouper(3, 'ABCDEFG', 'x') --> ABC DEF Gxx
+    """grouper(3, 'ABCDEFG', 'x') --> ABC DEF Gxx
     """
     args = [iter(iterable)] * n
-    return izip_longest(fillvalue=fillvalue, *args)
+    return zip_longest(fillvalue=fillvalue, *args)
+
 
 def optimal_group_size(l, min_group_size=4, max_group_size=10):
-    """
-    Based on the size of the given list, determine the optimal group size
-    or "packing" between the specified allowable range.
+    """Based on the size of the given list, determine the optimal group
+    size or "packing" between the specified allowable range.
     """
     listlen = len(l)
     min_remainder, best_group_size = 999, 999
@@ -23,10 +27,10 @@ def optimal_group_size(l, min_group_size=4, max_group_size=10):
         counter -= 1
     return best_group_size
 
+
 def gen_job_strings(group):
-    """
-    Given a list of strings, generate the proper ORCA calls and determine the CPU
-    offsets automatically.
+    """Given a list of strings, generate the proper ORCA calls and
+    determine the CPU offsets automatically.
     """
     proc_offset = 0
     orca_call = ""
@@ -35,10 +39,10 @@ def gen_job_strings(group):
         proc_offset += 16
     return orca_call
 
+
 def add_delimiters(l, delim):
-    """
-    Given a list of strings, join them all with a delimiter 
-    (or any arbitrary string).
+    """Given a list of strings, join them all with a delimiter (or any
+    arbitrary string).
     """
     tmp = ""
     for element in l:
@@ -47,16 +51,16 @@ def add_delimiters(l, delim):
             return tmp
         tmp += element + delim
 
+
 def gen_cp_string(l):
-    """
-    Generate the string for the copy command.
+    """Generate the string for the copy command.
     """
     return "{" + add_delimiters(l, ",") + "}"
 
 
 def gen_eprfile(charge, xyzfile, functional):
-    """
-    Generate an ORCA input file for performing an EPR calculation with the given charge, geometry, and functional.
+    """Generate an ORCA input file for performing an EPR calculation with
+    the given charge, geometry, and functional.
     """
     return """! uks def2-tzvpp nori somf(1x) tightscf tightopt grid5
 
@@ -91,9 +95,9 @@ def gen_eprfile(charge, xyzfile, functional):
 
 """.format(charge, xyzfile, functional)
 
+
 def gen_pbsfile(xyzfile, f):
-    """
-    Generate a Torque job submission file.
+    """Generate a Torque job submission file.
     """
     ncpus = len(f) * 16
 
@@ -130,7 +134,7 @@ wait
 if __name__ == "__main__":
     import argparse
     import subprocess as sp
-    from itertools import izip_longest
+
 
     parser = argparse.ArgumentParser(description="")
     parser.add_argument(dest="xname", metavar="<xyzfile>", type=str, help="")
@@ -139,11 +143,55 @@ if __name__ == "__main__":
     xname = args.xname
     charge = args.charge
 
-    functionals = ["hfs", "xalpha", "lsd", "vwn5", "vwn3", "pwlda", "bnull", "bvwn", "bp", "pw91", "mpwpw", "mpwlyp",
-               "blyp", "gp", "glyp", "pbe", "revpbe", "rpbe", "pwp", "olyp", "opbe", "xlyp", "b97-d", "b97-d3",
-               "tpss", "b1lyp", "b3lyp", "b1p", "b3p", "g1lyp", "g3lyp", "g1p", "g3p", "pbe0", "pwp1", "mpw1pw",
-               "mpw1lyp", "pw91_0", "o3lyp", "x3lyp", "pw6b95", "b97", "bhandhlyp", "tpssh", "tpss0", "b3lyp_tm",
-               "b3lyp_g"]
+    functionals = [
+        "hfs",
+        "xalpha",
+        "lsd",
+        "vwn5",
+        "vwn3",
+        "pwlda",
+        "bnull",
+        "bvwn",
+        "bp",
+        "pw91",
+        "mpwpw",
+        "mpwlyp",
+        "blyp",
+        "gp",
+        "glyp",
+        "pbe",
+        "revpbe",
+        "rpbe",
+        "pwp",
+        "olyp",
+        "opbe",
+        "xlyp",
+        "b97-d",
+        "b97-d3",
+        "tpss",
+        "b1lyp",
+        "b3lyp",
+        "b1p",
+        "b3p",
+        "g1lyp",
+        "g3lyp",
+        "g1p",
+        "g3p",
+        "pbe0",
+        "pwp1",
+        "mpw1pw",
+        "mpw1lyp",
+        "pw91_0",
+        "o3lyp",
+        "x3lyp",
+        "pw6b95",
+        "b97",
+        "bhandhlyp",
+        "tpssh",
+        "tpss0",
+        "b3lyp_tm",
+        "b3lyp_g"
+    ]
 
     for group in grouper(optimal_group_size(functionals, 4, 8), functionals):
         funcs = [f for f in group if f is not None]
