@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
+
 
 def template_pbsfile(inpfile, ppn, time, queue, extrafiles):
     copy_string_template = "cp $PBS_O_WORKDIR/{} $LOCAL\n"
@@ -75,7 +77,7 @@ if __name__ == "__main__":
     extrafiles = args.extrafiles
 
     pbsfilename = inpfilename + '.pbs'
-    with open(pbsfilename, 'wb') as pbsfile:
+    with open(pbsfilename, 'w') as pbsfile:
         pbsfile.write(template_pbsfile(inpfilename, ppn, time, queue, extrafiles))
 
     print(pbsfilename)

@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
+
+
 def template_pbsfile(inpfile, ppn, time, queue, save, old):
     save = ''
     scratchdir = ''
@@ -26,18 +29,18 @@ module purge
 module load intel/2013.0
 module load {module}
 
-cp $PBS_O_WORKDIR/{inpfile}.in $LOCAL
-cd $LOCAL
+cp ${{PBS_O_WORKDIR}}/{inpfile}.in ${{LOCAL}}
+cd ${{LOCAL}}
 
 run_on_exit() {{
     set -v
-    rm $LOCAL/pathtable
-    cp -v -R $LOCAL/* $PBS_O_WORKDIR
+    rm ${{LOCAL}}/pathtable
+    cp -v -R ${{LOCAL}}/* ${{PBS_O_WORKDIR}}
 }}
 
 trap run_on_exit EXIT
 
-`which qchem` {save}-nt {ppn} {inpfile}.in $PBS_O_WORKDIR/{inpfile}.out{scratchdir}
+`which qchem` {save}-nt {ppn} {inpfile}.in ${{PBS_O_WORKDIR}}/{inpfile}.out{scratchdir}
 '''.format(inpfile=inpfile,
            ppn=ppn,
            time=time,
@@ -81,7 +84,7 @@ if __name__ == '__main__':
     old = args.old
 
     pbsfilename = inpfilename + '.pbs'
-    with open(pbsfilename, 'wb') as pbsfile:
+    with open(pbsfilename, 'w') as pbsfile:
         pbsfile.write(template_pbsfile(inpfilename, ppn, time, queue, save, old))
 
     print(pbsfilename)

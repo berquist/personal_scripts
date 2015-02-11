@@ -24,7 +24,7 @@ if not quality:
 convertstring = 'convert {filename}.tga {filename}.png'
 
 bashfilename = 'povray.bash'
-with open(bashfilename, 'wb') as bashfile:
+with open(bashfilename, 'w') as bashfile:
     bashfile.write('#!/bin/bash\n\n')
     for povrayinputfilename in sorted(glob('*.pov')):
         print(povrayinputfilename)
