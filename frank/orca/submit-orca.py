@@ -1,9 +1,13 @@
 #!/usr/bin/env python
 
+"""submit-orca.py: A standalone script for submitting ORCA jobs to
+Frank's PBS scheduler."""
+
 from __future__ import print_function
 
 
 def template_pbsfile(inpfile, ppn, time, queue, extrafiles):
+    """The template for a PBS jobfile that calls ORCA."""
     copy_string_template = "cp $PBS_O_WORKDIR/{} $LOCAL\n"
     if extrafiles is None:
         joined_extrafiles = ""
@@ -22,7 +26,6 @@ def template_pbsfile(inpfile, ppn, time, queue, extrafiles):
 #PBS -l nodes=1:ppn={ppn}
 #PBS -l walltime={time}:00:00
 #PBS -j oe
-#PBS -l qos=low
 #PBS -m abe
 #PBS -M {username}@pitt.edu
 
@@ -50,7 +53,7 @@ trap run_on_exit EXIT
 
 if __name__ == "__main__":
     import argparse
-    import os
+    import os.path
 
     parser = argparse.ArgumentParser()
     parser.add_argument('inpfilename',
@@ -71,13 +74,13 @@ if __name__ == "__main__":
                         nargs='*')
     args = parser.parse_args()
     inpfilename = os.path.splitext(args.inpfilename)[0]
-    ppn = args.ppn
-    time = args.time
-    queue = args.queue
-    extrafiles = args.extrafiles
 
     pbsfilename = inpfilename + '.pbs'
     with open(pbsfilename, 'w') as pbsfile:
-        pbsfile.write(template_pbsfile(inpfilename, ppn, time, queue, extrafiles))
+        pbsfile.write(template_pbsfile(inpfilename,
+                                       args.ppn,
+                                       args.time,
+                                       args.queue,
+                                       args.extrafiles))
 
     print(pbsfilename)

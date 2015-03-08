@@ -1,18 +1,20 @@
 #!/usr/bin/env python
 
+"""submit-qchem.py: A standalone script for submitting Q-Chem jobs to
+Frank's PBS scheduler."""
+
 from __future__ import print_function
 
 
 def template_pbsfile(inpfile, ppn, time, queue, save, old):
+    """The template for a PBS jobfile that calls Q-Chem."""
     save = ''
     scratchdir = ''
     if save:
         save = '-save '
         scratchdir = ' {inpfile}.${{PBS_JOBID}}'.format(inpfile=inpfile)
-    # module = 'qchem/dlambrecht/4.2-trunk.20140824.omp.release'
     module = 'qchem/dlambrecht/4.2-trunk.20141216.omp.release'
     if old:
-        # module = 'qchem/dlambrecht/4.1-trunk.20130919.omp.ccman2'
         module = 'qchem/dlambrecht/4.2-trunk.20140824.omp.release'
     return '''#!/bin/bash
 
@@ -21,7 +23,6 @@ def template_pbsfile(inpfile, ppn, time, queue, save, old):
 #PBS -l nodes=1:ppn={ppn}
 #PBS -l walltime={time}:00:00
 #PBS -j oe
-#PBS -l qos=low
 #PBS -m abe
 #PBS -M {username}@pitt.edu
 
@@ -77,14 +78,14 @@ if __name__ == '__main__':
                         help='Use an older (known good) version of Q-Chem.')
     args = parser.parse_args()
     inpfilename = os.path.splitext(args.inpfilename)[0]
-    ppn = args.ppn
-    time = args.time
-    queue = args.queue
-    save = args.save
-    old = args.old
 
     pbsfilename = inpfilename + '.pbs'
     with open(pbsfilename, 'w') as pbsfile:
-        pbsfile.write(template_pbsfile(inpfilename, ppn, time, queue, save, old))
+        pbsfile.write(template_pbsfile(inpfilename,
+                                       args.ppn,
+                                       args.time,
+                                       args.queue,
+                                       args.save,
+                                       args.old))
 
     print(pbsfilename)

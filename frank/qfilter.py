@@ -5,10 +5,16 @@
 
 from __future__ import print_function
 
+import argparse
 import subprocess as sp
 
 
-stream = sp.check_output(["qstat", "-a"])
-job_lines = [line for line in stream.split('\n') if line.find("vriesjk") == -1]
+parser = argparse.ArgumentParser()
+parser.add_argument('user', type=str)
+args = parser.parse_args()
+user = args.user
+
+stream = sp.check_output(["qstat", "-a"]).decode("utf-8")
+job_lines = [line for line in stream.split('\n') if line.find(user) == -1]
 for line in job_lines:
     print(line)
