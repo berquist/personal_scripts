@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
-"""submit-gamess.py: A standalone script for submitting GAMESS jobs to
+"""submit-orca.py: A standalone script for submitting ORCA jobs to
 Frank's PBS scheduler."""
 
 from __future__ import print_function
 
 
-def template_pbsfile(inpfile, ppn, time, queue, extrafiles):
-    """The template for a PBS jobfile that calls GAMESS."""
+def template_pbsfile_orca(inpfile, ppn, time, queue, extrafiles):
+    """The template for a PBS jobfile that calls ORCA."""
     copy_string_template = "cp $PBS_O_WORKDIR/{} $LOCAL\n"
     if extrafiles is None:
         joined_extrafiles = ""
@@ -26,14 +26,13 @@ def template_pbsfile(inpfile, ppn, time, queue, extrafiles):
 #PBS -l nodes=1:ppn={ppn}
 #PBS -l walltime={time}:00:00
 #PBS -j oe
-#PBS -l qos=low
 #PBS -m abe
 #PBS -M {username}@pitt.edu
 
 module purge
-module load gamess
+module load orca/3.0.3
 
-cp $PBS_O_WORKDIR/{inpfile}.inp $LOCAL
+cp $PBS_O_WORKDIR/{inpfile}.in $LOCAL
 {extrafiles}cd $LOCAL
 
 run_on_exit() {{
@@ -43,7 +42,7 @@ run_on_exit() {{
 
 trap run_on_exit EXIT
 
-gms {inpfile}.inp >& $PBS_O_WORKDIR/{inpfile}.out
+`which orca` {inpfile}.in >& $PBS_O_WORKDIR/{inpfile}.out
 """.format(inpfile=inpfile,
            ppn=ppn,
            time=time,
@@ -58,7 +57,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument('inpfilename',
-                        help='the GAMESS input file to submit')
+                        help='the ORCA input file to submit')
     parser.add_argument('--ppn',
                         type=int,
                         default=4,
@@ -78,10 +77,10 @@ if __name__ == "__main__":
 
     pbsfilename = inpfilename + '.pbs'
     with open(pbsfilename, 'w') as pbsfile:
-        pbsfile.write(template_pbsfile(inpfilename,
-                                       args.ppn,
-                                       args.time,
-                                       args.queue,
-                                       args.extrafiles))
+        pbsfile.write(template_pbsfile_orca(inpfilename,
+                                            args.ppn,
+                                            args.time,
+                                            args.queue,
+                                            args.extrafiles))
 
     print(pbsfilename)

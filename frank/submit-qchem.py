@@ -6,7 +6,7 @@ Frank's PBS scheduler."""
 from __future__ import print_function
 
 
-def template_pbsfile(inpfile, ppn, time, queue, save, old):
+def template_pbsfile_qchem(inpfile, ppn, time, queue, save, old):
     """The template for a PBS jobfile that calls Q-Chem."""
     save = ''
     scratchdir = ''
@@ -81,11 +81,11 @@ if __name__ == '__main__':
 
     pbsfilename = inpfilename + '.pbs'
     with open(pbsfilename, 'w') as pbsfile:
-        pbsfile.write(template_pbsfile(inpfilename,
-                                       args.ppn,
-                                       args.time,
-                                       args.queue,
-                                       args.save,
-                                       args.old))
+        pbsfile.write(template_pbsfile_qchem(inpfilename,
+                                             args.ppn,
+                                             args.time,
+                                             args.queue,
+                                             args.save,
+                                             args.old))
 
     print(pbsfilename)

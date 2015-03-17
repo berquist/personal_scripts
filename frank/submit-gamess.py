@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
-"""submit-orca.py: A standalone script for submitting ORCA jobs to
+"""submit-gamess.py: A standalone script for submitting GAMESS jobs to
 Frank's PBS scheduler."""
 
 from __future__ import print_function
 
 
-def template_pbsfile(inpfile, ppn, time, queue, extrafiles):
-    """The template for a PBS jobfile that calls ORCA."""
+def template_pbsfile_gamess(inpfile, ppn, time, queue, extrafiles):
+    """The template for a PBS jobfile that calls GAMESS."""
     copy_string_template = "cp $PBS_O_WORKDIR/{} $LOCAL\n"
     if extrafiles is None:
         joined_extrafiles = ""
@@ -26,13 +26,14 @@ def template_pbsfile(inpfile, ppn, time, queue, extrafiles):
 #PBS -l nodes=1:ppn={ppn}
 #PBS -l walltime={time}:00:00
 #PBS -j oe
+#PBS -l qos=low
 #PBS -m abe
 #PBS -M {username}@pitt.edu
 
 module purge
-module load orca/3.0.3
+module load gamess
 
-cp $PBS_O_WORKDIR/{inpfile}.in $LOCAL
+cp $PBS_O_WORKDIR/{inpfile}.inp $LOCAL
 {extrafiles}cd $LOCAL
 
 run_on_exit() {{
@@ -42,7 +43,7 @@ run_on_exit() {{
 
 trap run_on_exit EXIT
 
-`which orca` {inpfile}.in >& $PBS_O_WORKDIR/{inpfile}.out
+gms {inpfile}.inp >& $PBS_O_WORKDIR/{inpfile}.out
 """.format(inpfile=inpfile,
            ppn=ppn,
            time=time,
@@ -57,7 +58,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument('inpfilename',
-                        help='the ORCA input file to submit')
+                        help='the GAMESS input file to submit')
     parser.add_argument('--ppn',
                         type=int,
                         default=4,
@@ -77,10 +78,10 @@ if __name__ == "__main__":
 
     pbsfilename = inpfilename + '.pbs'
     with open(pbsfilename, 'w') as pbsfile:
-        pbsfile.write(template_pbsfile(inpfilename,
-                                       args.ppn,
-                                       args.time,
-                                       args.queue,
-                                       args.extrafiles))
+        pbsfile.write(template_pbsfile_gamess(inpfilename,
+                                              args.ppn,
+                                              args.time,
+                                              args.queue,
+                                              args.extrafiles))
 
     print(pbsfilename)
