@@ -19,7 +19,7 @@ def template_pbsfile_orca(inpfile, ppn, time, queue, extrafiles):
         joined_extrafiles = "".join(copy_strings)
     else:
         joined_extrafiles = copy_string_template.format(extrafiles)
-    return """#!/bin/bash
+    return """#!/usr/bin/env bash
 
 #PBS -N {inpfile}
 #PBS -q {queue}

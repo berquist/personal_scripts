@@ -1,43 +1,14 @@
 #!/usr/bin/env python
 
-"""submit-dalton.py: A standalone script for submitting DALTON jobs to
+"""submit-molcas.py: A standalone script for submitting Molcas jobs to
 Frank's PBS scheduler.
 """
 
 from __future__ import print_function
 
-# import logging
-import sys
 
-# logging.basicConfig(level=logging.INFO)
-
-
-def determine_parallelism(args):
-    """Based on the command line arguments, determine whether or not to
-    use MPI or OpenMP parallelism.
-
-    Edge cases
-    ==========
-    1. Both flags present: MPI
-    2. No flags present: OpenMP
-    """
-
-    if args.omp and args.mpi:
-        return 'mpi'
-    elif args.omp and not args.mpi:
-        return 'omp'
-    elif not args.omp and args.mpi:
-        return 'mpi'
-    elif not args.omp and not args.mpi:
-        return 'omp'
-    else:
-        logging.error("Bad arguments to parallel flags")
-        sys.exit(1)
-
-
-def template_pbsfile_dalton(inpfile, ppn, time, queue, parimpl, extrafiles):
-    """The template for a PBS jobfile that calls DALTON."""
-
+def template_pbsfile_molcas(inpfile, ppn, time, queue, extrafiles, save):
+    """The template for a PBS jobfile that calls Molcas."""
     copy_string_template = "cp $PBS_O_WORKDIR/{} $LOCAL\n"
     if extrafiles is None:
         joined_extrafiles = ""
@@ -49,15 +20,7 @@ def template_pbsfile_dalton(inpfile, ppn, time, queue, parimpl, extrafiles):
         joined_extrafiles = "".join(copy_strings)
     else:
         joined_extrafiles = copy_string_template.format(extrafiles)
-    # Are we using an OpenMPI- or OpenMP-parallel version?
-    if parimpl == 'mpi':
-        parflag = '-N'
-        module = 'dalton/2015-i2013.0-mkl-mpi'
-    elif parimpl == 'omp':
-        parflag = '-omp'
-        module = 'dalton/2015-i2013.0-mkl-omp'
-    else:
-        raise
+    savemap = {False: 'no', True: 'yes'}
     return """#!/usr/bin/env bash
 
 #PBS -N {inpfile}
@@ -69,27 +32,29 @@ def template_pbsfile_dalton(inpfile, ppn, time, queue, parimpl, extrafiles):
 #PBS -M {username}@pitt.edu
 
 module purge
-module load {module}
+module load molcas/8.0
 
-cp $PBS_O_WORKDIR/{inpfile}.dal $LOCAL
+export CPUS=`wc -l $PBS_NODEFILE | cut -d" " -f1`
+export MOLCAS_KEEP_WORKDIR={keep_workdir}
+
+cp $PBS_O_WORKDIR/{inpfile}.in $LOCAL
 {extrafiles}cd $LOCAL
 
 run_on_exit() {{
     set -v
-    cp -R $LOCAL/dalton/DALTON_scratch_{username}/* $PBS_O_WORKDIR
+    cp -R $LOCAL/* $PBS_O_WORKDIR
 }}
 
 trap run_on_exit EXIT
 
-`which dalton` {parflag} {ppn} {inpfile}.dal
+`which molcas` {inpfile}.in >& $PBS_O_WORKDIR/{inpfile}.out
 """.format(inpfile=inpfile,
            ppn=ppn,
            time=time,
            queue=queue,
-           parflag=parflag,
-           module=module,
            username=os.environ['USER'],
-           extrafiles=joined_extrafiles)
+           extrafiles=joined_extrafiles,
+           keep_workdir=savemap[save])
 
 
 if __name__ == "__main__":
@@ -98,7 +63,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument('inpfilename',
-                        help='the DALTON input file to submit')
+                        help='the Molcas input file to submit')
     parser.add_argument('--ppn',
                         type=int,
                         default=4,
@@ -110,27 +75,22 @@ if __name__ == "__main__":
     parser.add_argument('--queue',
                         default='shared',
                         help='queue to run in (typically shared or shared_large')
-    parser.add_argument('--omp',
-                        help='Use the OpenMP-parallel version.',
-                        action='store_true')
-    parser.add_argument('--mpi',
-                        help='Use the MPI-parallel version (OpenMPI).',
-                        action='store_true')
     parser.add_argument('--extrafiles',
                         help='An arbitrary number of files to copy to $LOCAL.',
                         nargs='*')
+    parser.add_argument('--save',
+                        action='store_true',
+                        help='save the scratch directory')
     args = parser.parse_args()
-    parimpl = determine_parallelism(args)
     inpfilename = os.path.splitext(args.inpfilename)[0]
 
     pbsfilename = inpfilename + '.pbs'
     with open(pbsfilename, 'w') as pbsfile:
-        pbsfile.write(template_pbsfile_dalton(inpfilename,
+        pbsfile.write(template_pbsfile_molcas(inpfilename,
                                               args.ppn,
                                               args.time,
                                               args.queue,
-                                              parimpl,
-                                              args.extrafiles))
+                                              args.extrafiles,
+                                              args.save))
 
-    # logging.info(pbsfilename)
     print(pbsfilename)

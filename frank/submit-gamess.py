@@ -19,19 +19,18 @@ def template_pbsfile_gamess(inpfile, ppn, time, queue, extrafiles):
         joined_extrafiles = "".join(copy_strings)
     else:
         joined_extrafiles = copy_string_template.format(extrafiles)
-    return """#!/bin/bash
+    return """#!/usr/bin/env bash
 
 #PBS -N {inpfile}
 #PBS -q {queue}
 #PBS -l nodes=1:ppn={ppn}
 #PBS -l walltime={time}:00:00
 #PBS -j oe
-#PBS -l qos=low
 #PBS -m abe
 #PBS -M {username}@pitt.edu
 
 module purge
-module load gamess
+module load gamess/2013-05-01
 
 cp $PBS_O_WORKDIR/{inpfile}.inp $LOCAL
 {extrafiles}cd $LOCAL
