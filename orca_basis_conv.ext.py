@@ -9,7 +9,7 @@ if __name__ == "__main__":
 
     import argparse
 
-    from orcaparse.basis_utils import convert_basis_ext
+    import orcaparse
 
     # pylint: disable=C0103
     parser = argparse.ArgumentParser()
@@ -23,4 +23,4 @@ if __name__ == "__main__":
         inp_file_contents = inp_file.read()
 
     with open(out_filename, 'w') as out_file:
-        out_file.write(convert_basis_ext(inp_file_contents))
+        out_file.write(orcaparse.basis_utils.convert_basis_ext(inp_file_contents))

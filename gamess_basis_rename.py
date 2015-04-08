@@ -6,18 +6,28 @@ basis set file from symbols from full names to symbols.
 
 from __future__ import print_function
 
-from .periodic_table import Name as s2n
+from scripts.periodic_table import Name as s2n
 
 
 def invert_dict(d):
     """Create the inverse/reverse map of a dictionary."""
-    return {v:k for k, v in d.items()}
+
+    return {v:k for (k, v) in d.items()}
+
+
+def invert_dict_lowercase_vals(d):
+    """Create the inverse/reverse map of a dictionary and make the old
+    values/new keys lowercase.
+    """
+
+    return {v.lower():k for (k, v) in d.items()}
 
 
 def rename_elements(basfile, mapdict):
-    """Rename all the element labels in the basis file accoding to given
+    """Rename all the element labels in the basis file according to given
     map.
     """
+
     newbasfile = []
     for line in basfile:
         for k in mapdict:
@@ -34,12 +44,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('basfilename')
     args = parser.parse_args()
-    basfilename = args.basfilename
 
     # Create the reverse map: full name to symbol
-    n2s = invert_dict(s2n)
+    n2s = invert_dict_lowercase_vals(s2n)
 
-    with open(basfilename) as basfile:
+    with open(args.basfilename) as basfile:
         newbasfile = rename_elements(basfile, n2s)
 
     print(newbasfile)

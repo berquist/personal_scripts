@@ -10,7 +10,7 @@ if __name__ == "__main__":
 
     import argparse
 
-    from orcaparse.basis_utils import convert_basis_int
+    import orcaparse
 
     # pylint: disable=C0103
     parser = argparse.ArgumentParser()
@@ -26,5 +26,5 @@ if __name__ == "__main__":
         basis_name = inp_filename.split('.')[1]
         out_filename = 'orca.' + basis_name + '.bas'
         with open(out_filename, 'w') as out_file:
-            out_file.write(convert_basis_int(inp_file_contents))
+            out_file.write(orcaparse.basis_utils.convert_basis_int(inp_file_contents))
         print(out_filename)
