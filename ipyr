@@ -1,0 +1,101 @@
+#!/usr/bin/env python
+
+import argparse
+import subprocess
+import shlex
+import webbrowser as wb
+
+
+def get_arguments(args=None):
+    parser = argparse.ArgumentParser(prog='ipyr',
+                                     usage='%(prog)s remotemachine [options] ',
+                                     description=''' %(prog)s, or IPython Remote is a simplified wrapper
+                                     script for spawning an IPython Notebook on a remote server, and accessing
+                                     the Notebook locally through the browser ''',
+                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter
+                                 )
+    parser.add_argument('server', help='Remote Server IP or ssh/config alias to host IPy NB. "local" for this server')
+    parser.add_argument('--server-port', type=int, default=6001, help='Remote server port')
+    opts = parser.parse_args(args)
+    return opts
+
+
+def main(opts):
+    """
+    ipyr
+      IPy(thon notebook) R(emote)
+
+    Spawn IPython Notebooks remotely, and then set up port forward
+      to access them locally via localhost:{0}
+
+    :opts: Command Line Options
+
+    """.format(opts.server_port)
+
+    if opts.server == 'local':
+        status = spawn_in_background()
+    else:
+        status = spawn_remotely(opts.server, opts.server_port)
+    print(status)
+
+
+def spawn_in_background():
+    """
+    Local call:
+      No argument
+
+          ipyr
+
+          <Check if ipython notebook already running via `ps aux | grep ipython notebook`>
+          nohup ipython notebook --no-browser &
+          <close connection?>
+
+    """
+
+    psauxCommand = "ps aux "
+    grepCommand = "grep -c 'ipython notebook'"
+    p1 = subprocess.Popen(shlex.split(psauxCommand), stdout=subprocess.PIPE)
+    p2 = subprocess.Popen(shlex.split(grepCommand), stdin=p1.stdout, stdout=subprocess.PIPE)
+    output = p2.communicate()[0]
+
+    status = str(output.split()[0].decode())
+
+    ipython_nb_instances = int(status)
+
+    if ipython_nb_instances <= 1:
+        ipythonCommand = 'ipython notebook --no-browser'
+        subprocess.Popen(shlex.split(ipythonCommand))
+        return 0
+    return 1
+
+
+def spawn_remotely(server, server_port=6001):
+    """
+    Remote call:
+      Give remote ssh alias as only arg
+
+          ipyr von
+
+          ssh von 'ipyr'
+          ssh -N -f -L localhost:{0}:localhost:8888 von
+          <open browser to localhost:{0}>
+
+    :server: The server to spawn IPython Notebook
+
+    """.format(server_port)
+
+    sshCommand = "ssh " + server + " 'ipyr local'"
+    subprocess.Popen(shlex.split(sshCommand))
+
+    sshtunnelCommand = "ssh -N -f -L localhost:{0}:localhost:8888 ".format(server_port) + server
+
+    subprocess.Popen(shlex.split(sshtunnelCommand))
+
+    wb.open('http://localhost:{0}'.format(server_port))
+
+    return 0
+
+
+if __name__ == '__main__':
+    opts = get_arguments()
+    main(opts)
