@@ -13,10 +13,10 @@ def template_pbsfile_qchem(inpfile, ppn, time, queue, save, old):
     if save:
         save = '-save '
         scratchdir = ' {inpfile}.${{PBS_JOBID}}'.format(inpfile=inpfile)
-    module = 'qchem/dlambrecht/4.3-trunk.20150310.omp.release'
+    module = 'qchem/4.3-trunk.20150310.omp.release'
     if old:
-        # module = 'qchem/dlambrecht/4.2-trunk.20140824.omp.release'
-        module = 'qchem/dlambrecht/4.2-trunk.20141216.omp.release'
+        # module = 'qchem/4.2-trunk.20140824.omp.release'
+        module = 'qchem/4.2-trunk.20141216.omp.release'
     return '''#!/usr/bin/env bash
 
 #PBS -N {inpfile}
