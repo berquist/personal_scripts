@@ -43,6 +43,7 @@ run_on_exit() {{
 trap run_on_exit EXIT
 
 `which orca` {inpfile}.in >& $PBS_O_WORKDIR/{inpfile}.out
+orca_2mkl {inpfile} -molden
 """.format(inpfile=inpfile,
            ppn=ppn,
            time=time,
