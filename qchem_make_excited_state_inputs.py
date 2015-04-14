@@ -139,6 +139,14 @@ def inpfile_params_to_rem_string(inpfile_params):
     return '\n'.join(block)
 
 
+def dict_keys_private_to_public(d):
+    for k in d:
+        if k[0] == '_':
+            nk = k[1:]
+            d[nk] = d[k]
+            del d[k]
+
+
 def main(args):
 
     # Handle parameters that will be common to all inputs, like
@@ -150,21 +158,21 @@ def main(args):
         sys.exit()
     else:
         with open(args.xyzfile) as xyzfile:
-            inpfile_default_params['molecule'] = ''.join(xyzfile.readlines()[2:])
+            inpfile_default_params['_molecule'] = ''.join(xyzfile.readlines()[2:])
 
-    inpfile_default_params['charge'] = args.charge
-    inpfile_default_params['mult'] = args.mult
+    inpfile_default_params['_charge'] = args.charge
+    inpfile_default_params['_mult'] = args.mult
 
     # Handle the standard basis set.
     inpfile_default_params['basis'] = args.basis
-    inpfile_default_params['basis_section'] = ''
+    inpfile_default_params['_basis_section'] = ''
     if args.basis == 'gen':
         inpfile_default_params['purecart'] = '1111'
         blocks_basis = ['$basis']
         with open(args.basis_file) as basis_file:
             blocks_basis.append(basis_file.read())
         blocks_basis.append('$end')
-        inpfile_default_params['basis_section'] = '\n'.join(blocks_basis)
+        inpfile_default_params['_basis_section'] = '\n'.join(blocks_basis)
 
     # Can't completely handle the aux_basis here, need to wait until
     # the main loop. We can fail early, though.
@@ -304,10 +312,11 @@ def main(args):
                                              unrestricted_str,
                                              fc_str)
 
-                inpfile_params['rem'] = inpfile_params_to_rem_string(inpfile_params)
                 inpfile_params.update(inpfile_default_params)
+                inpfile_params['rem'] = inpfile_params_to_rem_string(inpfile_params)
 
-                inpfile_params['aux_basis_section'] = inpfile_params['_aux_basis_section']
+                # Convert all 'private' keys into 'public' keys.
+                dict_keys_private_to_public(inpfile_params)
 
                 inpfile_contents = input_file(**inpfile_params)
                 if not args.dry_run:
