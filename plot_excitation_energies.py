@@ -5,6 +5,17 @@ from __future__ import print_function
 from cclib.parser.utils import convertor
 
 
+def orca_get_cis_ex_energies(inputfile):
+    state_energies = []
+    line = ''
+    while 'STATE' not in line:
+        line = next(inputfile)
+    while list(set(line.strip())) != ['-']:
+        if 'STATE' in line:
+            state_energies.append(float(line.split()[3]))
+    return state_energies
+
+
 def qchem_get_cis_energies(inputfile, unrestricted=True):
     multiplicity_map = {
         'Singlet': 0.0,
@@ -133,7 +144,7 @@ def main(args):
 
     if args.actually_plot:
         fig, ax = plt.subplots()
-        cmap = plt.cm.qchem_get_cmap('nipy_spectral')
+        cmap = plt.cm.get_cmap('nipy_spectral')
         njobs = len(args.inputfile)
         ax.set_color_cycle([cmap(i) for i in np.linspace(0, 1, njobs)])
 
@@ -183,7 +194,13 @@ def main(args):
 
         elif type(job) == cclib.parser.orcaparser.ORCA:
             print('ORCA:', stub)
-            pass
+            for line in inputfile:
+                if 'Total Energy' in line:
+                    energy_gs = float(line.split()[3])
+                if 'CIS EXCITED STATES' in line:
+                    energies_es = orca_get_cis_ex_energies(inputfile)
+                if 'TD-DFT/TDA EXCITED STATES' in line:
+                    energies_es = orca_get_cis_ex_energies(inputfile)
 
         elif type(job) == cclib.parser.psiparser.Psi:
             print('Psi:', stub)
@@ -197,17 +214,24 @@ def main(args):
         # print('Excited state energies:')
         # print(energies_es)
 
-        excitation_energies = [convertor(energy_es - energy_gs, 'hartree', 'eV')
-                               for energy_es in energies_es]
+        try:
+            if type(job) == cclib.parser.orcaparser.ORCA:
+                excitation_energies = energies_es
+            else:
+                excitation_energies = [convertor(energy_es - energy_gs, 'hartree', 'eV')
+                                       for energy_es in energies_es]
 
-        # print('Excitation energies:')
-        # print(excitation_energies)
+            # print('Excitation energies:')
+            # print(excitation_energies)
 
-        nstates = len(excitation_energies)
-        states = range(1, nstates + 1)
+            nstates = len(excitation_energies)
+            states = range(1, nstates + 1)
 
-        if args.actually_plot:
-            ax.plot(states, excitation_energies[:nstates], label=stub, marker='o')
+            if args.actually_plot:
+                ax.plot(states, excitation_energies[:nstates], label=stub, marker='o')
+
+        except:
+            print("Something's wrong!")
 
     if args.actually_plot:
         ax.set_xlabel('excited state #')
