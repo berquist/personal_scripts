@@ -8,6 +8,8 @@ displacement.
 
 from __future__ import print_function
 
+import sys
+
 import numpy as np
 import numpy.linalg as npl
 from itertools import combinations, chain
@@ -62,7 +64,7 @@ def find_all_instances(haystack, needle):
 
 
 def find_CO2_atom_indices(atomnos, atomcoords, bond_CO_min=1.15, bond_CO_max=1.18):
-    """Return the all possible first indices belonging to the CO2."""
+    """Return the all possible *first* indices belonging to the CO2."""
     # The three possible orderings of the CO2 atomic numbers.
     seq1 = [6, 8, 8]
     seq2 = [8, 6, 8]
@@ -101,6 +103,10 @@ def find_CO2_atom_indices(atomnos, atomcoords, bond_CO_min=1.15, bond_CO_max=1.1
 
 def find_CO2_mode_indices(index, vibdisps, thresh=0.85):
     """Return a list of indices corresponding to CO2-dominant modes."""
+    if thresh > 100.0 or thresh < 0.0:
+        print("This threshold doesn't make sense: {}".format(thresh))
+        print("Try again! Should be a float between 0 and 1.")
+        sys.exit(1)
     modelist = []
     # # Find the starting indices of all possible blocks, not including
     # # the CO2.
@@ -119,6 +125,7 @@ def find_CO2_mode_indices(index, vibdisps, thresh=0.85):
     #             break
     #     else:
     #         modelist.append(modeidx)
+    # This is a much simpler way of doing things.
     for modeidx, mode in enumerate(vibdisps):
         disp_CO2 = np.sum(np.abs(mode)[index:index + 3])
         disp_tot = np.sum(np.abs(mode))
@@ -139,6 +146,8 @@ def main(args):
     of the total displacement contains CO2
     3. 
     """
+
+    print("Using threshold of {} for fraction of normal mode displacement".format(args.thresh))
     filenames = args.filename
     for filename in filenames:
         job = ccopen(filename)
@@ -177,9 +186,15 @@ def main(args):
                 # else:
                 #     print('no degeneracy')
                 modeindices = find_CO2_mode_indices(start, vibdisps, thresh=args.thresh)
-                print(modeindices)
                 freqs = [vibfreqs[i] for i in modeindices]
-                print(freqs)
+                print('Mode indices:')
+                for mi in modeindices:
+                    print(mi, end=' ')
+                print('')
+                print('Frequencies:')
+                for f in freqs:
+                    print(round(f, 2), end=' ')
+                print('')
             except AttributeError:
                 pass
 
