@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 
-"""submit-molpro.py: A standalone script for submitting Molpro jobs to
+"""submit-aces.py: A standalone script for submitting ACES jobs to
 Frank's PBS scheduler.
 """
 
 from __future__ import print_function
 
 
-def template_pbsfile_molpro(inpfile, ppn, time, queue, extrafiles):
-    """The template for a PBS jobfile that calls Molpro."""
+def template_pbsfile_aces(inpfile, ppn, time, queue, extrafiles):
+    """The template for a PBS jobfile that calls ACES."""
     copy_string_template = "cp $PBS_O_WORKDIR/{} $LOCAL\n"
     if extrafiles is None:
         joined_extrafiles = ""
@@ -31,9 +31,9 @@ def template_pbsfile_molpro(inpfile, ppn, time, queue, extrafiles):
 #PBS -M {username}@pitt.edu
 
 module purge
-module load molpro/2012.1.8
+module load aces/3.0.7-i2013.0-ompi1.6.3
 
-cp $PBS_O_WORKDIR/{inpfile}.in $LOCAL
+cp $PBS_O_WORKDIR/ZMAT $LOCAL
 {extrafiles}cd $LOCAL
 
 run_on_exit() {{
@@ -43,7 +43,7 @@ run_on_exit() {{
 
 trap run_on_exit EXIT
 
-`which molpro` -n {ppn} -d $LOCAL {inpfile}.in
+$(which mpirun) -np {ppn} $(which xaces3) >& $PBS_O_WORKDIR/{inpfile}.out
 """.format(inpfile=inpfile,
            ppn=ppn,
            time=time,
@@ -58,7 +58,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument('inpfilename',
-                        help='the Molpro input file to submit')
+                        help='the name of the job/ACES output file')
     parser.add_argument('--ppn',
                         type=int,
                         default=4,
@@ -78,10 +78,10 @@ if __name__ == "__main__":
 
     pbsfilename = inpfilename + '.pbs'
     with open(pbsfilename, 'w') as pbsfile:
-        pbsfile.write(template_pbsfile_molpro(inpfilename,
-                                              args.ppn,
-                                              args.time,
-                                              args.queue,
-                                              args.extrafiles))
+        pbsfile.write(template_pbsfile_aces(inpfilename,
+                                            args.ppn,
+                                            args.time,
+                                            args.queue,
+                                            args.extrafiles))
 
     print(pbsfilename)
