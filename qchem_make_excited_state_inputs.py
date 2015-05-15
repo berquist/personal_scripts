@@ -123,7 +123,7 @@ def bool_to_str(b):
         return 'false'
     else:
         print('Oh no!')
-        sys.exit()
+        sys.exit(1)
 
 
 def inpfile_params_to_rem_string(inpfile_params):
@@ -155,7 +155,7 @@ def main(args):
 
     if not args.xyzfile:
         print('Specify an XYZ file!')
-        sys.exit()
+        sys.exit(1)
     else:
         with open(args.xyzfile) as xyzfile:
             inpfile_default_params['_molecule'] = ''.join(xyzfile.readlines()[2:])
@@ -179,7 +179,7 @@ def main(args):
     if args.aux_basis == 'gen':
         if not args.aux_basis_file:
             print('Specify an aux_basis file!')
-            sys.exit()
+            sys.exit(1)
 
     STATES = args.nstates
 
