@@ -20,9 +20,10 @@ axes location off
 menu graphics on
 
 # general color settings
-color Element C gray
 color Axes Labels black
 color Display Background white
+color Element C gray
+color Element Cu orange
 
 # create a new material
 material add copy GlassBubble
