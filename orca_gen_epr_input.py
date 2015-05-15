@@ -7,7 +7,7 @@ from __future__ import print_function
 
 choices_functionals = [
     # This top one will be the Hartree-Fock case.
-    {'functional': None, 'functional_type': 'hybrid'},
+    {'functional': 'hf', 'functional_type': 'hybrid'},
     {'functional': 'hfs', 'functional_type': 'pure'},
     {'functional': 'vwn3', 'functional_type': 'pure'},
     {'functional': 'vwn5', 'functional_type': 'pure'},
@@ -134,7 +134,7 @@ def eprfile(**kwargs):
     """A default template for running ORCA EPR calculations, finding the
     g-tensor and copper/nitrogen hyperfine/nuclear quadrupole tensors.
     """
-    return """! {hf} {functional} {basis} {aux_basis} {ri_flags} noautostart verytightscf grid5 nofinalgrid
+    return """! {hf} {functional} {basis} {aux_basis} {ri_flags} noautostart verytightscf grid5 gridx5 nofinalgrid
 
 %pal
  nprocs 8
@@ -259,7 +259,7 @@ def main(args):
 
     all_inpfile_params = []
 
-    name = 'u{functional}_{basis}_{ri_type}'.format
+    name = '{functional}_{basis}_{ri_type}'.format
 
     if args.all_functionals and args.all_ri_flags:
         for choice_functional in choices_functionals:
@@ -268,10 +268,10 @@ def main(args):
                 inpfile_params = inpfile_default_params.copy()
                 inpfile_params['hf'] = 'uks'
                 inpfile_params['functional'] = choice_functional['functional']
-                if inpfile_params['functional'] is None:
-                    inpfile_params['hf'] = 'uhf'
-                    inpfile_params['functional'] = ''
-                inpfile_params['basis'] = args.basis
+                if inpfile_params['functional'] == 'hf':
+                    inpfile_params['hf'] = ''
+                    inpfile_params['functional'] = 'uhf'
+                inpfile_params['basis'] = args.basis.lower()
                 inpfile_params['ri_flags'] = ' '.join([choice_ri[0], choice_ri[1]])
                 inpfile_params['ri_type'] = inpfile_params['ri_flags'].split()[-1]
                 inpfile_params['aux_basis'] = determine_aux_basis(args, inpfile_params)
@@ -284,10 +284,10 @@ def main(args):
             inpfile_params = inpfile_default_params.copy()
             inpfile_params['hf'] = 'uks'
             inpfile_params['functional'] = choice_functional['functional']
-            if inpfile_params['functional'] is None:
-                inpfile_params['hf'] = 'uhf'
-                inpfile_params['functional'] = ''
-            inpfile_params['basis'] = args.basis
+            if inpfile_params['functional'] == 'uhf':
+                inpfile_params['hf'] = ''
+                inpfile_params['functional'] = 'uhf'
+            inpfile_params['basis'] = args.basis.lower()
             inpfile_params['ri_flags'] = determine_ri_flags(args, inpfile_params)
             inpfile_params['ri_type'] = inpfile_params['ri_flags'].split()[-1]
             inpfile_params['aux_basis'] = determine_aux_basis(args, inpfile_params)
@@ -303,11 +303,11 @@ def main(args):
         for choice_ri in choices_ri[functional_type]:
             inpfile_params = inpfile_default_params.copy()
             inpfile_params['hf'] = 'uks'
-            inpfile_params['functional'] = args.functional
-            if args.functional is None:
-                inpfile_params['hf'] = 'uhf'
-                inpfile_params['functional'] = ''
-            inpfile_params['basis'] = args.basis
+            inpfile_params['functional'] = args.functional.lower()
+            if inpfile_params['functional'] == 'hf':
+                inpfile_params['hf'] = ''
+                inpfile_params['functional'] = 'uhf'
+            inpfile_params['basis'] = args.basis.lower()
             inpfile_params['ri_flags'] = ' '.join([choice_ri[0], choice_ri[1]])
             inpfile_params['ri_type'] = inpfile_params['ri_flags'].split()[-1]
             inpfile_params['aux_basis'] = determine_aux_basis(args, inpfile_params)
@@ -318,11 +318,11 @@ def main(args):
     else:
         inpfile_params = inpfile_default_params.copy()
         inpfile_params['hf'] = 'uks'
-        inpfile_params['functional'] = args.functional
-        if args.functional is None:
-            inpfile_params['hf'] = 'uhf'
-            inpfile_params['functional'] = ''
-        inpfile_params['basis'] = args.basis
+        inpfile_params['functional'] = args.functional.lower()
+        if inpfile_params['functional'] == 'hf':
+            inpfile_params['hf'] = ''
+            inpfile_params['functional'] = 'uhf'
+        inpfile_params['basis'] = args.basis.lower()
         inpfile_params['ri_flags'] = determine_ri_flags(args, inpfile_params)
         inpfile_params['ri_type'] = inpfile_params['ri_flags'].split()[-1]
         inpfile_params['aux_basis'] = determine_aux_basis(args, inpfile_params)
@@ -333,8 +333,7 @@ def main(args):
 
     if args.debug:
         for inpfile_params in all_inpfile_params:
-            print(inpfile_params['ri_type'],
-                  inpfile_params['aux_basis'])
+            print(inpfile_params)
 
     if not args.dry_run:
         for inpfile_params in all_inpfile_params:
