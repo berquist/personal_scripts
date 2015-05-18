@@ -188,6 +188,7 @@ def main(args):
         'scf_convergence': 8,
         'thresh': 14,
         'scf_algorithm': 'rca_diis',
+        'scf_max_cycles': 1000,
         'symmetry': 'false',
         'sym_ignore': 'true',
         'chelpg': 'false',
@@ -209,9 +210,20 @@ def main(args):
         'eom_davidson_max_iter': 100,
         'eom_davidson_convergence': 7,
         'eom_davidson_threshold': 10007,
-        'eom_nguess_singles': 20,
-        'eom_nguess_doubles': 20,
+        'eom_nguess_singles': STATES + 5,
+        'eom_nguess_doubles': STATES + 5,
         'eom_preconv_sd': 60,
+    }
+
+    # Default settings shared by adcman calculations.
+    default_settings_adc = {
+        'cc_symmetry': 'false',
+        'state_analysis': 'true',
+        'adc_davidson_maxiter': 100,
+        'adc_davidson_conv': 7,
+        'adc_davidson_thresh': 14,
+        'adc_nguess_singles': STATES + 5,
+        'adc_nguess_doubles': STATES + 5,
     }
 
     # Input file option is [0], string for filename is [1].
@@ -232,33 +244,44 @@ def main(args):
     )
 
     choices_method_noteom = [
-        {'method': 'pbe', '_needs_aux_basis': False,},
-        {'method': 'pbe0', '_needs_aux_basis': False,},
-        {'method': 'cis', '_needs_aux_basis': False,},
-        {'method': 'cis(d)', '_needs_aux_basis': False,},
-        {'method': 'ricis(d)', '_needs_aux_basis': True,},
-        {'method': 'soscis(d)', '_needs_aux_basis': True,},
-        {'method': 'soscis(d0)', '_needs_aux_basis': True,},
-        {'method': 'soscis(d)', '_needs_aux_basis': True, 'sos_ufactor': 140, '_name': 'soscis_d_factor_d0',},
-        {'method': 'soscis(d0)', '_needs_aux_basis': True, 'sos_ufactor': 151, '_name': 'soscis_d0_factor_d',}
+        {'_needs_aux_basis': False, 'method': 'pbe',},
+        {'_needs_aux_basis': False, 'method': 'pbe0',},
+        {'_needs_aux_basis': False, 'method': 'cis',},
+        {'_needs_aux_basis': False, 'method': 'cis(d)',},
+        {'_needs_aux_basis': True, 'method': 'ricis(d)',},
+        {'_needs_aux_basis': True, 'method': 'soscis(d)',},
+        {'_needs_aux_basis': True, 'method': 'soscis(d0)',},
+        {'_needs_aux_basis': True, 'method': 'soscis(d)', 'sos_ufactor': 140, '_name': 'soscis_d_factor_d0',},
+        {'_needs_aux_basis': True, 'method': 'soscis(d0)', 'sos_ufactor': 151, '_name': 'soscis_d0_factor_d',},
     ]
 
     choices_method_eom = [
-        {'exchange': 'hf', 'correlation': 'ci', 'eom_corr': 'cis', 'sf_states': STATES, '_needs_aux_basis': False,},
-        {'exchange': 'hf', 'correlation': 'ci', 'eom_corr': 'cis(d)', 'sf_states': STATES, '_needs_aux_basis': False,},
-        {'exchange': 'hf', 'correlation': 'ci', 'eom_corr': 'cisd', 'sf_states': STATES, '_needs_aux_basis': False,},
-        {'exchange': 'hf', 'correlation': 'ci', 'eom_corr': 'cis', 'ee_states': STATES, '_needs_aux_basis': False,},
-        {'exchange': 'hf', 'correlation': 'ci', 'eom_corr': 'cis(d)','ee_states': STATES, '_needs_aux_basis': False,},
-        {'exchange': 'hf', 'correlation': 'ci', 'eom_corr': 'cisd', 'ee_states': STATES, '_needs_aux_basis': False,},
-        {'exchange': 'hf', 'correlation': 'ci', 'eom_corr': 'sdt', 'ee_states': STATES, '_needs_aux_basis': False,},
-        {'exchange': 'hf', 'correlation': 'ccsd', 'ee_states': STATES, 'ccman2': False, '_needs_aux_basis': False,},
-        {'exchange': 'hf', 'correlation': 'ccsd', 'ee_states': STATES, 'ccman2': True, '_needs_aux_basis': False,},
-        {'exchange': 'hf', 'correlation': 'ccsd', 'ee_states': STATES, 'ccman2': True, 'cholesky_tol': 3, '_needs_aux_basis': False,},
-        {'method': 'eom-ee(2,3)', 'ee_states': STATES, '_name': 'eom-ee-cc23', '_needs_aux_basis': False,}
+        {'_needs_aux_basis': False, 'exchange': 'hf', 'correlation': 'ci', 'eom_corr': 'cis', 'sf_states': STATES,},
+        {'_needs_aux_basis': False, 'exchange': 'hf', 'correlation': 'ci', 'eom_corr': 'cis(d)', 'sf_states': STATES,},
+        {'_needs_aux_basis': False, 'exchange': 'hf', 'correlation': 'ci', 'eom_corr': 'cisd', 'sf_states': STATES,},
+        {'_needs_aux_basis': False, 'exchange': 'hf', 'correlation': 'ci', 'eom_corr': 'cis', 'ee_states': STATES,},
+        {'_needs_aux_basis': False, 'exchange': 'hf', 'correlation': 'ci', 'eom_corr': 'cis(d)','ee_states': STATES,},
+        {'_needs_aux_basis': False, 'exchange': 'hf', 'correlation': 'ci', 'eom_corr': 'cisd', 'ee_states': STATES,},
+        {'_needs_aux_basis': False, 'exchange': 'hf', 'correlation': 'ci', 'eom_corr': 'sdt', 'ee_states': STATES,},
+        {'_needs_aux_basis': False, 'exchange': 'hf', 'correlation': 'ccsd', 'ee_states': STATES, 'ccman2': False,},
+        {'_needs_aux_basis': False, 'exchange': 'hf', 'correlation': 'ccsd', 'ee_states': STATES, 'ccman2': True,},
+        {'_needs_aux_basis': False, 'exchange': 'hf', 'correlation': 'ccsd', 'ee_states': STATES, 'ccman2': True, 'cholesky_tol': 3,},
+        {'_needs_aux_basis': False, 'method': 'eom-ee(2,3)', 'ee_states': STATES, '_name': 'eom-ee-cc23',},
+    ]
+
+    choices_method_adc = [
+        {'ee_states': STATES, '_needs_aux_basis': False, 'method': 'adc(0)', '_name': 'adc0',},
+        {'ee_states': STATES, '_needs_aux_basis': False, 'method': 'adc(1)', '_name': 'adc1',},
+        {'ee_states': STATES, '_needs_aux_basis': False, 'method': 'adc(2)', '_name': 'adc2',},
+        {'ee_states': STATES, '_needs_aux_basis': False, 'method': 'adc(2)-x', '_name': 'adc2x',},
+        {'ee_states': STATES, '_needs_aux_basis': False, 'method': 'sos-adc(2)', '_name': 'sosadc2',},
+        {'ee_states': STATES, '_needs_aux_basis': False, 'method': 'sos-adc(2)-x', '_name': 'sosadc2x',},
+        {'ee_states': STATES, '_needs_aux_basis': False, 'method': 'adc(3)',  '_name': 'adc3',},
     ]
 
     options_jobs_cdman = []
     options_jobs_ccman = []
+    options_jobs_adcman = []
 
     # Add default settings to specific job types.
     for c in choices_method_noteom:
@@ -273,8 +296,14 @@ def main(args):
         d.update(default_settings_eom)
         d.update(c)
         options_jobs_ccman.append(d)
+    for c in choices_method_adc:
+        d = dict()
+        d.update(default_settings_all)
+        d.update(default_settings_adc)
+        d.update(c)
+        options_jobs_adcman.append(d)
 
-    options_jobs = options_jobs_cdman + options_jobs_ccman
+    options_jobs = options_jobs_cdman + options_jobs_ccman + options_jobs_adcman
 
     # A giant loop over all possible options! Oh boy!
     for choice_unrestricted in choices_unrestricted:
