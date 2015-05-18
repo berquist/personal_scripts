@@ -33,6 +33,7 @@ def template_pbsfile_aces(inpfile, ppn, time, queue, extrafiles):
 module purge
 module load aces/3.0.7-i2013.0-ompi1.6.3
 
+cp $ACES_ROOT/tests/GENBAS $LOCAL
 cp $PBS_O_WORKDIR/ZMAT $LOCAL
 {extrafiles}cd $LOCAL
 
