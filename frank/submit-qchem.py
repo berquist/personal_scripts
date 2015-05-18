@@ -8,12 +8,13 @@ from __future__ import print_function
 
 def template_pbsfile_qchem(inpfile, ppn, time, queue, save, old):
     """The template for a PBS jobfile that calls Q-Chem."""
-    save = ''
+    saveflag = ''
     scratchdir = ''
     if save:
-        save = '-save '
+        saveflag = '-save '
         scratchdir = ' "{inpfile}.${{PBS_JOBID}}"'.format(inpfile=inpfile)
-    module = 'qchem/4.3-trunk.20150310.omp.release'
+    # module = 'qchem/4.3-trunk.20150310.omp.release'
+    module = 'qchem/4.3-trunk.20150505.omp.release'
     if old:
         # module = 'qchem/4.2-trunk.20140824.omp.release'
         module = 'qchem/4.2-trunk.20141216.omp.release'
@@ -41,12 +42,12 @@ run_on_exit() {{
 
 trap run_on_exit EXIT
 
-`which qchem` {save}-nt {ppn} "{inpfile}.in" "${{PBS_O_WORKDIR}}/{inpfile}.out"{scratchdir}
+$(which qchem) {saveflag}-nt {ppn} "{inpfile}.in" "${{PBS_O_WORKDIR}}/{inpfile}.out"{scratchdir}
 '''.format(inpfile=inpfile,
            ppn=ppn,
            time=time,
            queue=queue,
-           save=save,
+           saveflag=saveflag,
            scratchdir=scratchdir,
            username=os.environ['USER'],
            module=module)
