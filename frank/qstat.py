@@ -12,22 +12,121 @@ parser.add_argument('-u', dest='username', type=str, metavar='<username>', help=
 args = parser.parse_args()
 username = args.username
 
-# get all the user's jobs in short format and discard the first 5 lines
-short_output = sp.check_output('qstat -u {}'.format(username).split()).splitlines()
-header = short_output[:5]
+if username:
+    qstat_cmd = ['qstat', '-u', username]
+else:
+    qstat_cmd = ['qstat', '-a']
+
+short_output = sp.check_output(qstat_cmd).decode('utf-8').splitlines()
 short_output = short_output[5:]
 
-regex = re.compile('\d*') # return all integers
-for idx, line in enumerate(short_output):
-    job = regex.match(line.strip().split()[0])
+re_ints = re.compile('\d*')
+
+blank_spot = '--'
+
+def make_spaced_dashes(lints):
+    return ' '.join([('-' * lint) for lint in lints])
+
+reformatted_lines = []
+
+for idx, short_output_line in enumerate(short_output):
+
+    jobinfo = dict()
+    short_output_line_chomp = short_output_line.split()
+    job = re_ints.match(short_output_line_chomp[0])
     jobid = job.group()
-    full_output = sp.check_output(['qstat', '-f', str(jobid)])
 
-    # get the full job name and queue from the full output
-    tmp = full_output.splitlines()
-    jobname = tmp[1].split()[2]
-    queue = tmp[8].split()[2]
+    try:
+        full_output = sp.check_output(['qstat', '-f', str(jobid)]).decode('utf-8')
+    except sp.CalledProcessError as e:
+        continue
 
-    short_output[2] = queue
-    short_output[3] = jobname
-    print(short_output)
+    for full_output_line in full_output.splitlines():
+
+        chomp = full_output_line.split()
+
+        if 'Id:' in chomp:
+            pass
+        elif len(chomp) > 2:
+            key = chomp[0]
+            value = ' '.join(chomp[2:])
+            jobinfo[key] = value
+        else:
+            oldvalue = jobinfo[key]
+            newvalue = ''.join([full_output_line, oldvalue])
+            jobinfo[key] = newvalue
+
+    queue = jobinfo['queue']
+    jobname = jobinfo['Job_Name']
+    session_id = jobinfo.get('session_id', blank_spot)
+    # nodes = jobinfo['Resource_List.nodect']
+    nodes = short_output_line_chomp[5]
+    tasks = short_output_line_chomp[6]
+    reqd_mem = jobinfo.get('Resource_List.pmem', blank_spot)
+    reqd_time = jobinfo['Resource_List.walltime']
+    status = jobinfo['job_state']
+    elap_time = jobinfo.get('resources_used.walltime', blank_spot)
+
+    reformatted_lines.append([
+        jobid,
+        username,
+        queue,
+        jobname,
+        session_id,
+        nodes,
+        tasks,
+        reqd_time,
+        elap_time,
+        status
+    ])
+
+max_len_jobid = max(len(l[0]) for l in reformatted_lines)
+max_len_username = max(max(len(l[1]) for l in reformatted_lines), len('Username'))
+max_len_queue = max(max(len(l[2]) for l in reformatted_lines), len('Queue'))
+max_len_jobname = max(max(len(l[3]) for l in reformatted_lines), len('Jobname'))
+max_len_session_id = max(max(len(l[4]) for l in reformatted_lines), len('SID'))
+max_len_nodes = max(max(len(l[5]) for l in reformatted_lines), len('Nodes'))
+max_len_tasks = max(max(len(l[6]) for l in reformatted_lines), len('Cores'))
+max_len_reqd_time = max(max(len(l[7]) for l in reformatted_lines), len('Time (R)'))
+max_len_elap_time = max(max(len(l[8]) for l in reformatted_lines), len('Time (E)'))
+max_len_status = max(max(len(l[9]) for l in reformatted_lines), len('S'))
+
+rlt = '{{:{}}} {{:{}}} {{:{}}} {{:{}}} {{:>{}}} {{:>{}}} {{:>{}}} {{:>{}}} {{:>{}}} {{:{}}}'.format(
+    max_len_jobid,
+    max_len_username,
+    max_len_queue,
+    max_len_jobname,
+    max_len_session_id,
+    max_len_nodes,
+    max_len_tasks,
+    max_len_reqd_time,
+    max_len_elap_time,
+    max_len_status
+)
+print(rlt.format(
+    'ID',
+    'Username',
+    'Queue',
+    'Jobname',
+    'SID',
+    'Nodes',
+    'Cores',
+    'Time (R)',
+    'Time (E)',
+    'S'
+))
+print(make_spaced_dashes([
+    max_len_jobid,
+    max_len_username,
+    max_len_queue,
+    max_len_jobname,
+    max_len_session_id,
+    max_len_nodes,
+    max_len_tasks,
+    max_len_reqd_time,
+    max_len_elap_time,
+    max_len_status
+]))
+
+for reformatted_line in reformatted_lines:
+    print(rlt.format(*reformatted_line))
