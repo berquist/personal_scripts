@@ -1,8 +1,16 @@
 #!/usr/bin/env python
 
-"""orca_gen_epr_input.py: ..."""
+"""orca_gen_epr_input.py: For a given molecule and basis set, generate
+ORCA inputs for most of the possible EPR options."""
 
 from __future__ import print_function
+
+
+# TODO:
+# 1. handle relativistic options
+# 2. handle hyperfine nuclei via cmdline option
+# 3. allow a loop over some default basis sets
+# 4. does COSMO work for EPR properties?
 
 
 choices_functionals = [
@@ -15,7 +23,8 @@ choices_functionals = [
     {'functional': 'bp86', 'functional_type': 'pure'},
     {'functional': 'blyp', 'functional_type': 'pure'},
     {'functional': 'olyp', 'functional_type': 'pure'},
-    {'functional': 'glyp', 'functional_type': 'pure'},
+    # The implementation of GLYP appears to be broken.
+    # {'functional': 'glyp', 'functional_type': 'pure'},
     {'functional': 'xlyp', 'functional_type': 'pure'},
     {'functional': 'pw91', 'functional_type': 'pure'},
     {'functional': 'mpwpw', 'functional_type': 'pure'},
@@ -43,6 +52,7 @@ choices_functionals = [
     {'functional': 'm06l', 'functional_type': 'pure'},
     {'functional': 'm06', 'functional_type': 'hybrid'},
     {'functional': 'm062x', 'functional_type': 'hybrid'},
+    # Need to add double hybrids here.
 ]
 
 # RI options.
@@ -71,6 +81,10 @@ def getargs():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('xyzfilename')
+    parser.add_argument('--ppn',
+                        type=int,
+                        default=4,
+                        help="""number of total processors""")
     parser.add_argument('--molecule-in-file',
                         action='store_true',
                         help="""Should the molecular coordinates be inserted \
@@ -134,15 +148,19 @@ def eprfile(**kwargs):
     """A default template for running ORCA EPR calculations, finding the
     g-tensor and copper/nitrogen hyperfine/nuclear quadrupole tensors.
     """
-    return """! {hf} {functional} {basis} {aux_basis} {ri_flags} noautostart verytightscf grid5 gridx5 nofinalgrid
+    return """! {hf} {functional} {basis} {aux_basis} {ri_flags} noautostart verytightscf grid5 gridx5 nofinalgrid usesym
 
 %pal
- nprocs 8
+ nprocs {ppn}
  end
 
 {pointcharge_line}
 
 * {xyzflag} {charge} {multiplicity} {xyzcontents}*
+
+%scf
+ maxiter 2000
+ end
 
 %rel
  soctype 3
@@ -212,7 +230,7 @@ def determine_aux_basis(args, inpfile_params):
         if inpfile_params['ri_type'] == 'nori':
             return ''
         else:
-            return inpfile_params['basis'] + \
+            return select_aux_basis_family(inpfile_params['basis']) + \
                 ri_type_aux_basis_endings[inpfile_params['ri_type']]
     elif inpfile_params['functional']:
         for choice_functional in choices_functionals:
@@ -223,16 +241,40 @@ def determine_aux_basis(args, inpfile_params):
             return ''
         # pure default
         if functional_type == 'pure':
-            return inpfile_params['basis'] + '/j'
+            return select_aux_basis_family(inpfile_params['basis']) + '/j'
         # hybrid default
         if functional_type == 'hybrid':
-            return inpfile_params['basis'] + '/jk'
+            return select_aux_basis_family(inpfile_params['basis']) + '/jk'
         # shouldn't be here...
         else:
             return ''
     else:
         # finish me!
         return ''
+
+
+def select_aux_basis_family(basis_string):
+    """Not all basis sets have a matching auxiliary basis set. Make sure
+    we pick either the correct match or a good replacement for the
+    given primary basis set.
+    """
+
+    families = (
+        ('def2-sv', 'def2-svp'),
+        ('def2-tzvp', 'def2-tzvpp'),
+        ('def2-qzvp', 'def2-qzvpp'),
+        ('cc-pvdz', 'cc-pvdz'),
+        ('cc-pvtz', 'cc-pvtz'),
+        ('cc-pvqz', 'cc-pvqz'),
+        ('cc-pv5z', 'cc-pv5z'),
+        ('cc-pv6z', 'cc-pv6z'),
+    )
+
+    for (partial_match, family) in families:
+        if partial_match in basis_string.lower():
+            return family
+    else:
+        return 'def2-qzvpp'
 
 
 def main(args):
@@ -253,13 +295,14 @@ def main(args):
         inpfile_default_params['xyzcontents'] = os.path.basename(args.xyzfilename) + ' '
         inpfile_default_params['xyzflag'] = 'xyzfile'
 
+    inpfile_default_params['ppn'] = args.ppn
     inpfile_default_params['charge'] = args.charge
     inpfile_default_params['multiplicity'] = args.mult
     inpfile_default_params['pointcharge_line'] = make_pointcharge_line(args)
 
     all_inpfile_params = []
 
-    name = '{functional}_{basis}_{ri_type}'.format
+    name = '{functional}_{basis}_{ri_type}_nrel'.format
 
     if args.all_functionals and args.all_ri_flags:
         for choice_functional in choices_functionals:
