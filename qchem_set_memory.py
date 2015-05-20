@@ -23,12 +23,12 @@ def getargs():
 
 def main(args):
 
+    t = ' {} = {}\n'.format
+
     for inputfilename in args.inputfile:
 
         with open(inputfilename) as inputfile:
             inputfile_lines = inputfile.readlines()
-
-        t = ' {} = {}\n'.format
 
         for idx, line in enumerate(inputfile_lines):
             if '$rem' in line:
@@ -42,6 +42,8 @@ def main(args):
 
         with open(inputfilename, 'w') as inputfile:
             inputfile.write(''.join(inputfile_lines))
+
+    return locals()
 
 
 if __name__ == '__main__':

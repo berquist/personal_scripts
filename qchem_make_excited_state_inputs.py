@@ -21,15 +21,45 @@ def getargs():
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--dry-run', action='store_true')
-    parser.add_argument('--charge', type=int, default=0, help="")
-    parser.add_argument('--mult', type=int, default=1, help="")
-    parser.add_argument('--basis', type=str, default='sto-3g', help="")
-    parser.add_argument('--basis-file', type=str, help="")
-    parser.add_argument('--aux-basis', type=str, help="")
-    parser.add_argument('--aux-basis-file', type=str, help="")
-    parser.add_argument('--xyzfile', type=str, help="")
-    parser.add_argument('--nstates', type=int, default=15, help="")
+    parser.add_argument('--dry-run',
+                        action='store_true',
+                        help="""Don't actually write any input files.""")
+    parser.add_argument('--charge',
+                        type=int,
+                        default=0,
+                        help="""Total charge of the system.""")
+    parser.add_argument('--mult',
+                        type=int,
+                        default=1,
+                        help="""Spin multiplicity of the system.""")
+    parser.add_argument('--basis',
+                        type=str,
+                        default='sto-3g',
+                        help="""Name of the basis set to use, or 'gen' for a \
+                        custom basis.""")
+    parser.add_argument('--basis-file',
+                        type=str,
+                        help="""If using a general basis ('basis = gen'), the \
+                        file to read the basis set from.""")
+    parser.add_argument('--aux-basis',
+                        type=str,
+                        help="""If performing a calculation using the RI \
+                        approximation is desired, the name of the auxiliary \
+                        basis for the RI expansion, or 'gen' for a custom \
+                        basis.""")
+    parser.add_argument('--aux-basis-file',
+                        type=str,
+                        help="""If using a general aux basis \
+                        ('aux_basis = gen'), the file to read the aux basis \
+                        set from.""")
+    parser.add_argument('--xyzfile',
+                        type=str,
+                        help="""Path to the XYZ file containing the system's \
+                        coordinates.""")
+    parser.add_argument('--nstates',
+                        type=int,
+                        default=15,
+                        help="""Total number of excited states to compute.""")
 
     args = parser.parse_args()
 
@@ -89,15 +119,19 @@ def method_to_name(optdict):
         pieces.append(eom_type)
 
         # Handle the correlation type (CI/CC).
-        corr = optdict.get('correlation', 'ccsd')
-        eom_corr = optdict.get('eom_corr', None)
-        if corr == 'ci':
-            cityp = eom_corr.replace('(', '_').replace(')', '')
-            if 'sdt' in eom_corr:
-                cityp = 'cisdt'
-            pieces.append(cityp)
+        correlation = optdict.get('correlation', 'ccsd')
+        eom_corr = optdict.get('eom_corr', 'cisd')
+        if 'sdt' in eom_corr:
+            if correlation == 'ccsd':
+                eom_corr = 'cc23'
+            if correlation == 'ci':
+                eom_corr = 'cisdt'
         else:
-            pieces.append(corr)
+            if correlation == 'ccsd':
+                eom_corr = correlation
+            if correlation == 'ci':
+                eom_corr = eom_corr.replace('(', '_').replace(')', '')
+        pieces.append(eom_corr)
 
         # Handle the possible two-electron integral approxmations (RI/CD).
         if 'aux_basis' in optdict:
@@ -187,7 +221,7 @@ def main(args):
     default_settings_all = {
         'scf_convergence': 8,
         'thresh': 14,
-        'scf_algorithm': 'rca_diis',
+        'scf_algorithm': 'gdm',
         'scf_max_cycles': 1000,
         'symmetry': 'false',
         'sym_ignore': 'true',
@@ -207,7 +241,7 @@ def main(args):
         'cc_max_iter': 300,
         'cc_symmetry': 'false',
         'eom_davidson_maxvectors': 120,
-        'eom_davidson_max_iter': 100,
+        'eom_davidson_max_iter': 200,
         'eom_davidson_convergence': 7,
         'eom_davidson_threshold': 10007,
         'eom_nguess_singles': STATES + 5,
@@ -218,8 +252,8 @@ def main(args):
     # Default settings shared by adcman calculations.
     default_settings_adc = {
         'cc_symmetry': 'false',
-        'state_analysis': 'true',
-        'adc_davidson_maxiter': 100,
+        'state_analysis': 'false',
+        'adc_davidson_maxiter': 200,
         'adc_davidson_conv': 7,
         'adc_davidson_thresh': 14,
         'adc_nguess_singles': STATES + 5,
@@ -243,6 +277,7 @@ def main(args):
         ('0', 'nofc')
     )
 
+    # All cdman and TDDFT methods go here.
     choices_method_noteom = [
         {'_needs_aux_basis': False, 'method': 'pbe',},
         {'_needs_aux_basis': False, 'method': 'pbe0',},
@@ -255,28 +290,32 @@ def main(args):
         {'_needs_aux_basis': True, 'method': 'soscis(d0)', 'sos_ufactor': 151, '_name': 'soscis_d0_factor_d',},
     ]
 
+    # All CI- or CC-based EOM methods go here.
     choices_method_eom = [
-        {'_needs_aux_basis': False, 'exchange': 'hf', 'correlation': 'ci', 'eom_corr': 'cis', 'sf_states': STATES,},
-        {'_needs_aux_basis': False, 'exchange': 'hf', 'correlation': 'ci', 'eom_corr': 'cis(d)', 'sf_states': STATES,},
-        {'_needs_aux_basis': False, 'exchange': 'hf', 'correlation': 'ci', 'eom_corr': 'cisd', 'sf_states': STATES,},
-        {'_needs_aux_basis': False, 'exchange': 'hf', 'correlation': 'ci', 'eom_corr': 'cis', 'ee_states': STATES,},
-        {'_needs_aux_basis': False, 'exchange': 'hf', 'correlation': 'ci', 'eom_corr': 'cis(d)','ee_states': STATES,},
-        {'_needs_aux_basis': False, 'exchange': 'hf', 'correlation': 'ci', 'eom_corr': 'cisd', 'ee_states': STATES,},
-        {'_needs_aux_basis': False, 'exchange': 'hf', 'correlation': 'ci', 'eom_corr': 'sdt', 'ee_states': STATES,},
-        {'_needs_aux_basis': False, 'exchange': 'hf', 'correlation': 'ccsd', 'ee_states': STATES, 'ccman2': False,},
-        {'_needs_aux_basis': False, 'exchange': 'hf', 'correlation': 'ccsd', 'ee_states': STATES, 'ccman2': True,},
-        {'_needs_aux_basis': False, 'exchange': 'hf', 'correlation': 'ccsd', 'ee_states': STATES, 'ccman2': True, 'cholesky_tol': 3,},
-        {'_needs_aux_basis': False, 'method': 'eom-ee(2,3)', 'ee_states': STATES, '_name': 'eom-ee-cc23',},
+        {'_needs_aux_basis': False, 'exchange': 'hf', 'sf_states': STATES, 'correlation': 'ci', 'eom_corr': 'cis',},
+        {'_needs_aux_basis': False, 'exchange': 'hf', 'sf_states': STATES, 'correlation': 'ci', 'eom_corr': 'cis(d)',},
+        {'_needs_aux_basis': False, 'exchange': 'hf', 'sf_states': STATES, 'correlation': 'ci', 'eom_corr': 'cisd',},
+        {'_needs_aux_basis': False, 'exchange': 'hf', 'sf_states': STATES, 'correlation': 'ci', 'eom_corr': 'sdt',},
+        {'_needs_aux_basis': False, 'exchange': 'hf', 'ee_states': STATES, 'correlation': 'ci', 'eom_corr': 'cis',},
+        {'_needs_aux_basis': False, 'exchange': 'hf', 'ee_states': STATES, 'correlation': 'ci', 'eom_corr': 'cis(d)',},
+        {'_needs_aux_basis': False, 'exchange': 'hf', 'ee_states': STATES, 'correlation': 'ci', 'eom_corr': 'cisd',},
+        {'_needs_aux_basis': False, 'exchange': 'hf', 'ee_states': STATES, 'correlation': 'ci', 'eom_corr': 'sdt',},
+        {'_needs_aux_basis': False, 'exchange': 'hf', 'ee_states': STATES, 'correlation': 'ccsd', 'eom_corr': 'sdt',},
+        {'_needs_aux_basis': False, 'exchange': 'hf', 'ee_states': STATES, 'correlation': 'ccsd', 'ccman2': False,},
+        {'_needs_aux_basis': False, 'exchange': 'hf', 'ee_states': STATES, 'correlation': 'ccsd', 'ccman2': True,},
+        {'_needs_aux_basis': False, 'exchange': 'hf', 'ee_states': STATES, 'correlation': 'ccsd', 'ccman2': True, 'cholesky_tol': 3,},
+        # For now, we ignore the spin-flip variants of EOM-CCSD.
     ]
 
+    # All ADC methods go here.
     choices_method_adc = [
-        {'ee_states': STATES, '_needs_aux_basis': False, 'method': 'adc(0)', '_name': 'adc0',},
-        {'ee_states': STATES, '_needs_aux_basis': False, 'method': 'adc(1)', '_name': 'adc1',},
-        {'ee_states': STATES, '_needs_aux_basis': False, 'method': 'adc(2)', '_name': 'adc2',},
-        {'ee_states': STATES, '_needs_aux_basis': False, 'method': 'adc(2)-x', '_name': 'adc2x',},
-        {'ee_states': STATES, '_needs_aux_basis': False, 'method': 'sos-adc(2)', '_name': 'sosadc2',},
-        {'ee_states': STATES, '_needs_aux_basis': False, 'method': 'sos-adc(2)-x', '_name': 'sosadc2x',},
-        {'ee_states': STATES, '_needs_aux_basis': False, 'method': 'adc(3)',  '_name': 'adc3',},
+        {'ee_states': STATES, '_needs_aux_basis': False, 'method': 'adc(0)',},
+        {'ee_states': STATES, '_needs_aux_basis': False, 'method': 'adc(1)',},
+        {'ee_states': STATES, '_needs_aux_basis': False, 'method': 'adc(2)',},
+        {'ee_states': STATES, '_needs_aux_basis': False, 'method': 'adc(2)-x',},
+        {'ee_states': STATES, '_needs_aux_basis': False, 'method': 'sos-adc(2)',},
+        {'ee_states': STATES, '_needs_aux_basis': False, 'method': 'sos-adc(2)-x',},
+        {'ee_states': STATES, '_needs_aux_basis': False, 'method': 'adc(3)',},
     ]
 
     options_jobs_cdman = []
