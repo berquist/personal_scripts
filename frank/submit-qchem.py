@@ -6,7 +6,7 @@ Frank's PBS scheduler."""
 from __future__ import print_function
 
 
-def template_pbsfile_qchem(inpfile, ppn, time, queue, save, old):
+def template_pbsfile_qchem(inpfile, ppn, time, queue, save, old, lowqos):
     """The template for a PBS jobfile that calls Q-Chem."""
     saveflag = ''
     scratchdir = ''
@@ -18,12 +18,16 @@ def template_pbsfile_qchem(inpfile, ppn, time, queue, save, old):
     if old:
         # module = 'qchem/4.2-trunk.20140824.omp.release'
         module = 'qchem/4.2-trunk.20141216.omp.release'
+    qosline = '#PBS -l qos=investor'
+    if lowqos:
+        qosline = '#PBS -l qos=low'
     return '''#!/usr/bin/env bash
 
 #PBS -N {inpfile}
 #PBS -q {queue}
 #PBS -l nodes=1:ppn={ppn}
 #PBS -l walltime={time}:00:00
+{qosline}
 #PBS -j oe
 #PBS -m abe
 #PBS -M {username}@pitt.edu
@@ -50,7 +54,8 @@ $(which qchem) {saveflag}-nt {ppn} "{inpfile}.in" "${{PBS_O_WORKDIR}}/{inpfile}.
            saveflag=saveflag,
            scratchdir=scratchdir,
            username=os.environ['USER'],
-           module=module)
+           module=module,
+           qosline=qosline)
 
 
 if __name__ == '__main__':
@@ -77,6 +82,9 @@ if __name__ == '__main__':
     parser.add_argument('--old',
                         action='store_true',
                         help='Use an older (known good) version of Q-Chem.')
+    parser.add_argument('--lowqos',
+                        action='store_true',
+                        help='set "#PBS -l qos=low"')
     args = parser.parse_args()
     inpfilename = os.path.splitext(args.inpfilename)[0]
 
@@ -87,6 +95,7 @@ if __name__ == '__main__':
                                              args.time,
                                              args.queue,
                                              args.save,
-                                             args.old))
+                                             args.old,
+                                             args.lowqos))
 
     print(pbsfilename)
