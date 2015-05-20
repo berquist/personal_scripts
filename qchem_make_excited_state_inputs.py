@@ -312,9 +312,9 @@ def main(args):
         {'ee_states': STATES, '_needs_aux_basis': False, 'method': 'adc(0)',},
         {'ee_states': STATES, '_needs_aux_basis': False, 'method': 'adc(1)',},
         {'ee_states': STATES, '_needs_aux_basis': False, 'method': 'adc(2)',},
-        {'ee_states': STATES, '_needs_aux_basis': False, 'method': 'adc(2)-x',},
-        {'ee_states': STATES, '_needs_aux_basis': False, 'method': 'sos-adc(2)',},
-        {'ee_states': STATES, '_needs_aux_basis': False, 'method': 'sos-adc(2)-x',},
+        {'ee_states': STATES, '_needs_aux_basis': False, 'method': 'adc(2)x',},
+        {'ee_states': STATES, '_needs_aux_basis': False, 'method': 'sosadc(2)',},
+        {'ee_states': STATES, '_needs_aux_basis': False, 'method': 'sosadc(2)x',},
         {'ee_states': STATES, '_needs_aux_basis': False, 'method': 'adc(3)',},
     ]
 
