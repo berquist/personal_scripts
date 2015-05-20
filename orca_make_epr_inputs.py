@@ -148,7 +148,7 @@ def eprfile(**kwargs):
     """A default template for running ORCA EPR calculations, finding the
     g-tensor and copper/nitrogen hyperfine/nuclear quadrupole tensors.
     """
-    return """! {hf} {functional} {basis} {aux_basis} {ri_flags} noautostart verytightscf grid5 gridx5 nofinalgrid usesym
+    return """! {hf} {functional} {basis} {aux_basis} {ri_flags} noautostart verytightscf grid5 gridx5 nofinalgrid usesym kdiis
 
 %pal
  nprocs {ppn}
@@ -160,6 +160,11 @@ def eprfile(**kwargs):
 
 %scf
  maxiter 2000
+ end
+
+%method
+ specialgridatoms 8, 29;
+ specialgridintacc 10, 10;
  end
 
 %rel

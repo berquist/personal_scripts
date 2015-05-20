@@ -6,6 +6,7 @@ cclib. Name is the same stub, with the file extension replaced by
 '.xyz'.
 """
 
+from __future__ import print_function
 import argparse
 import os.path
 from cclib.parser import ccopen
@@ -22,6 +23,8 @@ suffix = args.suffix
 
 pt = PeriodicTable()
 
+s = '{:3s} {:15.10f} {:15.10f} {:15.10f}'
+
 for qmoutfile in qmoutfiles:
 
     job = ccopen(qmoutfile)
@@ -35,8 +38,6 @@ for qmoutfile in qmoutfiles:
         xyzfilename = ''.join([stub, '.', suffix, '.xyz'])
     else:
         xyzfilename = ''.join([stub, '.xyz'])
-
-    s = '{:3s} {:15.10f} {:15.10f} {:15.10f}'
 
     with open(xyzfilename, 'w') as xyzfile:
         xyzfile.write(str(len(last_geometry)) + '\n')
