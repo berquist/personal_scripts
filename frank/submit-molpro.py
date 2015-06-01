@@ -31,7 +31,7 @@ def template_pbsfile_molpro(inpfile, ppn, time, queue, extrafiles):
 #PBS -M {username}@pitt.edu
 
 module purge
-module load molpro/2012.1.8
+module load molpro/2012.1.23
 
 cp $PBS_O_WORKDIR/{inpfile}.in $LOCAL
 {extrafiles}cd $LOCAL
