@@ -12,11 +12,12 @@ def orca_get_cis_ex_energies(inputfile):
         line = next(inputfile)
     while list(set(line.strip())) != ['-']:
         if 'STATE' in line:
-            state_energies.append(float(line.split()[3]))
+            state_energies.append(float(line.split()[5]))
+        line = next(inputfile)
     return state_energies
 
 
-def qchem_get_cis_energies(inputfile, unrestricted=True):
+def qchem_get_cis_energies(inputfile, do_quartet=False):
     multiplicity_map = {
         'Singlet': 0.0,
         'Doublet': 0.75,
@@ -29,6 +30,9 @@ def qchem_get_cis_energies(inputfile, unrestricted=True):
     line = ''
     while 'Excited state' not in line:
         line = next(inputfile)
+    # RCIS: print all singlet/triplet in one block
+    # UCIS: print all in one block
+    # ROCIS: print doublet and quartet in separate blocks
     while list(set(line.strip())) != ['-']:
         if 'Total energy for state' in line:
             state_energies.append(float(line.split()[-1]))
@@ -39,10 +43,10 @@ def qchem_get_cis_energies(inputfile, unrestricted=True):
         if 'Strength' in line:
             state_strengths.append(float(line.split()[-1]))
         line = next(inputfile)
-    if not unrestricted:
+    if do_quartet:
         while 'Excited state' not in line:
             line = next(inputfile)
-        while 'Timing summary' not in line:
+        while list(set(line.strip())) != ['-']:
             if 'Total energy for state' in line:
                 state_energies.append(float(line.split()[-1]))
             if 'Multiplicity' in line:
@@ -104,6 +108,15 @@ def qchem_get_eom_energies_ccman2(inputfile):
     return state_energies
 
 
+def on_off_bool(s):
+    if s == 'on':
+        return True
+    elif s == 'off':
+        return False
+    else:
+        print('Uh oh!')
+
+
 def getargs():
     import argparse
     parser = argparse.ArgumentParser()
@@ -142,6 +155,11 @@ def main(args):
         'Total ground state energy'
     )
 
+    matches_orca_cis = (
+        'CIS-EXCITED STATES',
+        'CIS EXCITED STATES'
+    )
+
     if args.actually_plot:
         fig, ax = plt.subplots()
         cmap = plt.cm.get_cmap('nipy_spectral')
@@ -156,6 +174,7 @@ def main(args):
         stub = os.path.splitext(inputfilename)[0]
         inputfile = make_file_iterator(inputfilename)
         unrestricted = True
+        do_quartet = False
 
         if type(job) == cclib.parser.qchemparser.QChem:
             print('Q-Chem:', stub)
@@ -175,10 +194,12 @@ def main(args):
                     # Runs that call ccman/ccman2 will match here.
                     if 'ccsd total energy' in line.lower():
                         energy_gs = float(line.split()[-1])
+                if 'Doublet and Quartet excitation energies requested' in line:
+                    do_quartet = True
                 if 'CIS Excitation Energies' in line:
-                    energies_es = qchem_get_cis_energies(inputfile, unrestricted)
+                    energies_es = qchem_get_cis_energies(inputfile, do_quartet)
                 if 'TDDFT/TDA Excitation Energies' in line:
-                    energies_es = qchem_get_cis_energies(inputfile, unrestricted)
+                    energies_es = qchem_get_cis_energies(inputfile)
                 if line.strip() == 'CIS(D) Excitation Energies':
                     energies_es = qchem_get_cisd_energies(inputfile, energy_gs)
                 if line.strip() == 'RI-CIS(D) Excitation Energies':
@@ -197,7 +218,9 @@ def main(args):
             for line in inputfile:
                 if 'Total Energy' in line:
                     energy_gs = float(line.split()[3])
-                if 'CIS EXCITED STATES' in line:
+                if 'Generation of triplets' in line:
+                    do_triplet = on_off_bool(line.split()[-1])
+                if any(match in line for match in matches_orca_cis):
                     energies_es = orca_get_cis_ex_energies(inputfile)
                 if 'TD-DFT/TDA EXCITED STATES' in line:
                     energies_es = orca_get_cis_ex_energies(inputfile)
@@ -209,12 +232,14 @@ def main(args):
         else:
             sys.exit()
 
-        # print('Ground state energy:')
-        # print(energy_gs)
-        # print('Excited state energies:')
-        # print(energies_es)
+        print('Ground state energy (hartree):')
+        print(energy_gs)
 
         try:
+
+            print('Excited state energies:')
+            print(energies_es)
+
             if type(job) == cclib.parser.orcaparser.ORCA:
                 excitation_energies = energies_es
             else:
