@@ -182,6 +182,7 @@ def dict_keys_private_to_public(d):
 
 
 def main(args):
+    """If called from the command line, the main routine."""
 
     # Handle parameters that will be common to all inputs, like
     # charge, spin multiplicity, XYZ coordinates, basis sets(s)...
