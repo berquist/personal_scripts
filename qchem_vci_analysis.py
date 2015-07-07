@@ -16,7 +16,6 @@ Options:
 
 from __future__ import print_function
 
-import os.path
 from collections import OrderedDict
 from itertools import count
 
@@ -65,7 +64,7 @@ def parse_vibrational_anharmonic_analysis(outputfilename):
                 quantum = line[5:7].strip()
                 key = 'vci' + quantum
                 mode = int(line[13:15])
-                quanta = float(line.split()[-4])
+                # quanta = float(line.split()[-4])
                 freq = float(line.split()[-1])
                 mode_dict[mode][key] = freq
                 line = next(outputfile)
