@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from __future__ import print_function
 
 import collections
@@ -352,9 +354,8 @@ def main(args):
             filename = '.'.join(['_'.join(name), 'in'])
         print(filename)
         if not args.dry_run:
-            # with open(filename, 'w') as inpfile:
-            #     inpfile.write(inpfile_contents)
-            print(inpfile_contents)
+            with open(filename, 'w') as fh:
+                fh.write(inpfile_contents)
 
 if __name__ == '__main__':
     args = getargs()

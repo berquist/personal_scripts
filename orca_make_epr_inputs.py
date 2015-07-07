@@ -144,7 +144,7 @@ def getargs():
     return args
 
 
-def eprfile(**kwargs):
+def eprfile_dft(**kwargs):
     """A default template for running ORCA EPR calculations, finding the
     g-tensor and copper/nitrogen hyperfine/nuclear quadrupole tensors.
     """
@@ -158,13 +158,17 @@ def eprfile(**kwargs):
 
 * {xyzflag} {charge} {multiplicity} {xyzcontents}*
 
+%output
+ print[p_basis] 2
+ end
+
 %scf
  maxiter 2000
  end
 
 %method
- specialgridatoms 8, 29;
- specialgridintacc 10, 10;
+ specialgridatoms 29;
+ specialgridintacc 10;
  end
 
 %rel
@@ -174,12 +178,11 @@ def eprfile(**kwargs):
  end
 
 %eprnmr
+ ori centerofelcharge
  gtensor 1
- nuclei = all N  {{ aiso, adip, aorb, fgrad, rho }}
  nuclei = all Cu {{ aiso, adip, aorb, fgrad, rho }}
- printlevel 5
+ printlevel 4
  end
-
 """.format(**kwargs)
 
 
@@ -282,7 +285,13 @@ def select_aux_basis_family(basis_string):
         return 'def2-qzvpp'
 
 
-def main(args):
+def main_dft(args):
+    """If called from the command line, the main routine.
+
+    This handles making all the DFT-based (not wavefunction)
+    inputs.
+    """
+
     import os.path
 
     # Handle parameters that will be common to all inputs, like
@@ -383,17 +392,28 @@ def main(args):
         for inpfile_params in all_inpfile_params:
             print(inpfile_params)
 
-    if not args.dry_run:
-        for inpfile_params in all_inpfile_params:
-            inpfile_contents = eprfile(**inpfile_params)
-            filename = '.'.join([inpfile_params['name'], 'in'])
-            print(filename)
+    for inpfile_params in all_inpfile_params:
+        inpfile_contents = eprfile_dft(**inpfile_params)
+        filename = '.'.join([inpfile_params['name'], 'in'])
+        print(filename)
+        if not args.dry_run:
             with open(filename, 'w') as inpfile:
-                inpfile.write(inpfile_contents)
+            inpfile.write(inpfile_contents)
+
+    return locals()
+
+
+def main_wfn(args):
+    """If called from the command line, the main routine.
+
+    This handles making all the wavefunction-based (not DFT)
+    inputs.
+    """
 
     return locals()
 
 
 if __name__ == "__main__":
     args = getargs()
-    main_locals = main(args)
+    main_dft_locals = main_dft(args)
+    main_wfn_locals = main_wfn(args)
