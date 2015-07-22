@@ -398,7 +398,7 @@ def main_dft(args):
         print(filename)
         if not args.dry_run:
             with open(filename, 'w') as inpfile:
-            inpfile.write(inpfile_contents)
+                inpfile.write(inpfile_contents)
 
     return locals()
 
