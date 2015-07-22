@@ -2,6 +2,8 @@
 
 from __future__ import print_function
 
+from copy import deepcopy
+
 
 def make_file_iterator(filename):
     """Return an iterator over the contents of the given file name."""
@@ -11,7 +13,7 @@ def make_file_iterator(filename):
     return iter(contents.splitlines())
 
 
-def template_freq_input(**rem):
+def template_input_freq(**rem):
     """The template for a input file that performs a frequency calculation."""
     # If any of these keywords are present in the rem we've passed in,
     # add them to the new input file.
@@ -25,7 +27,9 @@ def template_freq_input(**rem):
         'scf_guess',
         'scf_algorithm',
         'thresh',
-        'xc_grid'
+        'xc_grid',
+        'mem_static',
+        'mem_total',
     )
     # Gather all the potential keywords for the new input file.
     rem_pieces = []
@@ -47,6 +51,27 @@ $end
 """.format(rem_str=rem_str, **rem)
 
 
+def clean_up_rem(rem):
+    """Make sure our $rem section is stringent enough for frequency
+    calculations.
+    """
+
+    # These are the minimum values we'd like for frequency
+    # calculations.
+    min_scf_convergence = 9
+    min_thresh = 12
+
+    newrem = deepcopy(rem)
+    if 'thresh' in newrem:
+        if int(newrem['thresh']) < min_thresh:
+            newrem['thresh'] = min_thresh
+    if 'scf_convergence' in newrem:
+        if int(newrem['scf_convergence']) < min_scf_convergence:
+            newrem['scf_convergence'] = min_scf_convergence
+
+    return newrem
+
+
 if __name__ == '__main__':
     import argparse
     import os
@@ -65,10 +90,14 @@ if __name__ == '__main__':
 
     for inputfilename in inputfilenames:
 
+        # Ugly munging to determine the name of the file we're
+        # writing.
         splitext = os.path.splitext(inputfilename)
         assert splitext[1] == '.out'
-        stub = '_'.join(splitext[0].split('_')[1:])
-        outputfilename = 'freq_{}.in'.format(stub)
+        split = splitext[0].split('_')
+        index = ['opt' in x for x in split].index(True)
+        split[index] = 'freq'
+        outputfilename = '_'.join(split) + '.in'
 
         inputfile = make_file_iterator(inputfilename)
 
@@ -99,6 +128,10 @@ if __name__ == '__main__':
         rem['charge'] = data.charge
         rem['multiplicity'] = data.mult
 
+        # Make sure our $rem section is up to snuff for frequency
+        # calculations.
+        rem = clean_up_rem(rem)
+
         # Form the atomic symbols and coordinates for each atom in
         # $molecule.
         last_geometry = data.atomcoords[-1]
@@ -107,4 +140,6 @@ if __name__ == '__main__':
                                  for element, coords in zip(element_list, last_geometry))
 
         with open(outputfilename, 'w') as outputfile:
-            outputfile.write(template_freq_input(**rem))
+            outputfile.write(template_input_freq(**rem))
+
+        print(outputfilename)
