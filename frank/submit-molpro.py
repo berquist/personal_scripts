@@ -33,17 +33,17 @@ def template_pbsfile_molpro(inpfile, ppn, time, queue, extrafiles):
 module purge
 module load molpro/2012.1.23
 
-cp $PBS_O_WORKDIR/{inpfile}.in $LOCAL
-{extrafiles}cd $LOCAL
+cp ${{PBS_O_WORKDIR}}/{inpfile}.in ${{LOCAL}}
+{extrafiles}cd ${{LOCAL}}
 
 run_on_exit() {{
     set -v
-    cp -R $LOCAL/* $PBS_O_WORKDIR
+    cp -R ${{LOCAL}}/* ${{PBS_O_WORKDIR}}
 }}
 
 trap run_on_exit EXIT
 
-`which molpro` -n {ppn} -d $LOCAL {inpfile}.in
+`which molpro` -n {ppn} -d ${{LOCAL}} -W ${{LOCAL}} -o ${{PBS_O_WORKDIR}}/{inpfile}.out {inpfile}.in
 """.format(inpfile=inpfile,
            ppn=ppn,
            time=time,
