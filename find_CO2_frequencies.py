@@ -34,6 +34,7 @@ def find(haystack, needle):
     1
 
     """
+
     h = len(haystack)
     n = len(needle)
     skip = {needle[i]: n - i - 1 for i in range(n - 1)}
@@ -45,12 +46,14 @@ def find(haystack, needle):
                 break
         else:
             return i - n + 1
+
     return -1
 
 
 def find_all_instances(haystack, needle):
     """Find all instances of the needle in the haystack.
     """
+
     instances = []
     starting_position = 0
     index = 0
@@ -60,12 +63,14 @@ def find_all_instances(haystack, needle):
             if index not in instances:
                 instances.append(starting_position + index)
             starting_position += index + 1
+
     return instances
 
 
-def find_CO2_atom_indices(atomnos, atomcoords, bond_CO_min=1.15, bond_CO_max=1.18):
+def find_CO2_atom_indices(atomnos, atomcoords, bond_CO_min=1.10, bond_CO_max=1.25):
     """Return the all possible *first* indices belonging to the CO2."""
-    # The three possible orderings of the CO2 atomic numbers.
+    # The three possible orderings of the CO2 atomic
+    # numbers. Enumerate them explicitly.
     seq1 = [6, 8, 8]
     seq2 = [8, 6, 8]
     seq3 = [8, 8, 6]
@@ -73,7 +78,8 @@ def find_CO2_atom_indices(atomnos, atomcoords, bond_CO_min=1.15, bond_CO_max=1.1
     # Find all possible starting indices for each of the sequences.
     sequence_candidates = list(chain.from_iterable([find_all_instances(atomnos, sequence)
                                                     for sequence in sequences]))
-    # print('sequence candidates: {}'.format(sequence_candidates))
+    print("Sequence candidates:")
+    print(sequence_candidates)
     # If no candidates are found, return a bad index.
     if sequence_candidates == []:
         return -1
@@ -108,6 +114,7 @@ def find_CO2_mode_indices(index, vibdisps, thresh=0.85):
         print("Try again! Should be a float between 0 and 1.")
         sys.exit(1)
     modelist = []
+
     # # Find the starting indices of all possible blocks, not including
     # # the CO2.
     # not_CO2_indices = [i for i in range(0, len(vibdisps[0]), 3)
@@ -125,15 +132,18 @@ def find_CO2_mode_indices(index, vibdisps, thresh=0.85):
     #             break
     #     else:
     #         modelist.append(modeidx)
-    # This is a much simpler way of doing things.
+
+    # This is hopefully a much simpler way of doing things.
+    template = 'modeidx: {:4d} disp_CO2: {:.4f} disp_tot: {:.4f} disp_not_CO2: {:.4f} fraction_CO2: {:.4f}'.format
     for modeidx, mode in enumerate(vibdisps):
         disp_CO2 = np.sum(np.abs(mode)[index:index + 3])
         disp_tot = np.sum(np.abs(mode))
         disp_not_CO2 = disp_tot - disp_CO2
         fraction_CO2 = disp_CO2 / disp_tot
+        print(template(modeidx, disp_CO2, disp_tot, disp_not_CO2, fraction_CO2))
         if fraction_CO2 >= thresh:
-            # print(disp_CO2, disp_tot, disp_not_CO2, fraction_CO2)
             modelist.append(modeidx)
+
     return modelist
 
 
@@ -142,9 +152,9 @@ def main(args):
 
     For each frequency calculation output filename passed in:
     1. find the indices that correspond to a CO2 molecule
-    2. look for normal mode displacements where a significant fraction 
+    2. look for normal mode displacements where a significant fraction
     of the total displacement contains CO2
-    3. 
+    3. ...
     """
 
     print("Using threshold of {} for fraction of normal mode displacement".format(args.thresh))
@@ -163,40 +173,36 @@ def main(args):
 
         # Find the indices corresponding to the CO2.
         start_indices = find_CO2_atom_indices(atoms, geometries)
+        print("Starting indices:")
+        print(start_indices)
 
         assert isinstance(start_indices, list)
 
         for start in start_indices:
-            # Try and access attributes that would belong to a
-            # frequency calculation. If they aren't present, then fail
-            # silently.
-            try:
-                vibfreqs = data.vibfreqs
-                vibdisps = data.vibdisps
-                geometries = data.atomcoords
-                atoms = data.atomnos
-                # print('vibfreqs:', len(vibfreqs))
-                # print('vibdisps:', vibdisps.shape)
-                # print('geometries:', geometries[-1].shape)
-                # predicted = (3*geometries[-1].shape[0]) - 6
-                # print('3N-6:', (3*geometries[-1].shape[0]) - 6)
-                # print('3N-5:', predicted - 1)
-                # if len(vibfreqs) < predicted:
-                #     print('degeneracy')
-                # else:
-                #     print('no degeneracy')
-                modeindices = find_CO2_mode_indices(start, vibdisps, thresh=args.thresh)
-                freqs = [vibfreqs[i] for i in modeindices]
-                print('Mode indices:')
-                for mi in modeindices:
-                    print(mi, end=' ')
-                print('')
-                print('Frequencies:')
-                for f in freqs:
-                    print(round(f, 2), end=' ')
-                print('')
-            except AttributeError:
-                pass
+            vibfreqs = data.vibfreqs
+            vibdisps = data.vibdisps
+            geometries = data.atomcoords
+            atoms = data.atomnos
+            # print('vibfreqs:', len(vibfreqs))
+            # print('vibdisps:', vibdisps.shape)
+            # print('geometries:', geometries[-1].shape)
+            # predicted = (3*geometries[-1].shape[0]) - 6
+            # print('3N-6:', (3*geometries[-1].shape[0]) - 6)
+            # print('3N-5:', predicted - 1)
+            # if len(vibfreqs) < predicted:
+            #     print('degeneracy')
+            # else:
+            #     print('no degeneracy')
+            modeindices = find_CO2_mode_indices(start, vibdisps, thresh=args.thresh)
+            freqs = [vibfreqs[i] for i in modeindices]
+            print('Mode indices:')
+            for mi in modeindices:
+                print(mi, end=' ')
+            print('')
+            print('Frequencies:')
+            for f in freqs:
+                print(round(f, 2), end=' ')
+            print('')
 
         print('=' * 78)
 
