@@ -5,15 +5,26 @@ from __future__ import print_function
 import argparse
 import re
 import subprocess as sp
+import sys
 
 
-parser = argparse.ArgumentParser(description='Drink Coffee: Do Stupid Things Faster With More Energy')
-parser.add_argument('-u', dest='username', type=str, metavar='<username>', help='')
+parser = argparse.ArgumentParser(description="Drink Coffee: Do Stupid Things Faster With More Energy")
+parser.add_argument('-u', dest='username', nargs="+", help="""""")
 args = parser.parse_args()
-username = args.username
 
-if username:
-    qstat_cmd = ['qstat', '-u', username]
+usernames = args.username
+
+if usernames:
+    if len(usernames) == 1:
+        # Assume it's the same type of comma-separated string w/o
+        # spaces that one might pass to qstat.
+        # if ',' in usernames:
+        #     qstat_cmd = ['qstat', '-u', ]
+        # else:
+        #     qstat_cmd = ['qstat', '-u', usernames[0]]
+        qstat_cmd = ['qstat', '-u', usernames[0]]
+    else:
+        qstat_cmd = ['qstat', '-u', ','.join(usernames)]
 else:
     qstat_cmd = ['qstat', '-a']
 
@@ -56,6 +67,8 @@ for idx, short_output_line in enumerate(short_output):
             newvalue = ''.join([full_output_line, oldvalue])
             jobinfo[key] = newvalue
 
+    username = jobinfo['euser']
+    group = jobinfo['egroup']
     queue = jobinfo['queue']
     jobname = jobinfo['Job_Name']
     session_id = jobinfo.get('session_id', blank_spot)
@@ -70,6 +83,7 @@ for idx, short_output_line in enumerate(short_output):
     reformatted_lines.append([
         jobid,
         username,
+        group,
         queue,
         jobname,
         session_id,
@@ -80,20 +94,26 @@ for idx, short_output_line in enumerate(short_output):
         status
     ])
 
+# If there aren't any results, terminate gracefully.
+if len(reformatted_lines) == 0:
+    sys.exit()
+
 max_len_jobid = max(len(l[0]) for l in reformatted_lines)
 max_len_username = max(max(len(l[1]) for l in reformatted_lines), len('Username'))
-max_len_queue = max(max(len(l[2]) for l in reformatted_lines), len('Queue'))
-max_len_jobname = max(max(len(l[3]) for l in reformatted_lines), len('Jobname'))
-max_len_session_id = max(max(len(l[4]) for l in reformatted_lines), len('SID'))
-max_len_nodes = max(max(len(l[5]) for l in reformatted_lines), len('Nodes'))
-max_len_tasks = max(max(len(l[6]) for l in reformatted_lines), len('Cores'))
-max_len_reqd_time = max(max(len(l[7]) for l in reformatted_lines), len('Time (R)'))
-max_len_elap_time = max(max(len(l[8]) for l in reformatted_lines), len('Time (E)'))
-max_len_status = max(max(len(l[9]) for l in reformatted_lines), len('S'))
+max_len_group = max(max(len(l[2]) for l in reformatted_lines), len('Group'))
+max_len_queue = max(max(len(l[3]) for l in reformatted_lines), len('Queue'))
+max_len_jobname = max(max(len(l[4]) for l in reformatted_lines), len('Jobname'))
+max_len_session_id = max(max(len(l[5]) for l in reformatted_lines), len('SID'))
+max_len_nodes = max(max(len(l[6]) for l in reformatted_lines), len('Nodes'))
+max_len_tasks = max(max(len(l[7]) for l in reformatted_lines), len('Cores'))
+max_len_reqd_time = max(max(len(l[8]) for l in reformatted_lines), len('Time (R)'))
+max_len_elap_time = max(max(len(l[9]) for l in reformatted_lines), len('Time (E)'))
+max_len_status = max(max(len(l[10]) for l in reformatted_lines), len('S'))
 
-rlt = '{{:{}}} {{:{}}} {{:{}}} {{:{}}} {{:>{}}} {{:>{}}} {{:>{}}} {{:>{}}} {{:>{}}} {{:{}}}'.format(
+rlt = '{{:{}}} {{:{}}} {{:{}}} {{:{}}} {{:{}}} {{:>{}}} {{:>{}}} {{:>{}}} {{:>{}}} {{:>{}}} {{:{}}}'.format(
     max_len_jobid,
     max_len_username,
+    max_len_group,
     max_len_queue,
     max_len_jobname,
     max_len_session_id,
@@ -106,6 +126,7 @@ rlt = '{{:{}}} {{:{}}} {{:{}}} {{:{}}} {{:>{}}} {{:>{}}} {{:>{}}} {{:>{}}} {{:>{
 print(rlt.format(
     'ID',
     'Username',
+    'Group',
     'Queue',
     'Jobname',
     'SID',
@@ -118,6 +139,7 @@ print(rlt.format(
 print(make_spaced_dashes([
     max_len_jobid,
     max_len_username,
+    max_len_group,
     max_len_queue,
     max_len_jobname,
     max_len_session_id,
