@@ -8,7 +8,7 @@ import subprocess as sp
 import sys
 
 
-parser = argparse.ArgumentParser(description="Drink Coffee: Do Stupid Things Faster With More Energy")
+parser = argparse.ArgumentParser()
 parser.add_argument('-u', dest='username', nargs="+", help="""""")
 args = parser.parse_args()
 
@@ -16,12 +16,8 @@ usernames = args.username
 
 if usernames:
     if len(usernames) == 1:
-        # Assume it's the same type of comma-separated string w/o
-        # spaces that one might pass to qstat.
-        # if ',' in usernames:
-        #     qstat_cmd = ['qstat', '-u', ]
-        # else:
-        #     qstat_cmd = ['qstat', '-u', usernames[0]]
+        # This will capture both a single usename and the typical
+        # comma-separated list without spaces.
         qstat_cmd = ['qstat', '-u', usernames[0]]
     else:
         qstat_cmd = ['qstat', '-u', ','.join(usernames)]
@@ -96,7 +92,7 @@ for idx, short_output_line in enumerate(short_output):
 
 # If there aren't any results, terminate gracefully.
 if len(reformatted_lines) == 0:
-    sys.exit()
+    sys.exit(0)
 
 max_len_jobid = max(len(l[0]) for l in reformatted_lines)
 max_len_username = max(max(len(l[1]) for l in reformatted_lines), len('Username'))
