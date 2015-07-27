@@ -58,6 +58,11 @@ def getargs():
                         type=float,
                         default=1.0,
                         help="""If normalizing data, the maximum value.""")
+    parser.add_argument("--columns",
+                        type=int,
+                        nargs='+',
+                        default=None,
+                        help="""""")
 
     args = parser.parse_args()
 
@@ -65,7 +70,7 @@ def getargs():
 
 
 def get_qchem_aimd_data(file_iterator, num_header_lines, num_columns, col_types):
-    """Given a file iterator over a Q-Chem"""
+    """Given a file iterator over a Q-Chem ..."""
 
     fi = file_iterator
 

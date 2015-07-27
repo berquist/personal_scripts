@@ -20,7 +20,7 @@ from cclib.parser import utils
 
 
 def main():
-    """"""
+    """The main routine!"""
 
     parser = argparse.ArgumentParser()
 
