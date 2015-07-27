@@ -24,10 +24,12 @@ color Axes Labels black
 color Display Background white
 color Element C gray
 color Element Cu orange
+color Element Cr orange
+color Element Ni green
+color Element Cl green
 
 # create a new material
-material add copy GlassBubble
-material rename Material22   GlassBubble2
+material add GlassBubble2 copy GlassBubble
 material change ambient      GlassBubble2 0.000000
 material change diffuse      GlassBubble2 1.000000
 material change specular     GlassBubble2 1.000000
@@ -39,7 +41,7 @@ material change transmode    GlassBubble2 1.000000
 """
 
 
-def vmd_covp_load_xyzfile(xyzfilename):
+def vmd_covp_load_xyzfile(xyzfilename, isoval=0.05):
     """A template for reading in an XYZ file as a new molecule and setting
     the default surface isovalues and colors.
     """
@@ -60,10 +62,10 @@ mol addrep 0
 mol addrep 0
 mol addrep 0
 
-mol modstyle 1 0 Isosurface  0.05 0 0 0 1 1
-mol modstyle 2 0 Isosurface -0.05 0 0 0 1 1
-mol modstyle 3 0 Isosurface  0.05 0 0 0 1 1
-mol modstyle 4 0 Isosurface -0.05 0 0 0 1 1
+mol modstyle 1 0 Isosurface  {isoval} 0 0 0 1 1
+mol modstyle 2 0 Isosurface -{isoval} 0 0 0 1 1
+mol modstyle 3 0 Isosurface  {isoval} 0 0 0 1 1
+mol modstyle 4 0 Isosurface -{isoval} 0 0 0 1 1
 
 mol modcolor 1 0 ColorID {color1}
 mol modcolor 2 0 ColorID {color2}
@@ -90,16 +92,16 @@ mol addfile mo.{moidx2}.cube
            moidx2=moidx2)
 
 
-def vmd_covp_pair_render(moidx1, moidx2, vmdidx1, vmdidx2):
+def vmd_covp_pair_render(moidx1, moidx2, vmdidx1, vmdidx2, isoval=0.05):
     """A template for VMD commands to set the isosurface values of a
     single COVP, then render the scene using the internal Tachyon
     renderer.
     """
     return """
-mol modstyle 1 0 Isosurface  0.05 {vmdidx1} 0 0 1 1
-mol modstyle 2 0 Isosurface -0.05 {vmdidx1} 0 0 1 1
-mol modstyle 3 0 Isosurface  0.05 {vmdidx2} 0 0 1 1
-mol modstyle 4 0 Isosurface -0.05 {vmdidx2} 0 0 1 1
+mol modstyle 1 0 Isosurface  {isoval} {vmdidx1} 0 0 1 1
+mol modstyle 2 0 Isosurface -{isoval} {vmdidx1} 0 0 1 1
+mol modstyle 3 0 Isosurface  {isoval} {vmdidx2} 0 0 1 1
+mol modstyle 4 0 Isosurface -{isoval} {vmdidx2} 0 0 1 1
 render TachyonInternal COVP_{moidx1}_{moidx2}.tga
 """.format(moidx1=moidx1,
            moidx2=moidx2,
