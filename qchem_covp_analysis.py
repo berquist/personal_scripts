@@ -166,10 +166,10 @@ def determine_fragment_indices(fragment_1_to_2, fragment_2_to_1, covpenergies, n
         else:
             fragment_indices['map_idx_to_covp'][idx] = '1 -> 2 virt'
 
-    with open('orbital_indices.json', 'w') as orbital_indices_file:
-        json.dump(orb_indices, orbital_indices_file)
-    with open('fragment_indices.json', 'w') as fragment_indices_file:
-        json.dump(fragment_indices, fragment_indices_file)
+    # with open('orbital_indices.json', 'w') as orbital_indices_file:
+    #     json.dump(orb_indices, orbital_indices_file)
+    # with open('fragment_indices.json', 'w') as fragment_indices_file:
+    #     json.dump(fragment_indices, fragment_indices_file)
 
     return fragment_indices
 
