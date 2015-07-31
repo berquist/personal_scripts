@@ -82,7 +82,7 @@ def make_command_block_from_inputs(inputfiles):
     job_commands = []
     for inputfile in inputfiles:
         stub = os.path.splitext(inputfile)[0]
-        job_commands.append(qchem_command_template(ppj=args.ppj,fnamestub=stub))
+        job_commands.append(qchem_command_template(ppj=args.ppj, fnamestub=stub))
     job_commands_section = "\n".join(job_commands)
     return job_commands_section
 
@@ -98,7 +98,8 @@ def main(args):
     jobvars['nodes'] = args.nodes
     jobvars['ppn'] = args.ppn
     jobvars['time'] = args.walltime
-    jobvars['nmpiprocs'] = len(args.inputfile)
+    # jobvars['nmpiprocs'] = len(args.inputfile)
+    jobvars['nmpiprocs'] =  int((args.ppn * args.nodes) / args.ppj)
     jobvars['username'] = os.environ['USER']
     jobvars['jobstrings'] = job_commands_section
     jobvars['batchname'] = args.batchname

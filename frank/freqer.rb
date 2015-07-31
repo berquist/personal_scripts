@@ -1,4 +1,4 @@
-#! /home/kjordan/xis19/usr/bin/ruby
+#!/usr/bin/env ruby
 
 class Array
   def approx_index value
