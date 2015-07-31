@@ -140,7 +140,7 @@ def find_CO2_mode_indices(index, vibdisps, thresh=0.85):
         disp_tot = np.sum(np.abs(mode))
         disp_not_CO2 = disp_tot - disp_CO2
         fraction_CO2 = disp_CO2 / disp_tot
-        print(template(modeidx, disp_CO2, disp_tot, disp_not_CO2, fraction_CO2))
+        # print(template(modeidx, disp_CO2, disp_tot, disp_not_CO2, fraction_CO2))
         if fraction_CO2 >= thresh:
             modelist.append(modeidx)
 
@@ -178,11 +178,10 @@ def main(args):
 
         assert isinstance(start_indices, list)
 
+        vibfreqs = data.vibfreqs
+        vibdisps = data.vibdisps
+
         for start in start_indices:
-            vibfreqs = data.vibfreqs
-            vibdisps = data.vibdisps
-            geometries = data.atomcoords
-            atoms = data.atomnos
             # print('vibfreqs:', len(vibfreqs))
             # print('vibdisps:', vibdisps.shape)
             # print('geometries:', geometries[-1].shape)
