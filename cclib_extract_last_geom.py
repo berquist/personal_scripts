@@ -28,7 +28,13 @@ s = '{:3s} {:15.10f} {:15.10f} {:15.10f}'
 for qmoutfile in qmoutfiles:
 
     job = ccopen(qmoutfile)
-    data = job.parse()
+    try:
+        data = job.parse()
+    # this is to deal with the Q-Chem parser not handling incomplete
+    # SCF cycles properly
+    except StopIteration:
+        print('no output made: StopIteration in {}'.format(qmoutfile))
+        continue
     # pylint: disable=E1101
     last_geometry = data.atomcoords[-1]
     element_list = [pt.element[Z] for Z in data.atomnos]
