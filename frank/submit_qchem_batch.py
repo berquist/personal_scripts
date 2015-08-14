@@ -25,7 +25,7 @@ module load qchem/4.3-trunk.20150505.omp.release
 
 cd ${{PBS_O_WORKDIR}}
 
-mpiexec -np {nmpiprocs} --loadbalance parallel-command-processor <<EOF
+mpiexec -np {nmpiprocs} --loadbalance --bind-to-core parallel-command-processor <<EOF
 {jobstrings}
 EOF
 """.format(**jobvars)
@@ -63,10 +63,6 @@ def getargs():
                         type=int,
                         default=1,
                         help="""The number of nodes to request.""")
-    # parser.add_argument('--nmpiprocs',
-    #                     type=int,
-    #                     default=16,
-    #                     help="""The total number of MPI processes to use.""")
 
     args = parser.parse_args()
 
@@ -98,7 +94,6 @@ def main(args):
     jobvars['nodes'] = args.nodes
     jobvars['ppn'] = args.ppn
     jobvars['time'] = args.walltime
-    # jobvars['nmpiprocs'] = len(args.inputfile)
     jobvars['nmpiprocs'] =  int((args.ppn * args.nodes) / args.ppj)
     jobvars['username'] = os.environ['USER']
     jobvars['jobstrings'] = job_commands_section
