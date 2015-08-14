@@ -30,6 +30,7 @@ def template_input_freq(**rem):
         'xc_grid',
         'mem_static',
         'mem_total',
+        'basis_lin_dep_thresh',
     )
     # Gather all the potential keywords for the new input file.
     rem_pieces = []
@@ -72,9 +73,22 @@ def clean_up_rem(rem):
     return newrem
 
 
-if __name__ == '__main__':
+def getargs():
+    """Get command-line arguments."""
+
     import argparse
-    import os
+
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('inputfilename', nargs='+')
+
+    args = parser.parse_args()
+
+    return args
+
+
+if __name__ == '__main__':
+    import re
     import cclib
     from cclib.parser.utils import PeriodicTable
 
@@ -82,22 +96,14 @@ if __name__ == '__main__':
     # Format string template for the XYZ section.
     s = '{:3s} {:15.10f} {:15.10f} {:15.10f}'
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument('inputfilename', nargs='+')
-
-    args = parser.parse_args()
+    args = getargs()
     inputfilenames = args.inputfilename
 
     for inputfilename in inputfilenames:
 
-        # Ugly munging to determine the name of the file we're
-        # writing.
-        splitext = os.path.splitext(inputfilename)
-        assert splitext[1] == '.out'
-        split = splitext[0].split('_')
-        index = ['opt' in x for x in split].index(True)
-        split[index] = 'freq'
-        outputfilename = '_'.join(split) + '.in'
+        # Determine the name of the file we're writing.
+        assert inputfilename.endswith('.out')
+        outputfilename = re.sub("opt\d*", "freq", inputfilename).replace(".out", ".in")
 
         inputfile = make_file_iterator(inputfilename)
 
@@ -123,7 +129,13 @@ if __name__ == '__main__':
         # rem['charge'], rem['multiplicity'] = map(int, line.split())
 
         job = cclib.parser.ccopen(inputfilename)
-        data = job.parse()
+        try:
+            data = job.parse()
+        # this is to deal with the Q-Chem parser not handling
+        # incomplete SCF cycles properly
+        except StopIteration:
+            print('no output made: StopIteration in {}'.format(inputfilename))
+            continue
 
         rem['charge'] = data.charge
         rem['multiplicity'] = data.mult
