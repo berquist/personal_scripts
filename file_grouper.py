@@ -53,7 +53,7 @@ def main(args):
             os.mkdir(dest, mode=0o755)
         except:
             pass
-        for f in group:
+        for f in (i for i in group if i):
             action(f, dest)
 
     return locals()
