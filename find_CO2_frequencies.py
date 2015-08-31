@@ -78,8 +78,6 @@ def find_CO2_atom_indices(atomnos, atomcoords, bond_CO_min=1.10, bond_CO_max=1.2
     # Find all possible starting indices for each of the sequences.
     sequence_candidates = list(chain.from_iterable([find_all_instances(atomnos, sequence)
                                                     for sequence in sequences]))
-    print("Sequence candidates:")
-    print(sequence_candidates)
     # If no candidates are found, return a bad index.
     if sequence_candidates == []:
         return -1
@@ -100,8 +98,6 @@ def find_CO2_atom_indices(atomnos, atomcoords, bond_CO_min=1.10, bond_CO_max=1.2
         lengths.append(l)
         if len(pair_indices) > 0:
             length_candidates.append(min(pair_indices))
-    # print('lengths: {}'.format(lengths))
-    # print('length candidates: {}'.format(sorted(length_candidates)))
     # Now that we've filtered out by bond length, we don't have any
     # other criteria to filter by. Return the matches.
     return sorted(length_candidates)
@@ -157,14 +153,24 @@ def main(args):
     3. ...
     """
 
+    if args.csv:
+        import csv
+        csvfile = open(args.csv_filename, 'w')
+        csvwriter = csv.writer(csvfile)
+
     print("Using threshold of {} for fraction of normal mode displacement".format(args.thresh))
     filenames = args.filename
     for filename in filenames:
-        job = ccopen(filename)
-        data = job.parse()
 
-        print('=' * 78)
-        print(filename)
+        job = ccopen(filename)
+
+        try:
+            data = job.parse()
+        except StopIteration:
+            print("Couldn't parse {}".format(filename), file=sys.stderr)
+            continue
+
+        # print(filename)
 
         # If from a geometry optimization, always take the last
         # geometry.
@@ -173,13 +179,16 @@ def main(args):
 
         # Find the indices corresponding to the CO2.
         start_indices = find_CO2_atom_indices(atoms, geometries)
-        print("Starting indices:")
-        print(start_indices)
+        # print("Starting indices:", start_indices)
 
         assert isinstance(start_indices, list)
 
-        vibfreqs = data.vibfreqs
-        vibdisps = data.vibdisps
+        try:
+            vibfreqs = data.vibfreqs
+            vibdisps = data.vibdisps
+        except AttributeError:
+            print("Couldn't parse frquencies from {}".format(filename), file=sys.stderr)
+            continue
 
         for start in start_indices:
             # print('vibfreqs:', len(vibfreqs))
@@ -194,24 +203,33 @@ def main(args):
             #     print('no degeneracy')
             modeindices = find_CO2_mode_indices(start, vibdisps, thresh=args.thresh)
             freqs = [vibfreqs[i] for i in modeindices]
-            print('Mode indices:')
-            for mi in modeindices:
-                print(mi, end=' ')
-            print('')
-            print('Frequencies:')
+            # print('Mode indices:')
+            # for mi in modeindices:
+            #     print(mi, end=' ')
+            # print('')
+            # print('Frequencies:')
+            print(filename, end=' ')
             for f in freqs:
                 print(round(f, 2), end=' ')
             print('')
+            if args.csv:
+                if len(freqs) > 0:
+                    row = [filename]
+                    row.extend(['{}'.format(round(f, 2)) for f in freqs])
+                    csvwriter.writerow(row)
 
-        print('=' * 78)
 
 
 if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--thresh', type=float, default=0.50)
+
     parser.add_argument('filename', nargs='+')
+    parser.add_argument('--thresh', type=float, default=0.50)
+    parser.add_argument('--csv', action='store_true')
+    parser.add_argument('--csv-filename', default='frequencies.csv')
+
     args = parser.parse_args()
 
     main(args)
