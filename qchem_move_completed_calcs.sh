@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# move_completed_calcs.sh: Move completed calculations (both inputs
-# and outputs) to the specified folder (second argument).
+# qchem_move_completed_calcs.sh: Move completed calculations (both
+# inputs and outputs) to the specified folder (second argument).
 
 destdir="${2}"
 mkdir -p "${destdir}"

@@ -1,10 +1,7 @@
 #!/usr/bin/env bash
 
-# qchem_move_failed_calcs.sh: Find incomplete or file Q-Chem calculations
-# and move all files related to the calculation to a separate folder.
-
-destdir=incomplete
-mkdir -p "${destdir}"
+# qchem_find_failed_calcs.sh: Find incomplete or file Q-Chem
+# calculations and echo the output names.
 
 outputs=$(find . -type f -name "*.out")
 
@@ -16,7 +13,6 @@ searchstr='Thank you very much for using Q-Chem'
 for output in ${outputs[@]}; do
     count=$(grep -c "${searchstr}" "${output}")
     if [ "${count}" -ne "${count_for_completed}" ]; then
-        stub="${output%.*}"
-        mv -v ${stub}.* "${destdir}"
+        echo "${output}"
     fi
 done
