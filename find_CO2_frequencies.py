@@ -185,6 +185,7 @@ def main(args):
 
         try:
             vibfreqs = data.vibfreqs
+            vibirs = data.vibirs
             vibdisps = data.vibdisps
         except AttributeError:
             print("Couldn't parse frquencies from {}".format(filename), file=sys.stderr)
@@ -202,20 +203,20 @@ def main(args):
             # else:
             #     print('no degeneracy')
             modeindices = find_CO2_mode_indices(start, vibdisps, thresh=args.thresh)
-            freqs = [vibfreqs[i] for i in modeindices]
+            pairs = [(vibfreqs[i], vibirs[i]) for i in modeindices]
             # print('Mode indices:')
             # for mi in modeindices:
             #     print(mi, end=' ')
             # print('')
             # print('Frequencies:')
             print(filename, end=' ')
-            for f in freqs:
-                print(round(f, 2), end=' ')
+            for p in pairs:
+                print('({:.2f}, {:.2f})'.format(*p), end=' ')
             print('')
             if args.csv:
-                if len(freqs) > 0:
+                if len(pairs) > 0:
                     row = [filename]
-                    row.extend(['{}'.format(round(f, 2)) for f in freqs])
+                    row.extend(['{}'.format(round(p[0], 2)) for p in pairs])
                     csvwriter.writerow(row)
 
 
