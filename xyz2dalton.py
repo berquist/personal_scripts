@@ -60,7 +60,6 @@ def main():
     """If used as a script, the main routine."""
 
     import argparse
-    # import os.path
     import sys
 
     parser = argparse.ArgumentParser()
@@ -74,16 +73,13 @@ def main():
 
     for xyzfilename in xyzfilenames:
 
-        # outfilename = ''.join([os.path.splitext(xyzfilename)[0], '.dal'])
-
         if args.convertor == 'openbabel':
             import subprocess as sp
             ob_output = sp.check_output(['obabel', '-ixyz', xyzfilename, '-odalmol']).decode('utf-8')
             ob_splitlines = ob_output.splitlines()
-            # with open(outfilename, 'w') as outfile:
-            #     outfile.write('\n'.join(ob_splitlines))
             print(ob_splitlines)
         elif args.convertor == 'cclib':
+            print("cclib-based converter not implemented yet", file=sys.stderr)
             sys.exit()
         elif args.convertor == 'builtin':
             output = xyz2dalton_from_file(xyzfilename, args.charge)
