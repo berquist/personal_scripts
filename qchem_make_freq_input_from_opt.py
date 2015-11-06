@@ -31,6 +31,10 @@ def template_input_freq(**rem):
         'mem_static',
         'mem_total',
         'basis_lin_dep_thresh',
+        'symmetry',
+        'cc_symmetry',
+        'sym_ignore',
+        'n_frozen_core',
     )
     # Gather all the potential keywords for the new input file.
     rem_pieces = []
