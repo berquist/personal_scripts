@@ -58,7 +58,7 @@ def template_pbsfile_dalton(inpfile, ppn, time, queue, parimpl, extrafiles):
         module = 'dalton/2015-i2013.0-mkl-omp'
     else:
         raise
-    return """#!/usr/bin/env bash
+    return '''#!/usr/bin/env bash
 
 #PBS -N {inpfile}
 #PBS -q {queue}
@@ -71,18 +71,18 @@ def template_pbsfile_dalton(inpfile, ppn, time, queue, parimpl, extrafiles):
 module purge
 module load {module}
 
-cp $PBS_O_WORKDIR/{inpfile}.dal $LOCAL
-{extrafiles}cd $LOCAL
+cp ${{PBS_O_WORKDIR}}/{inpfile}.dal ${{LOCAL}}
+{extrafiles}cd ${{LOCAL}}
 
 run_on_exit() {{
     set -v
-    cp -R $LOCAL/dalton/DALTON_scratch_{username}/* $PBS_O_WORKDIR
+    cp -v -R ${{LOCAL}}/* ${{PBS_O_WORKDIR}}
 }}
 
 trap run_on_exit EXIT
 
-`which dalton` {parflag} {ppn} {inpfile}.dal
-""".format(inpfile=inpfile,
+$(which dalton) {parflag} {ppn} {inpfile}.dal
+'''.format(inpfile=inpfile,
            ppn=ppn,
            time=time,
            queue=queue,
