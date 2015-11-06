@@ -8,6 +8,10 @@ import os.path
 def template_pbsfile_batch(**jobvars):
     """The template for a PBS jobfile ..."""
 
+    jobvars['module'] = 'qchem/4.3-trunk.20150505.omp.release'
+    if jobvars['_new']:
+        jobvars['module'] = 'qchem/4.3-trunk.20151005.omp.release'
+
     return """#!/usr/bin/env bash
 
 #PBS -N {batchname}
@@ -21,7 +25,7 @@ def template_pbsfile_batch(**jobvars):
 module purge
 module load pbstools
 module load openmpi/1.6.3-intel13
-module load qchem/4.3-trunk.20150505.omp.release
+module load {module}
 
 cd ${{PBS_O_WORKDIR}}
 
@@ -63,6 +67,9 @@ def getargs():
                         type=int,
                         default=1,
                         help="""The number of nodes to request.""")
+    parser.add_argument("--new",
+                        action="store_true",
+                        help="""Use a newer version of Q-Chem.""")
 
     args = parser.parse_args()
 
@@ -98,6 +105,7 @@ def main(args):
     jobvars['username'] = os.environ['USER']
     jobvars['jobstrings'] = job_commands_section
     jobvars['batchname'] = args.batchname
+    jobvars['_new'] = args.new
 
     with open("{0}.pbs".format(args.batchname), "w") as pbsfile:
         pbsfile.write(template_pbsfile_batch(**jobvars))
