@@ -6,7 +6,7 @@
 destdir="${2}"
 mkdir -p "${destdir}"
 
-outputs=$(find . -type f -name "*.out")
+outputs=$(find . -maxdepth 1 -type f -name "*.out")
 
 # This is how many times the search string needs to show up for a
 # calculation to be considered "completed".
