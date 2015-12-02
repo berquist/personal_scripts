@@ -3,7 +3,7 @@
 # extract_CO2.sh: Extract the CO2 from a "cluster" XYZ file and form a
 # new Q-Chem input file using it in place of the cluster.
 
-xyzfiles=$(ls CO2_BMIM*freq*.xyz)
+xyzfiles=$(ls CO2_BMIM*.xyz)
 
 for xyzfile in ${xyzfiles[@]}; do
 
