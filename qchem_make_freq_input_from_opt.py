@@ -116,8 +116,13 @@ if __name__ == '__main__':
         # Parse the $rem section in the repeated 'User input:' section
         # of the output.
         line = ''
-        while line.strip() != '$rem':
-            line = next(inputfile)
+        try:
+            while line.strip() != '$rem':
+                line = next(inputfile)
+        # Not sure yet why we'd hit this...
+        except StopIteration:
+            print('trouble parsing $rem: StopIteration in {}'.format(inputfilename))
+            continue
         line = next(inputfile)
         while '$end' not in line:
             sline = line.split()
