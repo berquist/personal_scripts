@@ -33,13 +33,15 @@ if __name__ == '__main__':
         queue = jobinfo['queue']
         jobname = jobinfo['Job_Name']
         session_id = jobinfo.get('session_id', blank_spot)
-        nodes = jobinfo['Resource_List.nodect']
+        nodes = int(jobinfo['Resource_List.nodect'])
         # tasks = short_output_line_chomp[6]
-        tasks = jobinfo['Resource_List.nodes'].split('=')[-1]
+        tasks = int(jobinfo['Resource_List.nodes'].split('=')[-1]) * nodes
         reqd_mem = jobinfo.get('Resource_List.pmem', blank_spot)
         reqd_time = jobinfo['Resource_List.walltime']
         status = jobinfo['job_state']
         elap_time = jobinfo.get('resources_used.walltime', blank_spot)
+
+        nodes, tasks = str(nodes), str(tasks)
 
         reformatted_lines.append([
             jobid,
