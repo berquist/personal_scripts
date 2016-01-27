@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 
-# qchem_move_failed_calcs.sh: Find incomplete or file Q-Chem calculations
-# and move all files related to the calculation to a separate folder.
+# qchem_move_failed_calcs.sh: Find incomplete or failed Q-Chem
+# calculations and move all files related to the calculation to a
+# separate folder.
 
 destdir=incomplete
 mkdir -p "${destdir}"
 
+# assume everything is an Q-Chem output!
 outputs=$(find . -maxdepth 1 -type f -name "*.out")
 
 # This is how many times the search string needs to show up for a
