@@ -2,6 +2,8 @@
 
 from __future__ import print_function
 
+import sys
+
 import subprocess as sp
 
 import re
@@ -16,6 +18,10 @@ def getargs():
 
     parser.add_argument('-u',
                         dest='username',
+                        nargs='+',
+                        help="""""")
+
+    parser.add_argument('--ids',
                         nargs='+',
                         help="""""")
 
@@ -68,6 +74,7 @@ def get_qstat_short_output(usernames=None, ids=None):
     elif ids:
         qstat_cmd = ['qstat', '-a', ' '.join(ids)]
     else:
+        print('Warning: grabbing all jobs!', file=sys.stderr)
         qstat_cmd = ['qstat', '-a']
 
     short_output = sp.check_output(qstat_cmd).decode('utf-8').splitlines()

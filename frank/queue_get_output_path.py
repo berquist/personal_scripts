@@ -14,7 +14,7 @@ if __name__ == '__main__':
 
     args = getargs()
 
-    short_output = get_qstat_short_output(args.username)
+    short_output = get_qstat_short_output(None, args.ids)
     full_outputs = get_qstat_full_outputs(short_output)
     jobinfos = [parse_qstat_full_output(full_output)
                 for full_output in full_outputs]
