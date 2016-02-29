@@ -14,20 +14,21 @@ from cclib.parser import ccopen
 
 def print_dispatch(outputfile):
     job = ccopen(outputfile)
-    if isinstance(job, cclib.parser.orcaparser.ORCA):
-        print_epr_orca(outputfile)
-    elif isinstance(job, cclib.parser.daltonparser.DALTON):
-        print_epr_dalton(outputfile)
-    elif isinstance(job, cclib.parser.qchemparser.QChem):
-        print_epr_qchem(outputfile)
-    elif isinstance(job, cclib.parser.adfparser.ADF):
-        print_epr_adf(outputfile)
-    else:
-        pass
-    return
+    program_types = (
+        (cclib.parser.adfparser.ADF, print_epr_adf),
+        (cclib.parser.daltonparser.DALTON, print_epr_dalton),
+        (cclib.parser.orcaparser.ORCA, print_epr_orca),
+        (cclib.parser.qchemparser.QChem, print_epr_qchem),
+    )
+    for (program_type, print_function) in program_types:
+        if isinstance(job, program_type):
+            d = print_function(outputfile)
+    return d
 
 
 def print_epr_orca(outputfile):
+
+    d = dict()
 
     # -------------------
     # ELECTRONIC G-MATRIX
@@ -111,10 +112,12 @@ def print_epr_orca(outputfile):
 
                 break
 
-    return
+    return d
 
 
 def print_epr_dalton(outputfile):
+
+    d = dict()
 
     with open(outputfile) as fh:
         for line in fh:
@@ -128,12 +131,12 @@ def print_epr_dalton(outputfile):
                 for _ in range(3):
                     line = next(fh)
 
-                g_rmc_ppm = float(next(fh).split()[2])
-                g_gc_1_ppm = dalton_parse_line(next(fh).split()[2:])
-                g_gc_2_ppm = dalton_parse_line(next(fh).split()[2:])
-                g_oz_soc_1_ppm = dalton_parse_line(next(fh).split()[2:])
-                g_oz_soc_2_ppm = dalton_parse_line(next(fh).split()[2:])
-                g_tot_ppm = dalton_parse_line(next(fh).split()[2:])
+                g_rmc_ppm = float(next(fh)[9:16])
+                g_gc_1_ppm = dalton_parse_line(next(fh))
+                g_gc_2_ppm = dalton_parse_line(next(fh))
+                g_oz_soc_1_ppm = dalton_parse_line(next(fh))
+                g_oz_soc_2_ppm = dalton_parse_line(next(fh))
+                g_tot_ppm = dalton_parse_line(next(fh))
 
                 g_sum_ppm = g_rmc_ppm*np.eye(3) + g_gc_1_ppm + g_gc_2_ppm + g_oz_soc_1_ppm + g_oz_soc_2_ppm
                 # This allows for 1 ppm error in every position.
@@ -170,15 +173,16 @@ def print_epr_dalton(outputfile):
 
                 break
 
-    return
+    return d
 
 
 def dalton_parse_line(line):
     """Unpack a '@G' line from a DALTON output into a matrix."""
 
-    xx, yy, zz = line[0], line[1], line[2]
-    xy, yx, xz = line[3], line[4], line[5]
-    zx, yz, zy = line[6], line[7], line[8]
+    # each field is 7 characters long
+    xx, yy, zz =  line[9:16], line[16:23], line[23:30]
+    xy, yx, xz = line[30:37], line[37:44], line[44:51]
+    zx, yz, zy = line[51:58], line[58:65], line[65:72]
 
     arr = np.array([[xx, xy, xz],
                     [yx, yy, yz],
@@ -195,6 +199,8 @@ def g_eigvals(g_matrix):
 
 def print_epr_qchem(outputfile):
     """"""
+
+    d = dict()
 
     with open(outputfile) as fh:
         for line in fh:
@@ -279,11 +285,13 @@ def print_epr_qchem(outputfile):
         print('\delta g^{OZ/SOC(2e)} :', return_eigval_string(g_oz_soc_2_eigvals_abs))
         print('\delta g              :', return_eigval_string(g_tot_eigvals_abs))
 
-    return
+    return d
 
 
 def print_epr_adf(outputfilename):
     """Rewrite me?"""
+
+    d = dict()
 
     for line in outputfile:
         # matches if we are doing a perturbative SO calculation
@@ -308,7 +316,7 @@ def print_epr_adf(outputfilename):
             print(' full: {:>11.3f} {:>11.3f} {:>11.3f}'.format(*gprin_full))
             break
 
-    return
+    return d
 
 
 def print_matrix_abs(matrix):
@@ -357,4 +365,4 @@ if __name__ == '__main__':
 
     for outputfile in args.outputfile:
         print(outputfile)
-        print_dispatch(outputfile)
+        d = print_dispatch(outputfile)
