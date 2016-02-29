@@ -18,6 +18,7 @@ from cclib.parser.utils import PeriodicTable
 parser = argparse.ArgumentParser()
 parser.add_argument('qmoutfiles', nargs='+')
 parser.add_argument('--suffix')
+parser.add_argument('--fragment', action='store_true')
 args = parser.parse_args()
 qmoutfiles = args.qmoutfiles
 suffix = args.suffix
@@ -31,10 +32,8 @@ for qmoutfile in qmoutfiles:
     job = ccopen(qmoutfile)
     try:
         data = job.parse()
-    # this is to deal with the Q-Chem parser not handling incomplete
-    # SCF cycles properly
-    except StopIteration:
-        print('no output made: StopIteration in {}'.format(qmoutfile))
+    except Exception as e:
+        print('no output made: {} in {}'.format(e, qmoutfile))
         continue
     # pylint: disable=E1101
     last_geometry = data.atomcoords[-1]
@@ -54,51 +53,52 @@ for qmoutfile in qmoutfiles:
             xyzfile.write(s.format(atom, *atomcoords) + '\n')
         print(xyzfilename)
 
-    # If this is from a Q-Chem fragment calculation, print a single
-    # fragment "XYZ" file as well.
-    if isinstance(job, cclib.parser.qchemparser.QChem):
-        with open(qmoutfile) as fh:
-            charges = []
-            multiplicities = []
-            start_indices = []
-            line = ''
-            while '$molecule' not in line:
+    if args.fragment:
+        # If this is from a Q-Chem fragment calculation, print a single
+        # fragment "XYZ" file as well.
+        if isinstance(job, cclib.parser.qchemparser.QChem):
+            with open(qmoutfile) as fh:
+                charges = []
+                multiplicities = []
+                start_indices = []
+                line = ''
+                while '$molecule' not in line:
+                    line = next(fh)
                 line = next(fh)
-            line = next(fh)
-            sys_charge, sys_multiplicity = line.split()
-            counter = -1
-            # Gather the charges, spin multiplicities, and starting
-            # positions of each fragment.
-            while '$end' not in line:
-                if '--' in line:
-                    line = next(fh)
-                    charge, multiplicity = line.split()
-                    charges.append(charge)
-                    multiplicities.append(multiplicity)
-                    start_indices.append(counter)
-                    line = next(fh)
-                else:
-                    counter += 1
-                    line = next(fh)
-        assert len(charges) == len(multiplicities) == len(start_indices)
-        if suffix:
-            fragxyzfilename = ''.join([stub, '.', suffix, '.xyz_frag'])
-        else:
-            fragxyzfilename = ''.join([stub, '.xyz_frag'])
-        with open(fragxyzfilename, 'w') as fh:
-            t = '{:3} {:15.10f} {:15.10f} {:15.10f}'.format
-            blocks = []
-            blocks.append('{} {}'.format(sys_charge, sys_multiplicity))
-            from itertools import count
-            for (charge, multiplicity, idx_iter) in zip(charges, multiplicities, count(0)):
-                blocks.append('--')
-                blocks.append('{} {}'.format(charge, multiplicity))
-                idx_start = start_indices[idx_iter]
-                try:
-                    idx_end = start_indices[idx_iter + 1]
-                except IndexError:
-                    idx_end = len(element_list)
-                for atomsym, atomcoords in zip(element_list[idx_start:idx_end], last_geometry[idx_start:idx_end]):
-                    blocks.append(t(atomsym, *atomcoords))
-            fh.write('\n'.join(blocks))
-            print(fragxyzfilename)
+                sys_charge, sys_multiplicity = line.split()
+                counter = -1
+                # Gather the charges, spin multiplicities, and starting
+                # positions of each fragment.
+                while '$end' not in line:
+                    if '--' in line:
+                        line = next(fh)
+                        charge, multiplicity = line.split()
+                        charges.append(charge)
+                        multiplicities.append(multiplicity)
+                        start_indices.append(counter)
+                        line = next(fh)
+                    else:
+                        counter += 1
+                        line = next(fh)
+            assert len(charges) == len(multiplicities) == len(start_indices)
+            if suffix:
+                fragxyzfilename = ''.join([stub, '.', suffix, '.xyz_frag'])
+            else:
+                fragxyzfilename = ''.join([stub, '.xyz_frag'])
+            with open(fragxyzfilename, 'w') as fh:
+                t = '{:3} {:15.10f} {:15.10f} {:15.10f}'.format
+                blocks = []
+                blocks.append('{} {}'.format(sys_charge, sys_multiplicity))
+                from itertools import count
+                for (charge, multiplicity, idx_iter) in zip(charges, multiplicities, count(0)):
+                    blocks.append('--')
+                    blocks.append('{} {}'.format(charge, multiplicity))
+                    idx_start = start_indices[idx_iter]
+                    try:
+                        idx_end = start_indices[idx_iter + 1]
+                    except IndexError:
+                        idx_end = len(element_list)
+                    for atomsym, atomcoords in zip(element_list[idx_start:idx_end], last_geometry[idx_start:idx_end]):
+                        blocks.append(t(atomsym, *atomcoords))
+                fh.write('\n'.join(blocks))
+                print(fragxyzfilename)
