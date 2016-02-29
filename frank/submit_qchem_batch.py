@@ -29,7 +29,7 @@ module load {module}
 
 cd ${{PBS_O_WORKDIR}}
 
-mpiexec -np {nmpiprocs} --loadbalance --bind-to-core parallel-command-processor <<EOF
+mpiexec -np {nmpiprocs} --loadbalance parallel-command-processor <<EOF
 {jobstrings}
 EOF
 """.format(**jobvars)
