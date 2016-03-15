@@ -1,45 +1,34 @@
 #!/usr/bin/env python
 
+"""qchem_make_freq_input_from_opt.py: Make an input file for a Q-Chem
+frequency calculation based on the last possible geometry from a
+Q-Chem geometry optimization.
+
+The script assumes the output file being read from is called
+'*opt(\d*).out', where 'opt' might be followed by a number. The script
+will write an input file called '*freq.in'.
+"""
+
 from __future__ import print_function
+
+import re
+
+import cclib
+from cclib.parser.utils import PeriodicTable
 
 from copy import deepcopy
 
-
-def make_file_iterator(filename):
-    """Return an iterator over the contents of the given file name."""
-    # pylint: disable=C0103
-    with open(filename) as f:
-        contents = f.read()
-    return iter(contents.splitlines())
+from qchem_make_opt_input_from_opt import make_file_iterator
 
 
 def template_input_freq(**rem):
     """The template for a input file that performs a frequency calculation."""
-    # If any of these keywords are present in the rem we've passed in,
-    # add them to the new input file.
-    desired_keywords = (
-        'method',
-        'exchange',
-        'correlation',
-        'basis',
-        'aux_basis',
-        'scf_convergence',
-        'scf_guess',
-        'scf_algorithm',
-        'thresh',
-        'xc_grid',
-        'mem_static',
-        'mem_total',
-        'basis_lin_dep_thresh',
-        'symmetry',
-        'cc_symmetry',
-        'sym_ignore',
-        'n_frozen_core',
+    avoid_these_keywords = (
+        'jobtype',
     )
-    # Gather all the potential keywords for the new input file.
     rem_pieces = []
-    for k in desired_keywords:
-        if k in rem:
+    for k in rem:
+        if k not in avoid_these_keywords:
             rem_pieces.append(' {} = {}'.format(k, rem[k]))
     rem_str = '\n'.join(rem_pieces)
     # Return a string, which is the contents of the new input file,
@@ -84,67 +73,61 @@ def getargs():
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('inputfilename', nargs='+')
+    parser.add_argument('outputfilename', nargs='+')
 
     args = parser.parse_args()
 
     return args
 
 
+def parse_rem_section(outputfilename):
+    """Parse the $rem section in the repeated 'User input:' section of the
+    output.
+    """
+
+    outputfile = make_file_iterator(outputfilename)
+
+    rem = dict()
+
+    line = ''
+    while line.strip().lower() != '$rem':
+        line = next(outputfile)
+    line = next(outputfile)
+    while '$end' not in line:
+        sline = line.split()
+        k = sline[0].replace('=', '').lower()
+        v = sline[-1].replace('=', '').lower()
+        rem[k] = v
+        line = next(outputfile)
+
+    return rem
+
+
 if __name__ == '__main__':
-    import re
-    import cclib
-    from cclib.parser.utils import PeriodicTable
+
+    args = getargs()
 
     pt = PeriodicTable()
     # Format string template for the XYZ section.
     s = '{:3s} {:15.10f} {:15.10f} {:15.10f}'
 
-    args = getargs()
-    inputfilenames = args.inputfilename
+    for outputfilename in args.outputfilenames:
 
-    for inputfilename in inputfilenames:
-
-        # Determine the name of the file we're writing.
-        assert inputfilename.endswith('.out')
-        outputfilename = re.sub("opt\d*", "freq", inputfilename).replace(".out", ".in")
-
-        inputfile = make_file_iterator(inputfilename)
-
-        rem = dict()
-
-        # Parse the $rem section in the repeated 'User input:' section
-        # of the output.
-        line = ''
-        try:
-            while line.strip() != '$rem':
-                line = next(inputfile)
-        # Not sure yet why we'd hit this...
-        except StopIteration:
-            print('trouble parsing $rem: StopIteration in {}'.format(inputfilename))
-            continue
-        line = next(inputfile)
-        while '$end' not in line:
-            sline = line.split()
-            k = sline[0].replace('=', '')
-            v = sline[-1].replace('=', '')
-            rem[k] = v
-            line = next(inputfile)
-
-        # Just use cclib to get the charge and multiplicity.
-        # while '$molecule' not in line:
-        #     line = next(inputfile)
-        # line = next(inputfile)
-        # rem['charge'], rem['multiplicity'] = map(int, line.split())
-
-        job = cclib.parser.ccopen(inputfilename)
+        job = cclib.parser.ccopen(outputfilename)
+        assert isinstance(job, cclib.parser.qchemparser.QChem)
         try:
             data = job.parse()
         # this is to deal with the Q-Chem parser not handling
         # incomplete SCF cycles properly
         except StopIteration:
-            print('no output made: StopIteration in {}'.format(inputfilename))
+            print('no output made: StopIteration in {}'.format(outputfilename))
             continue
+
+        # Determine the name of the file we're writing.
+        assert inputfilename.endswith('.out')
+        inputfilename = re.sub(r'opt\d*', 'freq', outputfilename).replace('.out', '.in')
+
+        rem = parse_rem_section(outputfilename)
 
         rem['charge'] = data.charge
         rem['multiplicity'] = data.mult
@@ -160,7 +143,7 @@ if __name__ == '__main__':
         rem['atoms'] = '\n'.join(s.format(element, *coords)
                                  for element, coords in zip(element_list, last_geometry))
 
-        with open(outputfilename, 'w') as outputfile:
-            outputfile.write(template_input_freq(**rem))
+        with open(inputfilename, 'w') as inputfile:
+            inputfile.write(template_input_freq(**rem))
 
-        print(outputfilename)
+        print(inputfilename)
