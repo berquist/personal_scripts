@@ -23,7 +23,7 @@ def template_pbsfile_psi4(inpfile, ppn, time, queue, extrafiles, python=False):
     module = 'psi4/2016-03-03'
     if python:
         module = 'python/anaconda2'
-    return """#!/usr/bin/env bash
+    return """#!/bin/bash
 
 #PBS -N {inpfile}
 #PBS -q {queue}
@@ -46,7 +46,7 @@ run_on_exit() {{
 
 trap run_on_exit EXIT
 
-psi4 -n {ppn} {inpfile}.in
+psi4 -n {ppn} {inpfile}.in $PBS_O_WORKDIR/{inpfile}.out
 """.format(inpfile=inpfile,
            ppn=ppn,
            time=time,
@@ -89,6 +89,7 @@ if __name__ == "__main__":
                                             args.ppn,
                                             args.time,
                                             args.queue,
-                                            args.extrafiles))
+                                            args.extrafiles,
+                                            args.python))
 
     print(pbsfilename)
