@@ -32,9 +32,12 @@ def getargs():
 
     import argparse
 
+    # pylint: disable=C0103
     parser = argparse.ArgumentParser()
 
     parser.add_argument('outputfilename', nargs='+')
+
+    parser.add_argument('--fragment', action='store_true')
 
     args = parser.parse_args()
 
@@ -74,13 +77,76 @@ def parse_user_input(outputfilename):
     return user_input
 
 
+def parse_fragments_from_molecule(molecule):
+    """Given a $molecule section (without the $ lines), identify the
+    charges and multiplicities of each fragment and the zero-based indices
+    for the starting atom of each fragment.
+    """
+
+    charges = []
+    multiplicities = []
+    start_indices = []
+    it = iter(molecule.splitlines())
+    line = next(it)
+    # sys_charge, sys_multiplicity = line.split()
+    counter = 0
+    # Gather the charges, spin multiplicities, and starting positions
+    # of each fragment.
+    for line in it:
+        if '--' in line:
+            line = next(it)
+            charge, multiplicity = line.split()
+            charges.append(charge)
+            multiplicities.append(multiplicity)
+            start_indices.append(counter)
+        else:
+            counter += 1
+    assert len(charges) == len(multiplicities) == len(start_indices)
+
+    return charges, multiplicities, start_indices
+
+
+def form_molecule_section_from_fragments(elements, geometry, charges, multiplicities, start_indices):
+    """"""
+
+    assert len(charges) == len(multiplicities) == (len(start_indices) + 1)
+
+    s = '{:3s} {:15.10f} {:15.10f} {:15.10f}'
+    molecule_section = ['{} {}'.format(charges[0], multiplicities[0])]
+
+    from itertools import count
+    for (charge, multiplicity, idx_iter) in zip(charges[1:], multiplicities[1:], count(0)):
+        molecule_section.append('--')
+        molecule_section.append('{} {}'.format(charge, multiplicity))
+        idx_start = start_indices[idx_iter]
+        try:
+            idx_end = start_indices[idx_iter + 1]
+        except IndexError:
+            idx_end = len(elements)
+        for element, coords in zip(elements[idx_start:idx_end], geometry[idx_start:idx_end]):
+            molecule_section.append(s.format(element, *coords))
+
+    return molecule_section
+
+
+def form_molecule_section(elements, geometry, charge, multiplicity):
+    """"""
+
+    s = '{:3s} {:15.10f} {:15.10f} {:15.10f}'
+    molecule_section = ['{} {}'.format(charge, multiplicity)]
+
+    for element, coords, in zip(elements, geometry):
+        molecule_section.append(s.format(element, *coords))
+
+    return molecule_section
+
+
+
 if __name__ == '__main__':
 
     args = getargs()
 
     pt = PeriodicTable()
-    # Format string template for the XYZ section.
-    s = '{:3s} {:15.10f} {:15.10f} {:15.10f}'
 
     for outputfilename in args.outputfilename:
 
@@ -107,11 +173,15 @@ if __name__ == '__main__':
 
         # Form the atomic symbols and coordinates for each atom in
         # $molecule.
-        element_list = (pt.element[Z] for Z in data.atomnos)
+        element_list = [pt.element[Z] for Z in data.atomnos]
         last_geometry = data.atomcoords[-1]
-        molecule_section = ['{} {}'.format(data.charge, data.mult)]
-        for element, coords, in zip(element_list, last_geometry):
-            molecule_section.append(s.format(element, *coords))
+        if args.fragment:
+            charges, multiplicities, start_indices = parse_fragments_from_molecule(user_input['molecule'])
+            charges.insert(0, data.charge)
+            multiplicities.insert(0, data.mult)
+            molecule_section = form_molecule_section_from_fragments(element_list, last_geometry, charges, multiplicities, start_indices)
+        else:
+            molecule_section = form_molecule_section(element_list, last_geometry, data.charge, data.mult)
         user_input['molecule'] = '\n'.join(molecule_section)
 
         with open(inputfilename, 'w') as fh:

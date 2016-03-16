@@ -18,18 +18,20 @@ from cclib.parser.utils import PeriodicTable
 
 from copy import deepcopy
 
-from qchem_make_opt_input_from_opt import make_file_iterator
+from qchem_make_opt_input_from_opt import \
+    (form_molecule_section, form_molecule_section_from_fragments,
+     make_file_iterator, parse_user_input, parse_fragments_from_molecule)
 
 
-def template_input_freq(**rem):
+def template_input_freq(molecule, **rem_keywords):
     """The template for a input file that performs a frequency calculation."""
     avoid_these_keywords = (
         'jobtype',
     )
     rem_pieces = []
-    for k in rem:
+    for k in rem_keywords:
         if k not in avoid_these_keywords:
-            rem_pieces.append(' {} = {}'.format(k, rem[k]))
+            rem_pieces.append(' {} = {}'.format(k, rem_keywords[k]))
     rem_str = '\n'.join(rem_pieces)
     # Return a string, which is the contents of the new input file,
     # with the '{}' fields appropriately replaced.
@@ -39,10 +41,9 @@ def template_input_freq(**rem):
 $end
 
 $molecule
-{charge} {multiplicity}
-{atoms}
+{molecule}
 $end
-""".format(rem_str=rem_str, **rem)
+""".format(rem_str=rem_str, molecule=molecule)
 
 
 def clean_up_rem(rem):
@@ -71,9 +72,12 @@ def getargs():
 
     import argparse
 
+    # pylint: disable=C0103
     parser = argparse.ArgumentParser()
 
     parser.add_argument('outputfilename', nargs='+')
+
+    parser.add_argument('--fragment', action='store_true')
 
     args = parser.parse_args()
 
@@ -111,7 +115,7 @@ if __name__ == '__main__':
     # Format string template for the XYZ section.
     s = '{:3s} {:15.10f} {:15.10f} {:15.10f}'
 
-    for outputfilename in args.outputfilenames:
+    for outputfilename in args.outputfilename:
 
         job = cclib.parser.ccopen(outputfilename)
         assert isinstance(job, cclib.parser.qchemparser.QChem)
@@ -124,26 +128,31 @@ if __name__ == '__main__':
             continue
 
         # Determine the name of the file we're writing.
-        assert inputfilename.endswith('.out')
+        assert outputfilename.endswith('.out')
         inputfilename = re.sub(r'opt\d*', 'freq', outputfilename).replace('.out', '.in')
 
         rem = parse_rem_section(outputfilename)
-
-        rem['charge'] = data.charge
-        rem['multiplicity'] = data.mult
 
         # Make sure our $rem section is up to snuff for frequency
         # calculations.
         rem = clean_up_rem(rem)
 
+        user_input = parse_user_input(outputfilename)
+
         # Form the atomic symbols and coordinates for each atom in
         # $molecule.
-        last_geometry = data.atomcoords[-1]
         element_list = [pt.element[Z] for Z in data.atomnos]
-        rem['atoms'] = '\n'.join(s.format(element, *coords)
-                                 for element, coords in zip(element_list, last_geometry))
+        last_geometry = data.atomcoords[-1]
+        if args.fragment:
+            charges, multiplicities, start_indices = parse_fragments_from_molecule(user_input['molecule'])
+            charges.insert(0, data.charge)
+            multiplicities.insert(0, data.mult)
+            molecule_section = form_molecule_section_from_fragments(element_list, last_geometry, charges, multiplicities, start_indices)
+        else:
+            molecule_section = form_molecule_section(element_list, last_geometry, data.charge, data.mult)
+        molecule = '\n'.join(molecule_section)
 
         with open(inputfilename, 'w') as inputfile:
-            inputfile.write(template_input_freq(**rem))
+            inputfile.write(template_input_freq(molecule, **rem))
 
         print(inputfilename)
