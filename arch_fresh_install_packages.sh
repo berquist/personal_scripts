@@ -76,6 +76,7 @@ packages=(
     ack
     colordiff
     lesspipe
+    dos2unix
 
     # fonts
     ttf-inconsolata
@@ -171,6 +172,8 @@ packages=(
     python-sh
     python2-sh
     pygmentize
+    python-pycuda
+    python2-pycuda
 
     # editors
     emacs
