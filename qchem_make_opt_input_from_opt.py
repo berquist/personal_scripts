@@ -14,6 +14,9 @@ number incremented by one.
 from __future__ import print_function
 
 import re
+import os.path
+
+from collections import OrderedDict
 
 import cclib
 from cclib.parser.utils import PeriodicTable
@@ -107,11 +110,18 @@ def parse_fragments_from_molecule(molecule):
 
 
 def form_molecule_section_from_fragments(elements, geometry, charges, multiplicities, start_indices):
-    """"""
+    """Form the Q-Chem $molecule section containing the charge,
+    multiplicity, and atomic symbols and coordinates for multiple
+    fragments.
+
+    Returns a list that will need to be joined with newlines.
+    """
 
     assert len(charges) == len(multiplicities) == (len(start_indices) + 1)
 
     s = '{:3s} {:15.10f} {:15.10f} {:15.10f}'
+    # The first elements of the charge and multiplicity lists are for
+    # the supersystem (whole molecule).
     molecule_section = ['{} {}'.format(charges[0], multiplicities[0])]
 
     from itertools import count
@@ -130,7 +140,11 @@ def form_molecule_section_from_fragments(elements, geometry, charges, multiplici
 
 
 def form_molecule_section(elements, geometry, charge, multiplicity):
-    """"""
+    """Form the Q-Chem $molecule section containing the charge,
+    multiplicity, and atomic symbols and coordinates.
+
+    Returns a list that will need to be joined with newlines.
+    """
 
     s = '{:3s} {:15.10f} {:15.10f} {:15.10f}'
     molecule_section = ['{} {}'.format(charge, multiplicity)]
@@ -167,7 +181,9 @@ if __name__ == '__main__':
             optnum = 2
         else:
             optnum = int(numstr) + 1
-        inputfilename = re.sub(r'opt\d*', 'opt{}'.format(optnum), outputfilename).replace('.out', '.in')
+        inputfilename = re.sub(r'opt\d*', 'opt{}'.format(optnum), outputfilename)
+        inputfilename = inputfilename.replace('.out', '.in')
+        inputfilename = os.path.basename(inputfilename)
 
         user_input = parse_user_input(outputfilename)
 

@@ -12,11 +12,13 @@ will write an input file called '*freq.in'.
 from __future__ import print_function
 
 import re
+import os.path
+
+from collections import OrderedDict
+from copy import deepcopy
 
 import cclib
 from cclib.parser.utils import PeriodicTable
-
-from copy import deepcopy
 
 from qchem_make_opt_input_from_opt import \
     (form_molecule_section, form_molecule_section_from_fragments,
@@ -46,7 +48,7 @@ $end
 """.format(rem_str=rem_str, molecule=molecule)
 
 
-def clean_up_rem(rem):
+def clean_up_rem(rem, do_fragment=False):
     """Make sure our $rem section is stringent enough for frequency
     calculations.
     """
@@ -57,12 +59,30 @@ def clean_up_rem(rem):
     min_thresh = 12
 
     newrem = deepcopy(rem)
+
     if 'thresh' in newrem:
         if int(newrem['thresh']) < min_thresh:
             newrem['thresh'] = min_thresh
     if 'scf_convergence' in newrem:
         if int(newrem['scf_convergence']) < min_scf_convergence:
             newrem['scf_convergence'] = min_scf_convergence
+
+    # If doing a no charge transfer fragment calculation, we can't use
+    # analytic Hessians, so switch to numerical ones.
+    if do_fragment:
+        if 'frgm_lpcorr' in newrem:
+            if int(newrem['frgm_lpcorr']) == 0:
+                newrem['ideriv'] = 1
+    # If we aren't doing a fragment calculation at all, certain
+    # keywords need to be removed.
+    else:
+        keywords_to_remove = (
+            'frgm_method',
+            'frgm_lpcorr',
+        )
+        for k in keywords_to_remove:
+            if k in newrem:
+                del newrem[k]
 
     return newrem
 
@@ -91,7 +111,7 @@ def parse_rem_section(outputfilename):
 
     outputfile = make_file_iterator(outputfilename)
 
-    rem = dict()
+    rem = []
 
     line = ''
     while line.strip().lower() != '$rem':
@@ -101,10 +121,10 @@ def parse_rem_section(outputfilename):
         sline = line.split()
         k = sline[0].replace('=', '').lower()
         v = sline[-1].replace('=', '').lower()
-        rem[k] = v
+        rem.append((k, v))
         line = next(outputfile)
 
-    return rem
+    return OrderedDict(rem)
 
 
 if __name__ == '__main__':
@@ -129,13 +149,15 @@ if __name__ == '__main__':
 
         # Determine the name of the file we're writing.
         assert outputfilename.endswith('.out')
-        inputfilename = re.sub(r'opt\d*', 'freq', outputfilename).replace('.out', '.in')
+        inputfilename = re.sub(r'opt\d*', 'freq', outputfilename)
+        inputfilename = inputfilename.replace('.out', '.in')
+        inputfilename = os.path.basename(inputfilename)
 
         rem = parse_rem_section(outputfilename)
 
         # Make sure our $rem section is up to snuff for frequency
         # calculations.
-        rem = clean_up_rem(rem)
+        rem = clean_up_rem(rem, do_fragment=args.fragment)
 
         user_input = parse_user_input(outputfilename)
 
