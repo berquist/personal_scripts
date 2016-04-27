@@ -248,6 +248,7 @@ packages=(
     python-seaborn
     python2-seaborn
     python-unp
+    snakemake
 )
 
 # for package in ${packages[@]}; do

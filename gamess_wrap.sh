@@ -12,7 +12,8 @@ ppn="${1}"
 input="${2}"
 
 stub="${input%.*}"
-scrdir="${HOME}"/scr
+# scrdir="${HOME}"/scr
+scrdir=/tmp
 
 exts=(
     dat
