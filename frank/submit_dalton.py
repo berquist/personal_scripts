@@ -6,10 +6,10 @@ Frank's PBS scheduler.
 
 from __future__ import print_function
 
-# import logging
+import logging
 import sys
 
-# logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO)
 
 
 def determine_parallelism(args):
@@ -76,12 +76,14 @@ cp ${{PBS_O_WORKDIR}}/{inpfile}.dal ${{LOCAL}}
 
 run_on_exit() {{
     set -v
-    cp -v -R ${{LOCAL}}/* ${{PBS_O_WORKDIR}}
+    find ${{LOCAL}} -type f -exec chmod 644 '{{}}' \;
+    cp -v -R ${{LOCAL}}/DALTON_scratch_{username}/* ${{PBS_O_WORKDIR}}
 }}
 
 trap run_on_exit EXIT
 
-$(which dalton) {parflag} {ppn} {inpfile}.dal
+$(which dalton) {parflag} {ppn} -noarch -nobackup -d -ow {inpfile}.dal
+chmod 644 ${{PBS_O_WORKDIR}}/{inpfile}.out
 '''.format(inpfile=inpfile,
            ppn=ppn,
            time=time,
@@ -132,5 +134,5 @@ if __name__ == "__main__":
                                               parimpl,
                                               args.extrafiles))
 
-    # logging.info(pbsfilename)
+    logging.info(pbsfilename)
     print(pbsfilename)

@@ -37,13 +37,15 @@ cp $PBS_O_WORKDIR/{inpfile}.in $LOCAL
 
 run_on_exit() {{
     set -v
-    cp -R $LOCAL/* $PBS_O_WORKDIR
+    find ${{LOCAL}} -type f -exec chmod 644 '{{}}' \;
+    cp -R ${{LOCAL}}/* ${{PBS_O_WORKDIR}}
 }}
 
 trap run_on_exit EXIT
 
-`which orca` {inpfile}.in >& $PBS_O_WORKDIR/{inpfile}.out
+$(which orca) {inpfile}.in >& $PBS_O_WORKDIR/{inpfile}.out
 orca_2mkl {inpfile} -molden
+chmod 644 ${{PBS_O_WORKDIR}}/{inpfile}.out
 """.format(inpfile=inpfile,
            ppn=ppn,
            time=time,

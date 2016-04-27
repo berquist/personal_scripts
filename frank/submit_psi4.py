@@ -34,6 +34,7 @@ def template_pbsfile_psi4(inpfile, ppn, time, queue, extrafiles, python=False):
 #PBS -M {username}@pitt.edu
 
 module purge
+export scratch=$LOCAL
 module load {module}
 
 cp $PBS_O_WORKDIR/{inpfile}.in $LOCAL
@@ -41,12 +42,14 @@ cp $PBS_O_WORKDIR/{inpfile}.in $LOCAL
 
 run_on_exit() {{
     set -v
-    cp -R $LOCAL/* $PBS_O_WORKDIR
+    find ${{LOCAL}} -type f -exec chmod 644 '{{}}' \;
+    cp -R ${{LOCAL}}/* ${{PBS_O_WORKDIR}}
 }}
 
 trap run_on_exit EXIT
 
-psi4 -n {ppn} {inpfile}.in $PBS_O_WORKDIR/{inpfile}.out
+psi4 -n {ppn} {inpfile}.in ${{PBS_O_WORKDIR}}/{inpfile}.out
+chmod 644 ${{PBS_O_WORKDIR}}/{inpfile}.out
 """.format(inpfile=inpfile,
            ppn=ppn,
            time=time,

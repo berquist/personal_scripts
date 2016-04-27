@@ -37,12 +37,14 @@ cp $PBS_O_WORKDIR/{inpfile}.inp $LOCAL
 
 run_on_exit() {{
     set -v
-    cp -R $LOCAL/* $PBS_O_WORKDIR
+    find ${{LOCAL}} -type f -exec chmod 644 '{{}}' \;
+    cp -R ${{LOCAL}}/* ${{PBS_O_WORKDIR}}
 }}
 
 trap run_on_exit EXIT
 
-gms {inpfile}.inp >& $PBS_O_WORKDIR/{inpfile}.out
+gms {inpfile}.inp >& ${{PBS_O_WORKDIR}}/{inpfile}.out
+chmod 644 ${{PBS_O_WORKDIR}}/{inpfile}.out
 """.format(inpfile=inpfile,
            ppn=ppn,
            time=time,

@@ -45,12 +45,14 @@ cd ${{LOCAL}}
 run_on_exit() {{
     set -v
     rm ${{LOCAL}}/pathtable
+    find ${{LOCAL}} -type f -exec chmod 644 '{{}}' \;
     cp -v -R ${{LOCAL}}/* ${{PBS_O_WORKDIR}}
 }}
 
 trap run_on_exit EXIT
 
 $(which qchem) {saveflag}-nt {ppn} "{inpfile}.in" "${{PBS_O_WORKDIR}}/{inpfile}.out"{scratchdir}
+chmod 644 "${{PBS_O_WORKDIR}}/{inpfile}.out"
 '''.format(inpfile=inpfile,
            ppn=ppn,
            time=time,
