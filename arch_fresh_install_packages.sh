@@ -7,88 +7,87 @@
 
 packages=(
     # low-level
+    abs
     base
     base-devel
+    cuda
     gcc-fortran
     gdb
-    valgrind
-    nvidia
-    cuda
-    nvidia-libgl
+    lib32-glibc
+    lib32-libstdc++5
     libcl
     libclc
     libcl-headers
-    lib32-glibc
     libstdc++5
-    lib32-libstdc++5
-    abs
+    nvidia
+    nvidia-libgl
+    valgrind
 
     # groups
     xfce4
     texlive-most
 
     # command-line tools and general libraries
-    mpdecimal
-    tcsh
-    zsh
-    unrar
-    htop
-    lsb-release
-    openssh
-    mosh
-    wget
-    keychain
-    # eigen
-    eigen2
-    git
-    perl-term-readkey # git-svn
-    mercurial
-    ctags
-    cmake
-    blas
-    lapack
-    cblas
-    hdf5
-    netcdf
-    netcdf-fortran
-    grace
-    openbabel
-    openmpi
-    boost
-    boost-libs
-    freeimage
-    swig
-    gsl
-    iotop
-    namcap
-    xsel
-    xclip
-    dos2unix
-    cronie
-    markdown
+    ack
+    arrayfire
     aspell
     aspell-en
-    tmux
-    gnuplot
-    parallel
-    arrayfire
-    rlwrap
-    ack
-    colordiff
-    lesspipe
-    dos2unix
     atool
+    blas
+    boost
+    boost-libs
+    cblas
+    cmake
+    colordiff
+    cronie
+    ctags
+    dos2unix
+    # eigen
+    eigen2
+    freeimage
+    git
+    gnuplot
+    grace
+    gsl
+    hdf5
+    keychain
+    htop
+    iotop
+    lapack
+    lesspipe
+    lsb-release
+    markdown
+    mercurial
+    mosh
+    mpdecimal
+    namcap
+    netcdf
+    netcdf-fortran
+    openbabel
+    openmpi
+    openssh
+    parallel
+    perl-term-readkey # git-svn
+    rlwrap
+    swig
+    tcsh
+    tmux
+    unrar
+    wget
+    xsel
+    xclip
+    zsh
 
     # fonts
+    cowsay
+    figlet
     ttf-inconsolata
     ttf-sazanami
-    figlet
-    cowsay
 
     # programming: C/C++
-    gdb
     clang
     clang-analyzer
+    gdb
 
     # programming: Julia
     julia
@@ -101,81 +100,81 @@ packages=(
     lua51
 
     # programming: Python
-    python
-    python2
-    pypy3
-    pypy
     cython
     cython2
-    python-numpy
-    python2-numpy
-    python-scipy
-    python2-scipy
-    python-openbabel
-    python2-openbabel
-    python-h5py
-    python2-h5py
     ipython
     ipython2
     ipython-notebook
     ipython2-notebook
-    python-terminado
-    python2-terminado
-    flake8
-    python2-flake8
-    python-pylint
-    python2-pylint
-    python-virtualenv
-    python2-virtualenv
-    python-virtualenvwrapper
-    # python2-virtualenvwrapper
-    python-pip
-    python2-pip
-    python-sphinx
-    python2-sphinx
-    python-numexpr
-    python2-numexpr
-    python-pytables
-    python2-pytables
-    python-pandas
-    python2-pandas
-    python-nose
-    python2-nose
+    pygmentize
+    pypy
+    pypy3
+    python
+    python2
     python-bottleneck
     python2-bottleneck
-    python-matplotlib
-    python2-matplotlib
-    python-statsmodels
-    python2-statsmodels
-    python-openpyxl
-    python2-openpyxl
-    python-xlsxwriter
-    python2-xlsxwriter
-    python-xlrd
-    python2-xlrd
-    python-xlwt
-    python2-xlwt
-    python-gmpy2
-    python2-gmpy2
-    python-mpmath
-    python2-mpmath
-    python-sympy
-    python2-sympy
     python-docopt
     python2-docopt
+    flake8
+    python2-flake8
+    python-gmpy2
+    python2-gmpy2
+    python-h5py
+    python2-h5py
+    python-matplotlib
+    python2-matplotlib
+    python-mpmath
+    python2-mpmath
+    python-nose
+    python2-nose
+    python-numexpr
+    python2-numexpr
+    python-numpy
+    python2-numpy
+    python-openbabel
+    python2-openbabel
+    python-opengl
+    python2-opengl
+    python-openpyxl
+    python2-openpyxl
+    python-pandas
+    python2-pandas
+    python-pillow
+    python2-pillow
+    python-pip
+    python2-pip
+    python-pycuda
+    python2-pycuda
+    python-pylint
+    python2-pylint
     python-pyqt4
     python2-pyqt4
     python-pyqt5
     python2-pyqt5
-    python-pillow
-    python2-pillow
-    python-opengl
-    python2-opengl
+    python-pytables
+    python2-pytables
+    python-scipy
+    python2-scipy
     python-sh
     python2-sh
-    pygmentize
-    python-pycuda
-    python2-pycuda
+    python-sphinx
+    python2-sphinx
+    python-statsmodels
+    python2-statsmodels
+    python-sympy
+    python2-sympy
+    python-terminado
+    python2-terminado
+    python-virtualenv
+    python2-virtualenv
+    python-virtualenvwrapper
+    # python2-virtualenvwrapper
+    python-xlrd
+    python2-xlrd
+    python-xlsxwriter
+    python2-xlsxwriter
+    python-xlwt
+    python2-xlwt
 
     # editors
     emacs
