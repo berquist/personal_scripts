@@ -77,6 +77,7 @@ packages=(
     colordiff
     lesspipe
     dos2unix
+    atool
 
     # fonts
     ttf-inconsolata
@@ -85,6 +86,7 @@ packages=(
     cowsay
 
     # programming: C/C++
+    gdb
     clang
     clang-analyzer
 
@@ -211,20 +213,20 @@ done
 # sudo pacman -S yaourt
 
 packages=(
-    dropbox
-    logmein-hamachi
-    haguichi
-    molden
-    modules
-    fftw2
-    swig2
-    pandoc-bin
-    multimarkdown
-    pelican
-    ttf-ms-fonts
     avogadro-git
-    symlinks
+    dropbox
+    fftw2
     figlet-fonts
+    haguichi
+    logmein-hamachi
+    modules
+    molden
+    multimarkdown
+    pandoc-bin
+    pelican
+    swig2
+    symlinks
+    ttf-ms-fonts
 
     # command-line simple tools
     checkbashisms
@@ -237,10 +239,11 @@ packages=(
     blitz
 
     # Programming: Ruby
-    travis-lint
     gist
+    travis-lint
 
     # Programming: Python
+    mypy-git
     python-llvmlite
     python2-llvmlite
     python-numba
