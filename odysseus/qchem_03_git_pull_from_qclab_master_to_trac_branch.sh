@@ -13,20 +13,32 @@ module use $HOME/modules/odysseus
 module purge
 module load qchem/gatekeeper
 
+branchname=lambrechtlab
+
 cd $QC
+git checkout trunk
+git svn fetch
+git svn rebase
 
 # Delete the branch at HQ:
-svn rm  -m "Deleting before push." $QCSVN/branches/lambrecht
+svn rm -m "Deleting before push." $QCSVN/branches/$branchname
 # Delete the branch locally:
-git branch -D -r lambrecht
+git branch -D -r $branchname
 # The second 'svn' appears because we cloned with `--prefix=svn/`.
-rm -rf ./.git/svn/refs/remotes/svn/lambrecht
+# Would this be different if we used git svn clone --std-layout?
+rm -rf ./.git/svn/refs/remotes/svn/$branchname
 
 # Make a clean local copy of the branch:
-git checkout -B lambrecht --no-track
+git checkout -B $branchname --no-track
 # Pull from qclab/master:
-git pull qclab master
+git pull --rebase qclab master:lambrechtlab
 
 # This will create the SVN branch.
 # The `-n` is for `--dry-run`. Remove to actually create the branch.
-git svn branch -n -m "Enter a sensible branch creation message here." lambrecht
+git svn branch -n -m "Enter a sensible branch creation message here." $branchname
+# git svn branch $branchname
+
+
+git rebase svn/$branchname
+git svn dcommit -n
+# git svn dcommit
