@@ -28,6 +28,7 @@ def getargs():
     parser.add_argument('outputfilename', nargs='+')
 
     parser.add_argument('--fragment', action='store_true')
+    parser.add_argument('--trajectory', action='store_true')
     parser.add_argument('--suffix')
 
     args = parser.parse_args()
@@ -59,30 +60,33 @@ if __name__ == '__main__':
         else:
             xyzfilename = ''.join([stub, '.xyz'])
 
-        with open(xyzfilename, 'w') as fh:
-            fh.write(str(len(last_geometry)) + '\n')
-            fh.write('\n')
-            molecule_section = form_molecule_section(element_list, last_geometry, data.charge, data.mult)
-            fh.write('\n'.join(molecule_section[1:]))
-            fh.write('\n')
-            print(xyzfilename)
+        if args.trajectory:
+            cclib.writer.ccwrite(data, outputdest=xyzfilename, allgeom=True)
+        else:
+            with open(xyzfilename, 'w') as fh:
+                fh.write(str(len(last_geometry)) + '\n')
+                fh.write('\n')
+                molecule_section = form_molecule_section(element_list, last_geometry, data.charge, data.mult)
+                fh.write('\n'.join(molecule_section[1:]))
+                fh.write('\n')
+                print(xyzfilename)
 
-        if args.fragment:
-            # If this is from a Q-Chem fragment calculation, print a single
-            # fragment "XYZ" file as well.
-            if isinstance(job, cclib.parser.qchemparser.QChem):
-                user_input = parse_user_input(outputfilename)
-                charges, multiplicities, start_indices = parse_fragments_from_molecule(user_input['molecule'])
-                charges.insert(0, data.charge)
-                multiplicities.insert(0, data.mult)
-                molecule_section = form_molecule_section_from_fragments(element_list, last_geometry, charges, multiplicities, start_indices)
+            if args.fragment:
+                # If this is from a Q-Chem fragment calculation, print a single
+                # fragment "XYZ" file as well.
+                if isinstance(job, cclib.parser.qchemparser.QChem):
+                    user_input = parse_user_input(outputfilename)
+                    charges, multiplicities, start_indices = parse_fragments_from_molecule(user_input['molecule'])
+                    charges.insert(0, data.charge)
+                    multiplicities.insert(0, data.mult)
+                    molecule_section = form_molecule_section_from_fragments(element_list, last_geometry, charges, multiplicities, start_indices)
 
-                if args.suffix:
-                    fragxyzfilename = ''.join([stub, '.', args.suffix, '.xyz_frag'])
-                else:
-                    fragxyzfilename = ''.join([stub, '.xyz_frag'])
+                    if args.suffix:
+                        fragxyzfilename = ''.join([stub, '.', args.suffix, '.xyz_frag'])
+                    else:
+                        fragxyzfilename = ''.join([stub, '.xyz_frag'])
 
-                with open(fragxyzfilename, 'w') as fh:
-                    fh.write('\n'.join(molecule_section))
-                    fh.write('\n')
-                    print(fragxyzfilename)
+                    with open(fragxyzfilename, 'w') as fh:
+                        fh.write('\n'.join(molecule_section))
+                        fh.write('\n')
+                        print(fragxyzfilename)
