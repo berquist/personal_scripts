@@ -5,8 +5,8 @@ frequency calculation based on the last possible geometry from a
 Q-Chem geometry optimization.
 
 The script assumes the output file being read from is called
-'*opt(\d*).out', where 'opt' might be followed by a number. The script
-will write an input file called '*freq.in'.
+'*opt(\d*)*.out', where 'opt' might be followed by a number. The
+script will write an input file called '*freq*.in'.
 """
 
 from __future__ import print_function
