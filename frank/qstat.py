@@ -35,7 +35,8 @@ if __name__ == '__main__':
         session_id = jobinfo.get('session_id', blank_spot)
         nodes = int(jobinfo['Resource_List.nodect'])
         # tasks = short_output_line_chomp[6]
-        tasks = int(jobinfo['Resource_List.nodes'].split('=')[-1]) * nodes
+        # Resource_List.nodes = 20:ppn=16:dist_ivy
+        tasks = int(jobinfo['Resource_List.nodes'].split('=')[-1].split(':')[0]) * nodes
         reqd_mem = jobinfo.get('Resource_List.pmem', blank_spot)
         reqd_time = jobinfo['Resource_List.walltime']
         status = jobinfo['job_state']
