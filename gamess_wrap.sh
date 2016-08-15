@@ -12,7 +12,6 @@ ppn="${1}"
 input="${2}"
 
 stub="${input%.*}"
-# scrdir="${HOME}"/scr
 scrdir=/tmp
 
 exts=(
@@ -27,3 +26,5 @@ for ext in ${exts[@]}; do
 done
 
 $(which rungms) "${input}" 01 "${ppn}" > "${stub}".out
+
+mv "${scrdir}/${stub}.dat" .
