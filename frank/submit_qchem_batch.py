@@ -8,9 +8,10 @@ import os.path
 def template_pbsfile_batch(**jobvars):
     """The template for a PBS jobfile ..."""
 
-    jobvars['module'] = 'qchem/4.3-trunk.20150505.omp.release'
+    # jobvars['module'] = 'qchem/4.3-trunk.20150505.omp.release'
+    jobvars['module'] = 'qchem/4.3-trunk.20151005.omp.release'
     if jobvars['_new']:
-        jobvars['module'] = 'qchem/4.3-trunk.20151005.omp.release'
+        jobvars['module'] = 'qchem/4.4-trunk.20160526.omp.release'
 
     return """#!/usr/bin/env bash
 
