@@ -1,14 +1,16 @@
 #!/bin/sh
 
 rm -f ./*.b
-# rm -f "./*.b^-1"
+rm -f ./*.b^\-1
 rm -f ./*.c
 rm -f ./*.cfock
 rm -f ./*.cphf_rhs.*
 rm -f ./*.cphf_sol.*
 rm -f ./*.db
+rm -f ./*.fd_ddipole
 rm -f ./*.gridpts.*
 rm -f ./*.grinfo.*
+rm -f ./*.hess
 rm -f ./*.lagr
 rm -f ./*.movec*
 rm -f ./*.nmode
