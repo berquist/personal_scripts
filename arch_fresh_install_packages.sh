@@ -39,6 +39,7 @@ packages=(
     cblas
     cmake
     colordiff
+    cpio
     cronie
     ctags
     dos2unix
@@ -218,6 +219,7 @@ packages=(
     figlet-fonts
     haguichi
     logmein-hamachi
+    lzip
     modules
     molden
     multimarkdown
