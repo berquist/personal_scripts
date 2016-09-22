@@ -5,7 +5,7 @@
 from __future__ import print_function
 from __future__ import division
 
-from cclib.parser import ccopen
+from cclib.io import ccopen
 
 
 def get_job_data(filename):

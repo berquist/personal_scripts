@@ -41,7 +41,7 @@ def main():
     canter of nuclear charge for the final geometry.
     """
     import argparse
-    from cclib.parser import ccopen
+    from cclib.io import ccopen
     import periodic_table as pt
 
     parser = argparse.ArgumentParser()

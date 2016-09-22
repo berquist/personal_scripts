@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import cclib
-from cclib.parser import ccopen
+from cclib.io import ccopen
 from cclib.parser.utils import convertor
 
 

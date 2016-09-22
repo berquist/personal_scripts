@@ -164,7 +164,7 @@ if __name__ == '__main__':
 
     for outputfilename in args.outputfilename:
 
-        job = cclib.parser.ccopen(outputfilename)
+        job = cclib.io.ccopen(outputfilename)
         assert isinstance(job, cclib.parser.qchemparser.QChem)
         try:
             data = job.parse()

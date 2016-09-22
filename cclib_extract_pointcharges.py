@@ -12,7 +12,7 @@ symbol, the second being the magnitude of the charge.
 from __future__ import print_function
 import argparse
 import os.path
-from cclib.parser import ccopen
+from cclib.io import ccopen
 from cclib.parser.utils import PeriodicTable
 
 

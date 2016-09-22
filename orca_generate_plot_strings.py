@@ -117,7 +117,7 @@ def generate_block(args):
     # If we desire to use cclib and automate some things...
     if args['--cclib']:
         # pylint: disable=E1101
-        from cclib.parser import ccopen
+        from cclib.io import ccopen
         job = ccopen(args['--cclib'])
         data = job.parse()
         plot_range = data.homos[0] * 2

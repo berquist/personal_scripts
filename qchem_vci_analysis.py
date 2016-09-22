@@ -20,7 +20,7 @@ from collections import OrderedDict
 from itertools import count
 
 from docopt import docopt
-from cclib.parser import ccopen
+from cclib.io import ccopen
 
 
 def parse_vibrational_anharmonic_analysis(outputfilename):

@@ -29,7 +29,7 @@ except ImportError:
 
 from docopt import docopt
 
-from cclib.parser import ccopen
+from cclib.io import ccopen
 
 from vmd_templates import pad_left_zeros
 from vmd_templates import vmd_covp_write_files

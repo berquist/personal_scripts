@@ -5,6 +5,8 @@
 
 # Add as "post-checkout" under ${GIT_DIR}/.git/hooks.
 
+# Modified from http://stackoverflow.com/a/8040405/3249688
+
 set -eu
 
 revision=$(git svn info | sed -n 's/^Revision: \([1-9][0-9]*\)$/\1/p')

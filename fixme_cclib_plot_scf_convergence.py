@@ -14,7 +14,7 @@ import argparse
 import os.path
 
 import cclib
-from cclib.parser import ccopen
+from cclib.io import ccopen
 from cclib.parser import utils
 
 

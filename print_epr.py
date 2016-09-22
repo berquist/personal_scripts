@@ -9,7 +9,7 @@ import numpy as np
 import numpy.linalg as npl
 
 import cclib
-from cclib.parser import ccopen
+from cclib.io import ccopen
 
 
 def print_dispatch(outputfile):

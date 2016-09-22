@@ -15,7 +15,7 @@ Options:
 from __future__ import print_function
 
 from docopt import docopt
-from cclib.parser import ccopen
+from cclib.io import ccopen
 from itertools import izip_longest
 
 

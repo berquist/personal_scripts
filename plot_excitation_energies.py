@@ -170,7 +170,7 @@ def main(args):
 
         # We aren't parsing the files, since they might fail; just
         # trying to determine which program they came from for now.
-        job = cclib.parser.ccopen(inputfilename)
+        job = cclib.io.ccopen(inputfilename)
         stub = os.path.splitext(inputfilename)[0]
         inputfile = make_file_iterator(inputfilename)
         unrestricted = True

@@ -14,7 +14,7 @@ import numpy as np
 import numpy.linalg as npl
 from itertools import combinations, chain
 
-from cclib.parser import ccopen
+from cclib.io import ccopen
 
 
 def distance(icoords, jcoords):

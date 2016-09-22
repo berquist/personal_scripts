@@ -11,6 +11,7 @@ from __future__ import print_function
 import os.path
 
 import cclib
+from cclib.io import ccopen
 from cclib.parser.utils import PeriodicTable
 
 from qchem_make_opt_input_from_opt import \
@@ -44,7 +45,7 @@ if __name__ == '__main__':
 
     for outputfilename in args.outputfilename:
 
-        job = cclib.parser.ccopen(outputfilename)
+        job = ccopen(outputfilename)
         try:
             data = job.parse()
         except Exception as e:

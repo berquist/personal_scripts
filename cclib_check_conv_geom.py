@@ -14,7 +14,7 @@ def main():
     """
 
     import argparse
-    from cclib.parser import ccopen
+    from cclib.io import ccopen
 
     parser = argparse.ArgumentParser()
     parser.add_argument('filenames', nargs = '+')
