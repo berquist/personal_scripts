@@ -51,11 +51,13 @@ packages=(
     grace
     gsl
     hdf5
+    keybase
     keychain
     htop
     iotop
     lapack
     lesspipe
+    lftp
     lsb-release
     markdown
     mercurial
@@ -142,6 +144,8 @@ packages=(
     python2-pandas
     python-pillow
     python2-pillow
+    python-pint
+    python2-pint
     python-pip
     python2-pip
     python-pycuda
@@ -249,6 +253,7 @@ packages=(
     python2-llvmlite
     python-numba
     python2-numba
+    python-proselint
     python-seaborn
     python2-seaborn
     python-unp
