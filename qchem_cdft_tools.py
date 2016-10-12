@@ -119,6 +119,7 @@ if __name__ == '__main__':
 
     for outputfilename in args.outputfilename:
 
+        print('=' * 70)
         print(outputfilename)
 
         # job = ccopen(outputfilename)
@@ -130,7 +131,7 @@ if __name__ == '__main__':
         # assert len(cdft_becke_populations) == len(atomnos)
 
         print(cdft_becke_populations)
-        print(sum(cdft_becke_populations))
+        print('total:', sum(cdft_becke_populations))
 
         constraint_values, all_constraints = parse_cdft_block(outputfilename)
         assert len(constraint_values) == len(all_constraints)
@@ -141,6 +142,8 @@ if __name__ == '__main__':
                 idx_atom1 -= 1
                 idx_atom2 -= 1
                 total_pop = sum(cdft_becke_populations[idx_atom1:idx_atom2+1])
-                print(constraint, total_pop)
+                print('constraint:', constraint, total_pop)
             # What is the population of the remainder?
-            print('remainder', sum(cdft_becke_populations[idx_atom2+1:]))
+            populations_remainder = cdft_becke_populations[idx_atom2+1:]
+            print(populations_remainder)
+            print('remainder:', sum(populations_remainder))
