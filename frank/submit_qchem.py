@@ -13,13 +13,7 @@ def template_pbsfile_qchem(inpfile, ppn, time, queue, save, old, new, debug, rel
     if save:
         saveflag = '-save '
         scratchdir = ' "{inpfile}.${{PBS_JOBID}}"'.format(inpfile=inpfile)
-    module = 'qchem/4.3-trunk.20150505.omp.release'
-    if old:
-        # module = 'qchem/4.2-trunk.20141216.omp.release'
-        module = 'qchem/4.3-trunk.20151005.omp.release'
-    if new:
-        # module = 'qchem/4.3-trunk.20151005.omp.release'
-        module = 'qchem/4.4-trunk.20160526.omp.release'
+    module = 'qchem/4.4-trunk.20160910.omp.release'
     if debug:
         module = 'qchem/trunk_intel_debug'
     if release:
