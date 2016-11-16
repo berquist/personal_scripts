@@ -82,7 +82,7 @@ run_on_exit() {{
 
 trap run_on_exit EXIT
 
-$(which dalton) {parflag} {ppn} -noarch -nobackup -d -ow {inpfile}.dal
+$(which dalton) {parflag} {ppn} -noarch -nobackup -d -ow -w "$PBS_O_WORKDIR" {inpfile}.dal
 chmod 644 ${{PBS_O_WORKDIR}}/{inpfile}.out
 '''.format(inpfile=inpfile,
            ppn=ppn,

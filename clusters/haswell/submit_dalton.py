@@ -7,7 +7,7 @@ Haswell's SLURM scheduler.
 from __future__ import print_function
 
 
-def template_slurmfile_dalton(inpfile, ppn, time, queue, extrafiles):
+def template_slurmfile_dalton(inpfile, ppn, time, extrafiles):
     """The template for a SLURM jobfile that calls DALTON."""
 
     copy_string_template = 'cp "$SLURM_SUBMIT_DIR"/{} "$LOCAL"\n'
@@ -47,12 +47,11 @@ run_on_exit() {{
 
 trap run_on_exit EXIT
 
-$(which dalton) -omp {ppn} -noarch -nobackup -d -ow {inpfile}.dal
+$(which dalton) -omp {ppn} -noarch -nobackup -d -ow -w "$SLURM_SUBMIT_DIR" {inpfile}.dal
 chmod 644 "$SLURM_SUBMIT_DIR"/{inpfile}.out
 '''.format(inpfile=inpfile,
            ppn=ppn,
            time=time,
-           queue=queue,
            module=module,
            username=os.environ['USER'],
            extrafiles=joined_extrafiles)
@@ -79,11 +78,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
     inpfilename = os.path.splitext(args.inpfilename)[0]
 
-    pbsfilename = inpfilename + '.pbs'
-    with open(pbsfilename, 'w') as pbsfile:
-        pbsfile.write(template_pbsfile_dalton(inpfilename,
-                                              args.ppn,
-                                              args.time,
-                                              args.extrafiles))
+    slurmfilename = inpfilename + '.slurm'
+    with open(slurmfilename, 'w') as slurmfile:
+        slurmfile.write(template_slurmfile_dalton(inpfilename,
+                                                  args.ppn,
+                                                  args.time,
+                                                  args.extrafiles))
 
-    print(pbsfilename)
+    print(slurmfilename)

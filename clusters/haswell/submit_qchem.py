@@ -86,10 +86,10 @@ if __name__ == '__main__':
     slurmfilename = inpfilename + '.slurm'
     with open(slurmfilename, 'w') as slurmfile:
         slurmfile.write(template_slurmfile_qchem(inpfilename,
-                                             args.ppn,
-                                             args.time,
-                                             args.save,
-                                             args.debug,
-                                             args.release))
+                                                 args.ppn,
+                                                 args.time,
+                                                 args.save,
+                                                 args.debug,
+                                                 args.release))
 
     print(slurmfilename)
