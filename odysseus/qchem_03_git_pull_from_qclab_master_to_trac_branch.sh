@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 # qchem_03_git_pull_from_qclab_master_to_trac_branch.sh
 # Run this script (manually) to load the git-svn Q-Chem repository
