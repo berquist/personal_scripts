@@ -21,13 +21,15 @@ def template_slurmfile_qchem(inpfile, ppn, time, save, debug, release):
 
 #SBATCH --job-name={inpfile}
 #SBATCH --output={inpfile}.slurmout
+#SBATCH --partition=smp
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node={ppn}
 #SBATCH --time=0-{time}:00:00
 
 module purge
-# We load OpenMPI only because of how Q-Chem was compiled.
-module load intel/15.0.3 mkl/11.2 openmpi/1.10.2
+module load intel/2017.1.132
+module load mkl/2017.1.132
+module load boost/1.62.0
 module load {module}
 
 mkdir -p "$LOCAL"
@@ -65,11 +67,11 @@ if __name__ == '__main__':
                         help='the Q-Chem input file to submit')
     parser.add_argument('--ppn',
                         type=int,
-                        default=4,
-                        help='number of cores to run on (max shared=48, shared_large=16)')
+                        default=12,
+                        help='number of cores to run on (max 12)')
     parser.add_argument('--time',
                         type=int,
-                        default=96,
+                        default=24,
                         help='walltime to reserve (max 144 hours)')
     parser.add_argument('--save',
                         action='store_true',

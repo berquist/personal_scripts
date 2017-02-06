@@ -21,7 +21,7 @@ def template_slurmfile_dalton(inpfile, ppn, time, extrafiles):
         joined_extrafiles = "".join(copy_strings)
     else:
         joined_extrafiles = copy_string_template.format(extrafiles)
-    module = 'dalton/2016.2-i2015.3-mkl_parallel-omp'
+    module = 'dalton/2016.2-i2017.1-mkl_parallel-omp'
     return '''#!/bin/bash
 
 #SBATCH --job-name={inpfile}
@@ -31,7 +31,8 @@ def template_slurmfile_dalton(inpfile, ppn, time, extrafiles):
 #SBATCH --time=0-{time}:00:00
 
 module purge
-module load intel/15.0.3 mkl/11.2
+module load intel/2017.1.132
+module load mkl/2017.1.132
 module load {module}
 
 mkdir -p "$LOCAL"
@@ -66,11 +67,11 @@ if __name__ == "__main__":
                         help='the DALTON input file to submit')
     parser.add_argument('--ppn',
                         type=int,
-                        default=4,
-                        help='number of cores to run on (max shared=48, shared_large=16)')
+                        default=12,
+                        help='number of cores to run on (max 12)')
     parser.add_argument('--time',
                         type=int,
-                        default=96,
+                        default=24,
                         help='walltime to reserve (max 144 hours)')
     parser.add_argument('--extrafiles',
                         help='An arbitrary number of files to copy to $LOCAL.',
