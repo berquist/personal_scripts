@@ -33,8 +33,8 @@ def xyz2dalton_from_splitlines(xyzfile_splitlines, totalcharge=0):
 
     outfilelines = []
     atomtypes = 0
-    atomsymbols = (line.split()[0] for line in xyzfile_splitlines)
-    atomnums = (float(AtomicNum[symbol]) for symbol in atomsymbols)
+    atomsymbols = [line.split()[0] for line in xyzfile_splitlines if line.strip() != '']
+    atomnums = [float(AtomicNum[symbol]) for symbol in atomsymbols]
     oldcharge = ''
     count = 0
     for i, atomnum, line in zip(counter(start=1), atomnums, xyzfile_splitlines):
