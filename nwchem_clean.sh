@@ -1,5 +1,6 @@
 #!/bin/sh
 
+rm -f ./*.aoresp_fiao_b1
 rm -f ./*.b
 rm -f ./*.b^\-1
 rm -f ./*.c
