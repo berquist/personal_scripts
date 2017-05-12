@@ -42,6 +42,7 @@ packages=(
     cpio
     cronie
     ctags
+    diffoscope
     dos2unix
     # eigen
     eigen2
@@ -103,6 +104,8 @@ packages=(
     lua51
 
     # programming: Python
+    # If something is commented out here, then it's probably a split
+    # package.
     cython
     cython2
     ipython
@@ -124,6 +127,8 @@ packages=(
     python2-gmpy2
     python-h5py
     python2-h5py
+    python-joblib
+    python2-joblib
     python-matplotlib
     python2-matplotlib
     python-mpmath
@@ -142,6 +147,8 @@ packages=(
     python2-openpyxl
     python-pandas
     python2-pandas
+    python-periodictable
+    # python-periodictable
     python-pillow
     python2-pillow
     python-pint
@@ -180,6 +187,7 @@ packages=(
     python2-xlsxwriter
     python-xlwt
     python2-xlwt
+    jupyter-nbconvert
 
     # editors
     emacs
@@ -235,6 +243,7 @@ packages=(
 
     # command-line simple tools
     checkbashisms
+    pipman-git
 
     # Programming: Fortran
     ftnchek
@@ -249,6 +258,8 @@ packages=(
 
     # Programming: Python
     mypy-git
+    python-ase
+    # python2-ase
     python-llvmlite
     python2-llvmlite
     python-numba
