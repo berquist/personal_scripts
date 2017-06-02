@@ -21,7 +21,7 @@ def template_pbsfile_qchem(inpfile, ppn, time, queue, save, old, new, debug, rel
     qosline = '#PBS -l qos=investor'
     if lowqos:
         qosline = '#PBS -l qos=low'
-    return '''#!/usr/bin/env bash
+    return '''#!/bin/bash
 
 #PBS -N {inpfile}
 #PBS -q {queue}

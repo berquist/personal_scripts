@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 # This script submits Quantum Espresso jobs.
 # It also properly modifies the user's output location in the

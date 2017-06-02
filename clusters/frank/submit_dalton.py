@@ -58,7 +58,7 @@ def template_pbsfile_dalton(inpfile, ppn, time, queue, parimpl, extrafiles):
         module = 'dalton/2015-i2013.0-mkl-omp'
     else:
         raise
-    return '''#!/usr/bin/env bash
+    return '''#!/bin/bash
 
 #PBS -N {inpfile}
 #PBS -q {queue}

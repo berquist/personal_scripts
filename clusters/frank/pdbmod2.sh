@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 # Crudely reformat our starting PDB file for AMBER's leap
 # $1: pdb input

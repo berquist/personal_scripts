@@ -10,7 +10,7 @@ def template_pbsfile_batch(**jobvars):
 
     jobvars['module'] = 'qchem/4.4-trunk.20160910.omp.release'
 
-    return """#!/usr/bin/env bash
+    return """#!/bin/bash
 
 #PBS -N {batchname}
 #PBS -q {queue}

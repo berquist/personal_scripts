@@ -21,7 +21,7 @@ def template_pbsfile_molcas(inpfile, ppn, time, queue, extrafiles, save):
     else:
         joined_extrafiles = copy_string_template.format(extrafiles)
     savemap = {False: 'no', True: 'yes'}
-    return """#!/usr/bin/env bash
+    return """#!/bin/bash
 
 #PBS -N {inpfile}
 #PBS -q {queue}

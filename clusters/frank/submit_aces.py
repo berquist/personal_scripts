@@ -20,7 +20,7 @@ def template_pbsfile_aces(inpfile, ppn, time, queue, extrafiles):
         joined_extrafiles = "".join(copy_strings)
     else:
         joined_extrafiles = copy_string_template.format(extrafiles)
-    return """#!/usr/bin/env bash
+    return """#!/bin/bash
 
 #PBS -N {inpfile}
 #PBS -q {queue}
