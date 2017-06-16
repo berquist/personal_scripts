@@ -7,7 +7,7 @@ Haswell's SLURM scheduler.
 from __future__ import print_function
 
 
-def template_slurmfile_qchem(inpfile, ppn, time, save, debug, release):
+def template_slurmfile_qchem(inpfile, ppn, time, save, debug, release, sam):
     """The template for a SLURM jobfile that calls Q-Chem."""
     saveflag = ''
     scratchdir = ''
@@ -17,6 +17,8 @@ def template_slurmfile_qchem(inpfile, ppn, time, save, debug, release):
     module = 'qchem/trunk_intel_release'
     if debug:
         module = 'qchem/trunk_intel_debug'
+    if sam:
+        module = 'qchem/4.3'
     return '''#!/bin/bash
 
 #SBATCH --job-name={inpfile}
@@ -29,25 +31,9 @@ def template_slurmfile_qchem(inpfile, ppn, time, save, debug, release):
 module purge
 module load intel/2017.1.132
 module load mkl/2017.1.132
-module load boost/1.62.0
 module load {module}
 
-mkdir -p "$LOCAL"
-
-# sbcast "$SLURM_SUBMIT_DIR"/{inpfile}.in "$LOCAL"
-cp "$SLURM_SUBMIT_DIR"/{inpfile}.in "$LOCAL"
-cd "$LOCAL"
-
-run_on_exit() {{
-    set -v
-    rm "$LOCAL"/pathtable
-    find "$LOCAL" -type f -exec chmod 644 '{{}}' \;
-    cp -v -R "$LOCAL"/* "$SLURM_SUBMIT_DIR"
-}}
-
-trap run_on_exit EXIT
-
-$(which qchem) {saveflag}-nt {ppn} "{inpfile}.in" "$SLURM_SUBMIT_DIR/{inpfile}.out"{scratchdir}
+$(which qchem) {saveflag}-nt $SLURM_NTASKS_PER_NODE "{inpfile}.in" "$SLURM_SUBMIT_DIR/{inpfile}.out"{scratchdir}
 chmod 644 "$SLURM_SUBMIT_DIR/{inpfile}.out"
 '''.format(inpfile=inpfile,
            ppn=ppn,
@@ -82,6 +68,9 @@ if __name__ == '__main__':
     parser.add_argument('--release',
                         action='store_true',
                         help='Use a release version of Q-Chem from trunk.')
+    parser.add_argument('--sam',
+                        action='store_true',
+                        help='Use the cluster (customer) copy of Q-Chem.')
     args = parser.parse_args()
     inpfilename = os.path.splitext(args.inpfilename)[0]
 
@@ -92,6 +81,7 @@ if __name__ == '__main__':
                                                  args.time,
                                                  args.save,
                                                  args.debug,
-                                                 args.release))
+                                                 args.release,
+                                                 args.sam))
 
     print(slurmfilename)
