@@ -12,15 +12,18 @@ Molden itself can read these 'malformed' inputs, and save a new
 Avogadro, or VMD. Ideally, one would just call Molden from the command
 line to generate this file, but it doesn't seem that Molden is
 scriptable in this way. In addition, that brings in Molden as a
-dependancy. Open Babel can read/write Molden inputs, but its output is
+dependency. Open Babel can read/write Molden inputs, but its output is
 severly truncated (no MOs!).
 
 Attempt to fix these malformed inputs, knowing what possible section
-headers/keys are and what the 'official' Molden output looks like..
-
+headers/keys are and what the 'official' Molden output looks like.
 """
 
 from __future__ import print_function
+
+
+bfs = ('[5D]', '[5D10F]', '[7F]', '[5D7F]', '[9G]')
+section_headers_no_newline = bfs + tuple('[Molden Format]')
 
 
 def make_file_iterator(filename):
@@ -32,14 +35,23 @@ def make_file_iterator(filename):
 
 
 def getargs():
+
     import argparse
+
     parser = argparse.ArgumentParser()
+
     parser.add_argument('moldeninputfilename')
+
     args = parser.parse_args()
+
     return args
 
 
 def get_molden_file_sections(moldeninputfile):
+    """Parse the given Molden file (iterator) for sections, which are
+    specified by [SECTIONNAME].
+    """
+
     sections_to_ignore = (
         '[Molden Format]',
         '[End of Molden output from Dalton2013]'
@@ -62,8 +74,8 @@ def get_molden_file_sections(moldeninputfile):
                     line = next(moldeninputfile)
             else:
                 sections[k].append(line)
-        # ..We must've already seen a section header (key), so keep it
-        # there.
+        # ...We must've already seen a section header (key), so keep
+        # it there.
         except IndexError:
             sections[k].append(line)
 
@@ -71,8 +83,10 @@ def get_molden_file_sections(moldeninputfile):
 
 
 def cleanup_section_atoms(section_atoms, in_au=False):
-    # If the coordinates are in atomic units (bohr), we must convert
-    # them to Angstroms.
+    """If the coordinates are in atomic units (bohr), we must convert them
+    to Angstroms.
+    """
+
     if in_au:
         section_lines = []
         for line in section_atoms:
@@ -82,14 +96,17 @@ def cleanup_section_atoms(section_atoms, in_au=False):
             section_lines.append(newline)
     else:
         section_lines = section_atoms
+
     return section_lines
 
 
 def cleanup_section_gto(section_gto):
+    """For now, the [GTO] block doesn't require cleaning up."""
     return section_gto
 
 
 def cleanup_section_mo(section_mo):
+    """For now, the [MO] block doesn't require cleaning up."""
     return section_mo
 
 
@@ -97,9 +114,8 @@ def section_end(section_header):
     """Given a section header, do we terminate it with a newline or not?
     Return the correct terminator.
     """
-    bfs = ('[5D]', '[5D10F]', '[7F]', '[5D7F]', '[9G]')
-    section_headers = bfs + tuple('[Molden Format]')
-    if section_header in section_headers:
+
+    if section_header in section_headers_no_newline:
         return ''
     else:
         return '\n'
@@ -108,6 +124,7 @@ def section_end(section_header):
 def main(args):
     moldeninputfile = make_file_iterator(args.moldeninputfilename)
     original_sections = get_molden_file_sections(moldeninputfile)
+    print(original_sections)
 
     # for pair in original_sections.items():
     #     print(pair)
@@ -162,7 +179,6 @@ def main(args):
         '[FR-NORM-COORD]',
         '[INT]'
     )
-    bfs = ('[5D]', '[5D10F]', '[7F]', '[5D7F]', '[9G]')
 
     if 'qchem' in args.moldeninputfilename:
         original_ordering = original_ordering_qchem
@@ -176,6 +192,7 @@ def main(args):
     #     print(section_header)
     #     print('\n'.join(original_sections[section_header]), end=section_end(section_header))
 
+    # ???
     singular_keywords = (
     )
 
@@ -183,35 +200,43 @@ def main(args):
     new_sections['[Molden Format]'] = []
 
     for sh_original in original_sections:
-        for sh_target in target_ordering:
 
-            if '[Atoms]' in sh_original:
-                if not any('[Atoms]' in k for k in new_sections):
-                    new_sh = '[Atoms] Angs'
-                    if 'AU' in sh_original:
-                        new_sections[new_sh] = cleanup_section_atoms(original_sections[sh_original], in_au=True)
-                    elif 'Angs' in sh_original:
-                        new_sections[new_sh] = cleanup_section_atoms(original_sections[sh_original], in_au=False)
-                    else:
-                        # Assume we're already in Angstroms.
-                        new_sections[new_sh] = cleanup_section_atoms(original_sections[sh_original], in_au=False)
+        if '[Atoms]' in sh_original:
+            if not any('[Atoms]' in k for k in new_sections):
+                new_sh = '[Atoms] Angs'
+                if 'AU' in sh_original:
+                    new_sections[new_sh] = cleanup_section_atoms(original_sections[sh_original], in_au=True)
+                elif 'Angs' in sh_original:
+                    new_sections[new_sh] = cleanup_section_atoms(original_sections[sh_original], in_au=False)
+                else:
+                    # Assume we're already in Angstroms.
+                    new_sections[new_sh] = cleanup_section_atoms(original_sections[sh_original], in_au=False)
 
-            if '[GTO]' in sh_original:
-                if '[GTO]' not in new_sections:
-                    new_sections['[GTO]'] = cleanup_section_gto(original_sections['[GTO]'])
+        elif '[GTO]' in sh_original:
+            if '[GTO]' not in new_sections:
+                new_sections['[GTO]'] = cleanup_section_gto(original_sections['[GTO]'])
 
-            if sh_original in bfs:
-                if sh_original not in new_sections:
-                    new_sections[sh_original] = []
+        elif sh_original in bfs:
+            if sh_original not in new_sections:
+                new_sections[sh_original] = []
 
-            if '[MO]' in sh_original:
-                if '[MO]' not in new_sections:
-                    new_sections['[MO]'] = cleanup_section_mo(original_sections['[MO]'])
+        elif '[MO]' in sh_original:
+            if '[MO]' not in new_sections:
+                new_sections['[MO]'] = cleanup_section_mo(original_sections['[MO]'])
+
+        # For sections that don't require cleaning up, just pass them
+        # through.
+        else:
+            if sh_original not in new_sections:
+                new_sections[sh_original] = original_sections[sh_original]
 
     for sh in target_ordering:
         if sh in new_sections:
             print(sh)
             print('\n'.join(new_sections[sh]), end=section_end(sh))
+
+    return
+
 
 if __name__ == '__main__':
     args = getargs()
