@@ -18,19 +18,17 @@ def template_slurmfile_qchem(inpfile, ppn, time, save, debug, release, sam):
     if debug:
         module = 'qchem/trunk_intel_debug'
     if sam:
-        module = 'qchem/4.3'
+        module = 'qchem/sam/4.3'
     return '''#!/bin/bash
 
 #SBATCH --job-name={inpfile}
 #SBATCH --output={inpfile}.slurmout
-#SBATCH --partition=smp
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node={ppn}
 #SBATCH --time=0-{time}:00:00
+#SBATCH --partition=smp
 
 module purge
-module load intel/2017.1.132
-module load mkl/2017.1.132
 module load {module}
 
 $(which qchem) {saveflag}-nt $SLURM_NTASKS_PER_NODE "{inpfile}.in" "$SLURM_SUBMIT_DIR/{inpfile}.out"{scratchdir}

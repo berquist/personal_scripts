@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
-"""submit-qchem.py: A standalone script for submitting Q-Chem jobs to
+"""submit_qchem.py: A standalone script for submitting Q-Chem jobs to
 Frank's PBS scheduler."""
 
 from __future__ import print_function
 
 
-def template_pbsfile_qchem(inpfile, ppn, time, queue, save, old, new, debug, release, lowqos):
+def template_pbsfile_qchem(inpfile, ppn, time, queue, save, lowqos):
     """The template for a PBS jobfile that calls Q-Chem."""
     saveflag = ''
     scratchdir = ''
@@ -14,10 +14,6 @@ def template_pbsfile_qchem(inpfile, ppn, time, queue, save, old, new, debug, rel
         saveflag = '-save '
         scratchdir = ' "{inpfile}.${{PBS_JOBID}}"'.format(inpfile=inpfile)
     module = 'qchem/4.4-trunk.20160910.omp.release'
-    if debug:
-        module = 'qchem/trunk_intel_debug'
-    if release:
-        module = 'qchem/trunk_intel_release'
     qosline = '#PBS -l qos=investor'
     if lowqos:
         qosline = '#PBS -l qos=low'
@@ -81,18 +77,6 @@ if __name__ == '__main__':
     parser.add_argument('--save',
                         action='store_true',
                         help='save the scratch directory')
-    parser.add_argument('--old',
-                        action='store_true',
-                        help='Use an older (known good) version of Q-Chem.')
-    parser.add_argument('--new',
-                        action='store_true',
-                        help='Use a newer version of Q-Chem.')
-    parser.add_argument('--debug',
-                        action='store_true',
-                        help='Use a debugging version of Q-Chem from trunk.')
-    parser.add_argument('--release',
-                        action='store_true',
-                        help='Use a release version of Q-Chem from trunk.')
     parser.add_argument('--lowqos',
                         action='store_true',
                         help='set "#PBS -l qos=low"')
@@ -106,10 +90,6 @@ if __name__ == '__main__':
                                              args.time,
                                              args.queue,
                                              args.save,
-                                             args.old,
-                                             args.new,
-                                             args.debug,
-                                             args.release,
                                              args.lowqos))
 
     print(pbsfilename)
