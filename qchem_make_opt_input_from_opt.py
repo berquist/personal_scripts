@@ -176,7 +176,7 @@ if __name__ == '__main__':
 
         # Determine the name of the file we're writing.
         assert outputfilename.endswith('.out')
-        numstr = re.search(r'opt(\d*).out$', outputfilename).groups()[0]
+        numstr = re.search(r'opt(\d*)', outputfilename).groups()[0]
         if numstr == '':
             optnum = 2
         else:
