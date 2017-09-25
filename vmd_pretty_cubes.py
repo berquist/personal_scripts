@@ -87,6 +87,7 @@ elif nsurf == 3:
 color1id = 23
 color2id = 29
 vmdrenderfile = '''
+# -*- mode: tcl -*-
 axes location off
 display resize 1050 1050
 display projection Orthographic

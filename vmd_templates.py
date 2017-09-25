@@ -9,7 +9,9 @@ def vmd_covp_base_template():
     """The default commands that get added to the top of every COVP
     script.
     """
-    return """# general display and rendering settings
+    return """# -*- mode: tcl -*-
+
+# general display and rendering settings
 display antialias on
 display depthcue off
 display culling off
