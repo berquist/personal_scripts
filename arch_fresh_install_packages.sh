@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 ### Keep track of my preferred packages and install them on a fresh
 ### Arch instance.
@@ -10,6 +10,7 @@ packages=(
     abs
     base
     base-devel
+    compton
     cuda
     gcc-fortran
     gdb
@@ -52,6 +53,7 @@ packages=(
     grace
     gsl
     hdf5
+    hub
     keybase
     keychain
     htop
@@ -62,6 +64,7 @@ packages=(
     lsb-release
     markdown
     mercurial
+    mlocate
     mosh
     mpdecimal
     namcap
@@ -75,7 +78,8 @@ packages=(
     rlwrap
     swig
     tcsh
-    tmux
+    # tmux
+    tree
     unrar
     wget
     xsel
@@ -165,6 +169,7 @@ packages=(
     python2-pyqt5
     python-pytables
     python2-pytables
+    python-scikit-learn
     python-scipy
     python2-scipy
     python-sh
@@ -230,6 +235,7 @@ packages=(
     fftw2
     figlet-fonts
     haguichi
+    libgfortran6
     logmein-hamachi
     lzip
     modules
@@ -239,6 +245,7 @@ packages=(
     pelican
     swig2
     symlinks
+    tmux-git
     ttf-ms-fonts
 
     # command-line simple tools
@@ -262,9 +269,11 @@ packages=(
     # python2-ase
     python-llvmlite
     python2-llvmlite
+    python-memory_profiler
     python-numba
     python2-numba
     python-proselint
+    python-pythonpy
     python-seaborn
     python2-seaborn
     python-unp
