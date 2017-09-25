@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# tangle: Given an org-mode file with code blocks, tangle them into
+# scripts/source code files.
+
+# https://github.com/koalaman/shellcheck/wiki/Ignore
+# shellcheck disable=SC2016
+emacs --batch -l org --eval "(org-babel-tangle-file \"$1\")"
