@@ -62,7 +62,7 @@ if __name__ == '__main__':
             xyzfilename = ''.join([stub, '.xyz'])
 
         if args.trajectory:
-            cclib.writer.ccwrite(data, outputdest=xyzfilename, allgeom=True)
+            cclib.io.ccwrite(data, outputdest=xyzfilename, allgeom=True)
         else:
             with open(xyzfilename, 'w') as fh:
                 fh.write(str(len(last_geometry)) + '\n')
