@@ -14,13 +14,9 @@ import sys
 
 try:
     import os
-    import grp
-    import pwd
-    import getpass
     import argparse
     import shlex
     from uuid import uuid4
-    from imp import load_source
     import subprocess as sp
 except ImportError:
     if sys.version_info < (2, 7):
@@ -30,16 +26,6 @@ except ImportError:
 
 def get_arguments(args=None):
     """Get arguments from user"""
-
-    ### Default Settings ###
-    # Determine default billing account
-    # ... first, determine group(s) that the user belongs to
-    # ... then pick the first group as the billing account (most likely the PI's # name)
-    user = getpass.getuser()
-    groups = [g.gr_name for g in grp.getgrall() if user in g.gr_mem]
-    gid = pwd.getpwnam(user).pw_gid
-    groups.append(grp.getgrgid(gid).gr_name)
-    def_account = groups[0] # default billing account
 
     # Determine default Q-Chem version
     # We first try $QC environment variable, if that is not defined,
@@ -61,7 +47,6 @@ def get_arguments(args=None):
                                      file and submits a job""",
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-
     # pylint: disable=C0326
     parser.add_argument('job',         type=str,  nargs='+', help='Input File')
     parser.add_argument('--ppn',       type=int,  default=1, help='Number of processors per node')
@@ -71,13 +56,11 @@ def get_arguments(args=None):
     parser.add_argument('--queue',     type=str,  default='smp', help='Queue (cluster) to submit to')
     # see https://crc.pitt.edu/documentation/h2p/ for more information
     parser.add_argument('--partition', type=str,  default='smp', help='Hardware within cluster')
-    parser.add_argument('--walltime',  type=str,  default='1:00:00', help='walltime in HH:MM:SS format')
-    # parser.add_argument('--account',   type=str,  default=def_account, help='account with Gold on Frank' )
-    # parser.add_argument('--path',      type=str,  default=def_path, help='path to program')
+    parser.add_argument('--walltime',  type=str,  default='1:00:00', help='Walltime in HH:MM:SS format')
+    parser.add_argument('--path',      type=str,  default=def_path, help='Path to program')
     parser.add_argument('--saveslurm', action='store_true', help='Save submission script (SLURM file) when set')
     parser.add_argument('--save',      action='store_true', help='Save scratch directory when set')
     parser.add_argument('--dry',       action='store_true', help='Do not run sbatch on SLURM file when True')
-    # parser.add_argument('--investor',  type=bool, default=True, help='Add prefix "i" to queue name if you are an investor group')
     parser.add_argument('--email',     type=str,  default='off', help='Email address for job start/finish notifications, set to "off" to turn off')
     parser.add_argument('--jobname',   type=str,  default='off', help='jobname to display in queue')
     parser.add_argument('--qcrc',      type=str,  default='off', help='qcrc path, defaults to qcrc instead of checking for Q-Chem modules, \'auto\' will find the last modified qcrc')
@@ -179,7 +162,7 @@ def writeslurm(opts, job):
 
     parallel_string = ""
     if int(opts.nodes) > 1:
-        total_cores = str(int(opts.nodes) * int(opts.ppn))
+        # total_cores = str(int(opts.nodes) * int(opts.ppn))
         parallel_string = "-np " + str(opts.nodes) + " -nt " + str(opts.ppn)
     elif int(opts.ppn) > 1:
         parallel_string = "-nt ${PPN} "
@@ -213,6 +196,8 @@ def submit(RUN):
     bashCommand = 'sbatch ' + RUN
     status = sp.check_output(shlex.split(bashCommand)).decode()
 
+    return status
+
 
 def main():
 
@@ -228,7 +213,7 @@ def main():
 
         RUN = writeslurm(opts, job)
 
-        if opts.dry == False:
+        if not opts.dry:
             submit(RUN)
 
 
