@@ -6,38 +6,22 @@
 Authors: Daniel   Lambrecht (original)
          Benjamin  Albrecht (rewritten)
          Eric      Berquist (rewritten for SLURM)
-****
-If replacing old submit script,
-be sure to replace old best_queue as well!
-****
-
-New version requires Python 2.7+ (for argparse)
-
-TODO:
-    - Improve optimal queue selection
-    - Check Limits per queue
-    - Read defaults from ~/.submitrc file
-
 """
-# Python3 compatibility
+
 from __future__ import print_function
 
-# Required to check version
 import sys
 
-# Standard library imports
 try:
     import os
     import grp
     import pwd
     import getpass
     import argparse
-    from subprocess import check_output
     import shlex
     from uuid import uuid4
     from imp import load_source
-    import best_queue
-    import subprocess
+    import subprocess as sp
 except ImportError:
     if sys.version_info < (2, 7):
         raise Exception("Python >= 2.7 required")
@@ -74,27 +58,26 @@ def get_arguments(args=None):
     parser = argparse.ArgumentParser(prog="submit",
                                      usage="%(prog)s job [options] ",
                                      description=""" %(prog)s is a script that auto-generates a SLURM
-                                     file and submits a job, utilizing another script, best_queue, which determines
-                                     the best queue to submit for minimizing wait times""",
+                                     file and submits a job""",
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
 
     # pylint: disable=C0326
     parser.add_argument('job',         type=str,  nargs='+', help='Input File')
-    parser.add_argument('--program',   type=str,  default='qchem', help='program to run on input file')
-    parser.add_argument('--ppn',       type=int,  default=1, help='processors per node')
-    parser.add_argument('--nodes',     type=int,  default=1, help='nodes')
-    parser.add_argument('--mem',       type=int,  default=-1, help='gb of memory')
-    parser.add_argument('--disk',      type=int,  default=-1, help='gb of scratch disk space')
-    parser.add_argument('--queue',     type=str,  default='auto', help='queue to submit to, auto for best, aggressive for all')
+    parser.add_argument('--ppn',       type=int,  default=1, help='Number of processors per node')
+    parser.add_argument('--nodes',     type=int,  default=1, help='Number of nodes')
+    # parser.add_argument('--mem',       type=int,  default=-1, help='gb of memory')
+    # parser.add_argument('--disk',      type=int,  default=-1, help='gb of scratch disk space')
+    parser.add_argument('--queue',     type=str,  default='smp', help='Queue (cluster) to submit to')
+    # see https://crc.pitt.edu/documentation/h2p/ for more information
+    parser.add_argument('--partition', type=str,  default='smp', help='Hardware within cluster')
     parser.add_argument('--walltime',  type=str,  default='1:00:00', help='walltime in HH:MM:SS format')
-    parser.add_argument('--qos',       type=str,  default='investor', help='priority', choices=['low','standard','investor'])
-    parser.add_argument('--account',   type=str,  default=def_account, help='account with Gold on Frank' )
-    parser.add_argument('--path',      type=str,  default=def_path, help='path to program')
+    # parser.add_argument('--account',   type=str,  default=def_account, help='account with Gold on Frank' )
+    # parser.add_argument('--path',      type=str,  default=def_path, help='path to program')
     parser.add_argument('--saveslurm', action='store_true', help='Save submission script (SLURM file) when set')
     parser.add_argument('--save',      action='store_true', help='Save scratch directory when set')
     parser.add_argument('--dry',       action='store_true', help='Do not run sbatch on SLURM file when True')
-    parser.add_argument('--investor',  type=bool, default=True, help='Add prefix "i" to queue name if you are an investor group')
+    # parser.add_argument('--investor',  type=bool, default=True, help='Add prefix "i" to queue name if you are an investor group')
     parser.add_argument('--email',     type=str,  default='off', help='Email address for job start/finish notifications, set to "off" to turn off')
     parser.add_argument('--jobname',   type=str,  default='off', help='jobname to display in queue')
     parser.add_argument('--qcrc',      type=str,  default='off', help='qcrc path, defaults to qcrc instead of checking for Q-Chem modules, \'auto\' will find the last modified qcrc')
@@ -104,36 +87,15 @@ def get_arguments(args=None):
 
     return opts
 
-def choosequeue(opts):
-    """Automatic selection of submission queue"""
-
-    if opts.queue == "auto":
-
-        queuetimes = best_queue.main(ppn=opts.ppn, nodes=opts.nodes, mem=opts.mem, disk=opts.disk, walltime=opts.walltime, investor=opts.investor)
-
-        print("Choices of queues:")
-        for queuetime in queuetimes:
-            print(queuetime[0])
-
-        queue = queuetimes[0][0]
-        wait = queuetimes[0][1]
-
-        print("Best submission queue: ", queue)
-        print("Estimated wait time: ", wait)
-
-        return queue
-
 
 def writeslurm(opts, job):
-    """
-    Write submission script
+    """Write submission script
     """
 
     job_name, __ = os.path.splitext(job)
     # Create unique ID for job
-    JOB_ID = uuid4().hex # a unique id for the current job
+    JOB_ID = uuid4().hex 
     RUN = "." + job_name + "." + JOB_ID + ".slurm"
-
 
     print("run script = ", RUN)
 
@@ -142,18 +104,14 @@ def writeslurm(opts, job):
     fileh.write("#!/bin/bash\n")
     fileh.write("\n")
 
-    # Jobname
     if opts.jobname == 'off':
         job_dir = os.path.basename(os.path.dirname(os.path.realpath(job)))
         fileh.write("#SBATCH --job-name=" + job_dir + "/" + job_name + "\n")
     else:
         fileh.write("#SBATCH --job-name=" + opts.jobname + "\n")
 
-    # Nodes
     fileh.write("#SBATCH --nodes=" + str(opts.nodes) + "\n")
     fileh.write("#SBATCH --ntasks-per-node=" + str(opts.ppn) + "\n")
-
-    # Walltime
     fileh.write("#SBATCH --time=" + opts.walltime + "\n")
 
     # Memory
@@ -164,13 +122,8 @@ def writeslurm(opts, job):
     # if opts.disk > 0:
     #     fileh.write("#PBS -l ddisk=" + str(opts.disk) + "gb\n")
 
-    # Queue
-    # TODO
-    # fileh.write("#PBS -q " + opts.queue + "\n")
-
-    # Quality of Service
-    # TODO
-    # fileh.write("#PBS -l qos=" + opts.qos + "\n")
+    fileh.write("#SBATCH --queue=" + opts.queue + "\n")
+    fileh.write("#SBATCH --partition=" + opts.partition + "\n")
 
     # Error Logging
     # TODO
@@ -183,28 +136,20 @@ def writeslurm(opts, job):
     #     fileh.write("#PBS -M " + opts.email + "\n")
     fileh.write("\n")
 
-    # Bash variables
-    fileh.write("NODES=" + str(opts.nodes) + "\n")
-    fileh.write("PPN=" + str(opts.ppn) + "\n")
-    fileh.write("\n")
-
-    # Program
-    fileh.write("# Load Modules\n")
     fileh.write("module purge\n")
-    fileh.write("module load intel/2013.0\n")
+    fileh.write("module load intel/2017.3.196\n")
 
     # Modules / qcrc - module manually updated
     # This will load lexigrapically greatest version
     module = "qchem/dlambrecht"
     moduleavail = "modulecmd bash avail " + module
-    status = check_output(shlex.split(moduleavail), stderr=subprocess.STDOUT)
+    status = sp.check_output(shlex.split(moduleavail), stderr=sp.STDOUT).decode()
 
-    # pylint: disable=E1135
     if module in status and opts.qcrc == 'off':
         fileh.write("module load " + module + "\n")
     elif opts.qcrc == 'auto' or opts.qcrc == 'off':
         qcrc = os.path.join(opts.path, 'qcrc')
-        fileh.write(". " + qcrc + "\n")
+        fileh.write("source " + qcrc + "\n")
     else:
         qcrc = opts.qcrc
         if os.path.isfile(qcrc):
@@ -237,14 +182,14 @@ def writeslurm(opts, job):
         total_cores = str(int(opts.nodes) * int(opts.ppn))
         parallel_string = "-np " + str(opts.nodes) + " -nt " + str(opts.ppn)
     elif int(opts.ppn) > 1:
-        parallel_string = "-nt ${PPN}"
+        parallel_string = "-nt ${PPN} "
 
     save_string = ""
     if opts.save:
         save_string = " -save "
 
     fileh.write("\n")
-    fileh.write("$(which qchem) " + parallel_string + save_string + " " + job + " ${SLURM_SUBMIT_DIR}/" + job_name + ".out " + job_name + "." + JOB_ID + "\n")
+    fileh.write("$(which qchem)" + parallel_string + save_string + " " + job + " ${SLURM_SUBMIT_DIR}/" + job_name + ".out " + job_name + "." + JOB_ID + "\n")
     fileh.write("chmod 640 ${SLURM_SUBMIT_DIR}/" + job_name + ".out\n")
     fileh.write("\n")
 
@@ -266,27 +211,21 @@ def submit(RUN):
     """
 
     bashCommand = 'sbatch ' + RUN
-    status = check_output(shlex.split(bashCommand))
+    status = sp.check_output(shlex.split(bashCommand)).decode()
+
 
 def main():
 
-    # Get arguments using argparse
     opts = get_arguments()
 
-    # Create job name
     for job in opts.job:
         print(job)
         #job_name = os.path.splitext(job)[0]
         job_name = os.path.basename(job)
         print("job name = ", job_name)
 
-        # Choose optimal queue
-        # if opts.queue == "auto":
-        #     opts.queue = choosequeue(opts)
-        # TODO
         opts.queue = 'smp'
 
-        # Write batch script file
         RUN = writeslurm(opts, job)
 
         if opts.dry == False:
