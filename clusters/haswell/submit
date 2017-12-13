@@ -53,9 +53,9 @@ def get_arguments(args=None):
     parser.add_argument('--nodes',     type=int,  default=1, help='Number of nodes')
     # parser.add_argument('--mem',       type=int,  default=-1, help='gb of memory')
     # parser.add_argument('--disk',      type=int,  default=-1, help='gb of scratch disk space')
-    parser.add_argument('--queue',     type=str,  default='smp', help='Queue (cluster) to submit to')
     # see https://crc.pitt.edu/documentation/h2p/ for more information
-    parser.add_argument('--partition', type=str,  default='smp', help='Hardware within cluster')
+    parser.add_argument('--cluster',   type=str,  default='smp', help='Queue (cluster) to submit to')
+    parser.add_argument('--partition', type=str,  default='smp', help='Queue (hardware) within cluster')
     parser.add_argument('--walltime',  type=str,  default='1:00:00', help='Walltime in HH:MM:SS format')
     parser.add_argument('--path',      type=str,  default=def_path, help='Path to program')
     parser.add_argument('--saveslurm', action='store_true', help='Save submission script (SLURM file) when set')
@@ -105,7 +105,7 @@ def writeslurm(opts, job):
     # if opts.disk > 0:
     #     fileh.write("#PBS -l ddisk=" + str(opts.disk) + "gb\n")
 
-    fileh.write("#SBATCH --queue=" + opts.queue + "\n")
+    fileh.write("#SBATCH --cluster=" + opts.cluster + "\n")
     fileh.write("#SBATCH --partition=" + opts.partition + "\n")
 
     # Error Logging
@@ -123,7 +123,7 @@ def writeslurm(opts, job):
     fileh.write("module load intel/2017.3.196\n")
 
     # Modules / qcrc - module manually updated
-    # This will load lexigrapically greatest version
+    # This will load lexicograpically greatest version
     module = "qchem/dlambrecht"
     moduleavail = "modulecmd bash avail " + module
     status = sp.check_output(shlex.split(moduleavail), stderr=sp.STDOUT).decode()
@@ -208,8 +208,6 @@ def main():
         #job_name = os.path.splitext(job)[0]
         job_name = os.path.basename(job)
         print("job name = ", job_name)
-
-        opts.queue = 'smp'
 
         RUN = writeslurm(opts, job)
 
