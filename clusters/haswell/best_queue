@@ -1,0 +1,221 @@
+#!/usr/bin/env python
+# encoding: utf-8
+
+"""
+This script determines the best queue for a given job
+and also serves as an improved qstat
+
+Authors: Albert Defusco (original)
+         Benjamin Albrecht (rewritten)
+         Eric Berquist (rewritten for SLURM)
+
+New version requires Python 2.7+ (for argparse)
+
+"""
+# Python3 compatibility
+from __future__ import print_function
+
+# Required to check version
+import sys
+import time
+
+try:
+    from collections import namedtuple
+    import argparse
+    from subprocess import check_output
+    import shlex
+except ImportError:
+    if sys.version_info < (2, 7):
+        raise Exception("Python >= 2.7 required")
+
+# Global Definitions
+#         name
+#         min_nodes, max_nodes
+#         min_cores, max_cores,
+#         min_mem (GB), max_mem (GB),
+#         min_disk (GB), max_disk (GB),
+#         max_cores_per_user,
+#         cost,
+#         max_walltime (h)
+
+def _get_arguments(args=None):
+    """Get arguments from user"""
+    parser = argparse.ArgumentParser(prog="best_queue",
+                                     usage="%(prog)s job [options] ",
+                                     description=""" %(prog)s is a queue status analysis""",
+                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+
+    parser.add_argument('--ppn',      type=int,  default=0, help='processors per node')
+    parser.add_argument('--nodes',    type=int,  default=0, help='nodes')
+    parser.add_argument('--mem',      type=int,  default=0, help='gb of memory')
+    parser.add_argument('--disk',     type=int,  default=0, help='gb of scratch disk space')
+    parser.add_argument('--walltime', type=str,  default='00:00:00', help='walltime in HH:MM:SS format')
+    parser.add_argument('--investor', type=bool, default=True, help='Investor status')
+
+    opts = parser.parse_args(args)
+
+    return opts
+
+
+def _inrange(min, value, max):
+    """ Basic function to check if value is in a given range """
+    return (value >= min) and (value <= max)
+
+
+def _time2sec(t):
+    if t == "INFINITY":
+        time = 10000000
+    elif len(t.split(':')) == 3:
+        h, m, s = [int(i) for i in t.split(':')]
+        time = 3600*h + 60*m + s
+    elif len(t.split(':')) == 4:
+        d, h, m, s = [int(i) for i in t.split(':')]
+        time = 86400*d + 3600*h + 60*m + s
+    else:
+        print("Time not in expected format:\n", t)
+        raise
+
+    return time
+
+def _valid_queue(queue, opts):
+    """ Check if queue is valid input """
+
+    q = queue
+
+    accept = True
+    if opts.nodes > 0:
+        accept = accept and _inrange(q.min_nodes, opts.nodes, q.max_nodes)
+    if opts.ppn > 0:
+        accept = accept and _inrange(q.min_ppn, opts.ppn, q.max_ppn)
+    if opts.total_cores> 0:
+        accept = accept and _inrange(q.min_ppn, opts.total_cores, q.max_ppn)
+    if _time2sec(opts.walltime) > 0:
+        accept = accept and _inrange(0, _time2sec(opts.walltime), q.max_wall*3600)
+    if opts.mem > 0:
+        accept = accept and _inrange(q.min_mem, opts.mem, q.max_mem)
+    return accept
+
+
+def _find_matches(opts):
+    """ Find all possible matches for job """
+    # queues[q]
+    # [0] min_nodes
+    # [1] max_nodes
+    # [2] min_ppn
+    # [3] max_ppn
+    # [4] min_memory (gb)
+    # [5] max_memory (gb)
+    # [6] min_disk (gb)
+    # [7] max_disk (gb)
+    # [8] max_ppu (max proccessors per user)
+    # [9] RU multiplier
+    # [10] max_walltime (hours)
+
+    # 8, 12, 16 (48) ppn
+    queuetuple = namedtuple('queue',
+                            ['name',
+                            'min_nodes',
+                            'max_nodes',
+                            'min_ppn',
+                            'max_ppn',
+                            'min_mem',
+                            'max_mem',
+                            'min_disk',
+                            'max_disk',
+                            'max_ppu',
+                            'ru',
+                            'max_wall'])
+
+    shared       = queuetuple('shared'      ,1  ,   1,  1,  48,   0,  32,    1,  150,  96, 0.5, 144)
+    nehalem      = queuetuple('nehalem'     ,1  ,   1,  1,  64,   0,   0,    0,  200, 512, 1.5, 144)
+    mem48g       = queuetuple('mem48g'      ,1  ,  12,  1,   1,   4,  48,    0, 2000, 999, 1.5,  48)
+    shared_large = queuetuple('shared_large',1  ,   1,  1,  16,   0,  63,  113, 1811,  96, 1.5, 144)
+    test         = queuetuple('test'        ,1  ,  16,  1,   8,   0,  12,    0,  230,  16, 1.0,   2)
+    dist_small   = queuetuple('dist_small'  ,4  ,   6, 12,  64,   0,   4,  905,  905,  72, 1.0,  12)
+    idist        = queuetuple('idist'       ,2  ,  12,  8, 144,   0,   4,  905,  905, 144, 1.0, 144)
+    dist_big     = queuetuple('dist_big'    ,4  ,  18,  4, 288,   0,   4,  905,  905, 288, 1.5, 144)
+    dist_fast    = queuetuple('dist_fast'   ,4  ,  12, 16, 192,   0,   8,  905,  905, 192, 1.5, 144)
+    dist_ivy     = queuetuple('dist_ivy'    ,16 ,  16, 64, 160,   0,   4,  905,  905, 160, 1.5, 144)
+
+    queues = [shared, nehalem, mem48g, shared_large, test, dist_small, idist, dist_big, dist_fast, dist_ivy]
+
+    matches = []
+    for queue in sorted(queues):
+        if _valid_queue (queue, opts):
+            matches.append(queue)
+    return matches
+
+
+def _sort_queues(matches, opts):
+
+    queuetimes = []
+
+    # Get a sorted list of queues and return list
+    for queue in matches:
+        bashCommand =('frank-avail ' + queue.name)
+        output = check_output(shlex.split(bashCommand)).decode("utf-8").split("\n")
+        best_wait_sec = 10000000
+        best_wait = ""
+
+        for line in output[2:]:
+            Tokens = str(line).split()
+            if not len(Tokens) == 5:
+                break
+            cores = int(Tokens[0])
+            nodes = int(Tokens[1])
+            wall = Tokens[2]
+            wait = Tokens[3]
+            start = Tokens[4]
+
+            t_requested = _time2sec(opts.walltime)
+            t_avail = _time2sec(wall)
+            t_wait = _time2sec(wait)
+
+            ## TODO FIXME total_cores ISSUE HERE
+            if cores > opts.total_cores and t_requested <= t_avail:
+                if t_wait <= best_wait_sec:
+                    best_wait_sec = t_wait
+                    best_wait = wait
+
+        queuetimes.append([queue.name, best_wait_sec])
+
+    queuetimes = sorted(queuetimes, key=lambda l:l[1])
+
+    # Remove 'test' queue unless it is the only available queue
+    if not len(queuetimes) == 1 and 'test' in [x[0] for x in queuetimes]:
+        queuenames = [x[0] for x in queuetimes]
+        idx = queuenames.index('test')
+        queuetimes.pop(idx)
+
+    return queuetimes
+
+
+def main(ppn=0, nodes=0, mem=0, disk=0, walltime='00:00:00', investor=True):
+
+    # This is a terrible design, but it works for now
+    options = namedtuple("opts", ['ppn', 'nodes', 'mem', 'disk', 'walltime', 'investor', 'total_cores'])
+    opts = options(ppn, nodes, mem, disk, walltime, investor, ppn*nodes)
+
+    # Find matching queues to given parameters (no args = all queues)
+    matches = _find_matches(opts)
+    if len(matches) == 0:
+        print("No matching queue found.")
+        sys.exit(1)
+
+    # Get list of queues sorted by wait time
+    queuetimes = _sort_queues(matches, opts)
+
+    return queuetimes
+
+
+if __name__ == "__main__":
+
+    opts = _get_arguments()
+
+    queuetimes = main(ppn=opts.ppn, nodes=opts.nodes, mem=opts.mem, disk=opts.disk, walltime=opts.walltime, investor=opts.investor)
+
+    print('{0:15}  {1:10}'.format('Queue', 'Wait time'))
+    print('============================')
+    for q in queuetimes:
+        timesec = time.strftime('%H:%M:%S', time.gmtime(q[1]))
+        print('{0:15} : {1:10}'.format(q[0], timesec))
