@@ -32,13 +32,13 @@ def get_arguments(args=None):
     # we assume we are on H2P and we pick the latest version of the
     # Q-Chem trunk
     def_path = os.environ.get("QC")
-    if not def_path:
-        qchem_dir = "/ihome/dlambrecht/software"
-        all_subdirs = [qchem_dir + "/" + d
-                       for d in os.listdir(qchem_dir)
-                       if not os.path.isfile(d) and "qchem" in d and "trunk" in d]
-        latest_subdir = max(all_subdirs, key=os.path.getmtime)
-        def_path = latest_subdir # default version
+    # if not def_path:
+    #     qchem_dir = "/ihome/dlambrecht/software/qchem"
+    #     all_subdirs = [qchem_dir + "/" + d
+    #                    for d in os.listdir(qchem_dir)
+    #                    if d not in ('qcaux', 'qcref', 'qc_ext_libs')]
+    #     latest_subdir = max(all_subdirs, key=os.path.getmtime)
+    #     def_path = latest_subdir # default version
 
     # Argparse parsing
     parser = argparse.ArgumentParser(prog="submit",
@@ -63,7 +63,7 @@ def get_arguments(args=None):
     parser.add_argument('--dry',       action='store_true', help='Do not run sbatch on SLURM file when True')
     parser.add_argument('--email',     type=str,  default='off', help='Email address for job start/finish notifications, set to "off" to turn off')
     parser.add_argument('--jobname',   type=str,  default='off', help='jobname to display in queue')
-    parser.add_argument('--qcrc',      type=str,  default='off', help='qcrc path, defaults to qcrc instead of checking for Q-Chem modules, \'auto\' will find the last modified qcrc')
+    # parser.add_argument('--qcrc',      type=str,  default='off', help='qcrc path, defaults to qcrc instead of checking for Q-Chem modules, \'auto\' will find the last modified qcrc')
 
     opts = parser.parse_args(args)
     print(opts)
@@ -92,6 +92,7 @@ def writeslurm(opts, job):
         fileh.write("#SBATCH --job-name=" + job_dir + "/" + job_name + "\n")
     else:
         fileh.write("#SBATCH --job-name=" + opts.jobname + "\n")
+    fileh.write("#SBATCH --output=" + job_name + ".slurmout\n")
 
     fileh.write("#SBATCH --nodes=" + str(opts.nodes) + "\n")
     fileh.write("#SBATCH --ntasks-per-node=" + str(opts.ppn) + "\n")
@@ -128,6 +129,7 @@ def writeslurm(opts, job):
     moduleavail = "modulecmd bash avail " + module
     status = sp.check_output(shlex.split(moduleavail), stderr=sp.STDOUT).decode()
 
+    opts.qcrc = '/ihome/dlambrecht/erb74/opt/apps/qchem/haswell/5.0.2-r26631-20171216-i2017.1.132/qcrc_erb74'
     if module in status and opts.qcrc == 'off':
         fileh.write("module load " + module + "\n")
     elif opts.qcrc == 'auto' or opts.qcrc == 'off':
@@ -136,7 +138,7 @@ def writeslurm(opts, job):
     else:
         qcrc = opts.qcrc
         if os.path.isfile(qcrc):
-            fileh.write(". " + qcrc+"\n")
+            fileh.write("source " + qcrc + "\n")
         else:
             print(qcrc, 'does not exist')
             raise FileNotFoundError
