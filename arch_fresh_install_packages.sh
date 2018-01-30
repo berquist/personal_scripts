@@ -30,6 +30,7 @@ packages=(
 
     # command-line tools and general libraries
     ack
+    arb
     arrayfire
     aspell
     aspell-en
@@ -58,6 +59,7 @@ packages=(
     keychain
     htop
     iotop
+    languagetool
     lapack
     lesspipe
     lftp
