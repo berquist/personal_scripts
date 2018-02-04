@@ -131,19 +131,24 @@ if __name__ == '__main__':
         # assert len(cdft_becke_populations) == len(atomnos)
 
         print(cdft_becke_populations)
-        print('total:', sum(cdft_becke_populations))
+        total = sum(cdft_becke_populations)
+        print('total:', total)
 
         constraint_values, all_constraints = parse_cdft_block(outputfilename)
         assert len(constraint_values) == len(all_constraints)
 
         for constraints_for_coeff_list in all_constraints:
+            population_remainder = total
             for constraint in constraints_for_coeff_list:
                 charge_deviation, idx_atom1, idx_atom2 = constraint
                 idx_atom1 -= 1
                 idx_atom2 -= 1
-                total_pop = sum(cdft_becke_populations[idx_atom1:idx_atom2+1])
-                print('constraint:', constraint, total_pop)
+                constraint_total_pop = sum(cdft_becke_populations[idx_atom1:idx_atom2+1])
+                print('constraint:', constraint, constraint_total_pop)
+                population_remainder -= constraint_total_pop
             # What is the population of the remainder?
+            # This is wrong; what if not all atoms had a constraint?
+            # It would miss them.
             populations_remainder = cdft_becke_populations[idx_atom2+1:]
-            print(populations_remainder)
-            print('remainder:', sum(populations_remainder))
+            # print('remainder:', sum(populations_remainder))
+            print('remainder:', population_remainder)

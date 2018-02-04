@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 '''Parse the reduced MO blocks for ...
 
@@ -16,16 +16,19 @@ from __future__ import print_function
 
 from docopt import docopt
 from cclib.io import ccopen
-from itertools import izip_longest
+from itertools import zip_longest
+import re
 
 
 def parse_line(line, max_mo_index, orbitals, spin):
     """Parse a single line of an orbital composition section."""
     split = line.split()
-    idx_atom = int(split[0])
-    element = split[1]
-    orbital_name = split[2]
-    contribs = list(map(float, split[3:]))
+    idx_atom_element = split[0]
+    m = re.search("(\d*)", idx_atom_element)
+    idx_atom = int(m.groups()[0])
+    element = split[0][m.lastindex:]
+    orbital_name = split[1]
+    contribs = [float(x) for x in split[2:]]
     mo_indices = list(range(max_mo_index - len(contribs), max_mo_index))
     for i, contrib in enumerate(contribs):
         entry = (idx_atom, element, orbital_name, contrib, spin)
@@ -82,7 +85,7 @@ def get_orbital_contribs_within_threshold(orbitals, threshold, max_orbital):
     MO.
     """
     neworbitals = dict()
-    for mo_index in orbitals.iterkeys():
+    for mo_index in orbitals.keys():
         if mo_index <= max_orbital:
             for contrib in orbitals[mo_index]:
                 if contrib[3] >= threshold:
@@ -102,7 +105,7 @@ def pretty_print_orbitals(energies, orbitals, nmo, has_beta):
     else:
         header_template  = ' {key} {en_alpha} {en_beta}'
         contrib_template = '  {:3} {:2} {:5} {:5} {spin:5}'
-    for key in orbitals.iterkeys():
+    for key in orbitals.keys():
         header_dict = {'key': key,
                        'en_alpha': energies[key],
                        'en_beta': energies[key + (has_beta * nmo)]}
@@ -142,7 +145,7 @@ def pretty_print_orbitals_dual(results):
         contrib_template_left  = '  {:3} {:2} {:5} {:5} {spin:5}'
         # header_template_right
         # contrib_template_right
-    for key1, key2 in izip_longest(orbitals1.iterkeys(), orbitals2.iterkeys()):
+    for key1, key2 in izip_longest(orbitals1.keys(), orbitals2.keys()):
         header_dict = {
             'key1': key1,
             'en_alpha1': energies1[key1],

@@ -2,4 +2,4 @@
 
 # qchem_cppcheck.sh: ...
 
-cppcheck --enable=all --std=c++03 ./*.C ./*.h
+cppcheck --enable=all --language=c++ --std=c++03 ./*.C ./*.h
