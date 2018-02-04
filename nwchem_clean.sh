@@ -8,6 +8,7 @@ rm -f ./*.cfock
 rm -f ./*.cphf_rhs.*
 rm -f ./*.cphf_sol.*
 rm -f ./*.db
+rm -f ./*.drv.hess
 rm -f ./*.fd_ddipole
 rm -f ./*.gridpts.*
 rm -f ./*.grinfo.*
