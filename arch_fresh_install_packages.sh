@@ -137,6 +137,8 @@ packages=(
     python2-joblib
     python-matplotlib
     python2-matplotlib
+    python-mdanalysis
+    python2-mdanalysis
     python-mpmath
     python2-mpmath
     python-nose
