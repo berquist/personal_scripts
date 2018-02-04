@@ -109,6 +109,9 @@ def writeslurm(opts, job):
     fileh.write("#SBATCH --cluster=" + opts.cluster + "\n")
     fileh.write("#SBATCH --partition=" + opts.partition + "\n")
 
+    # Priority
+    # TODO
+
     # Error Logging
     # TODO
     # fileh.write("#PBS -j oe\n")
@@ -146,15 +149,15 @@ def writeslurm(opts, job):
     fileh.write("\n")
 
     fileh.write("cd ${SLURM_SUBMIT_DIR}\n")
-    fileh.write("cp ${SLURM_SUBMIT_DIR}/"+job+" ${LOCAL}\n")
-    fileh.write("cd ${LOCAL}\n")
+    fileh.write("cp ${SLURM_SUBMIT_DIR}/"+job+" ${SLURM_SCRATCH}\n")
+    fileh.write("cd ${SLURM_SCRATCH}\n")
     fileh.write("\n")
 
     if opts.save:
         fileh.write("run_on_exit() {\n")
         fileh.write("    set -v\n")
-        fileh.write("    rm $LOCAL/pathtable\n")
-        fileh.write("    cp -v -R $LOCAL/* $SLURM_SUBMIT_DIR\n")
+        fileh.write("    rm ${SLURM_SCRATCH}/pathtable\n")
+        fileh.write("    cp -v -R ${SLURM_SCRATCH}/* $SLURM_SUBMIT_DIR\n")
         fileh.write("}\n")
         fileh.write("\n")
 
@@ -178,8 +181,8 @@ def writeslurm(opts, job):
     fileh.write("chmod 640 ${SLURM_SUBMIT_DIR}/" + job_name + ".out\n")
     fileh.write("\n")
 
-    if opts.saveslurm:
-        fileh.write("cp -r ${LOCAL}/* ${SLURM_SUBMIT_DIR}/\n")
+    if opts.save:
+        fileh.write("cp -r ${SLURM_SCRATCH}/* ${SLURM_SUBMIT_DIR}/\n")
 
     if not opts.saveslurm:
         fileh.write("rm ${SLURM_SUBMIT_DIR}/" + RUN + "\n")
