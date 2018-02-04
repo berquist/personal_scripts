@@ -17,6 +17,17 @@ def getargs():
     args = parser.parse_args()
     return args
 
+
+def print_polarizability(data, only_iso=False):
+    if hasattr(data, 'polarizabilities'):
+        for polarizability in data.polarizabilities:
+            if not only_iso:
+                print(polarizability)
+            print('avg(trace)       :', np.trace(polarizability) / 3)
+            print('avg(sum(eigvals)):', np.sum(np.linalg.eigvals(polarizability)) / 3)
+    return
+
+
 if __name__ == '__main__':
 
     args = getargs()
@@ -27,10 +38,6 @@ if __name__ == '__main__':
             data = job.parse()
             if hasattr(data, 'polarizabilities'):
                 print(outputfilename)
-                for polarizability in data.polarizabilities:
-                    if not args.only_iso:
-                        print(polarizability)
-                    print('avg(trace)       :', np.trace(polarizability) / 3)
-                    print('avg(sum(eigvals)):', np.sum(np.linalg.eigvals(polarizability)) / 3)
+            print_polarizability(data, args.only_iso)
         except:
             pass
