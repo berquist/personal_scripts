@@ -64,7 +64,8 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument('inpfilename',
-                        help='the DALTON input file to submit')
+                        help='the DALTON input file to submit',
+                        nargs='*')
     parser.add_argument('--ppn',
                         type=int,
                         default=12,
@@ -77,13 +78,15 @@ if __name__ == "__main__":
                         help='An arbitrary number of files to copy to $LOCAL.',
                         nargs='*')
     args = parser.parse_args()
-    inpfilename = os.path.splitext(args.inpfilename)[0]
 
-    slurmfilename = inpfilename + '.slurm'
-    with open(slurmfilename, 'w') as slurmfile:
-        slurmfile.write(template_slurmfile_dalton(inpfilename,
-                                                  args.ppn,
-                                                  args.time,
-                                                  args.extrafiles))
+    for inpfilename in args.inpfilename:
+        inpfilename = os.path.splitext(inpfilename)[0]
 
-    print(slurmfilename)
+        slurmfilename = inpfilename + '.slurm'
+        with open(slurmfilename, 'w') as slurmfile:
+            slurmfile.write(template_slurmfile_dalton(inpfilename,
+                                                      args.ppn,
+                                                      args.time,
+                                                      args.extrafiles))
+
+        print(slurmfilename)

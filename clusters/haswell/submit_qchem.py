@@ -48,7 +48,8 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('inpfilename',
-                        help='the Q-Chem input file to submit')
+                        help='the Q-Chem input file to submit',
+                        nargs='*')
     parser.add_argument('--ppn',
                         type=int,
                         default=12,
@@ -70,16 +71,18 @@ if __name__ == '__main__':
                         action='store_true',
                         help='Use the cluster (customer) copy of Q-Chem.')
     args = parser.parse_args()
-    inpfilename = os.path.splitext(args.inpfilename)[0]
 
-    slurmfilename = inpfilename + '.slurm'
-    with open(slurmfilename, 'w') as slurmfile:
-        slurmfile.write(template_slurmfile_qchem(inpfilename,
-                                                 args.ppn,
-                                                 args.time,
-                                                 args.save,
-                                                 args.debug,
-                                                 args.release,
-                                                 args.sam))
+    for inpfilename in args.inpfilename:
+        inpfilename = os.path.splitext(inpfilename)[0]
 
-    print(slurmfilename)
+        slurmfilename = inpfilename + '.slurm'
+        with open(slurmfilename, 'w') as slurmfile:
+            slurmfile.write(template_slurmfile_qchem(inpfilename,
+                                                     args.ppn,
+                                                     args.time,
+                                                     args.save,
+                                                     args.debug,
+                                                     args.release,
+                                                     args.sam))
+
+        print(slurmfilename)
