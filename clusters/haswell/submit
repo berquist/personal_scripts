@@ -117,10 +117,9 @@ def writeslurm(opts, job):
     # fileh.write("#PBS -j oe\n")
 
     # Email Logging
-    # TODO
-    # if not opts.email == "off":
-    #     fileh.write("#PBS -m abe\n")
-    #     fileh.write("#PBS -M " + opts.email + "\n")
+    if not opts.email == "off":
+        fileh.write("#SBATCH --mail-type=ALL\n")
+        fileh.write("#SBATCH --mail-user=" + opts.email + "\n")
     fileh.write("\n")
 
     fileh.write("module purge\n")
