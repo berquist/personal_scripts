@@ -51,8 +51,8 @@ def get_arguments(args=None):
     parser.add_argument('job',         type=str,  nargs='+', help='Input File')
     parser.add_argument('--ppn',       type=int,  default=1, help='Number of processors per node')
     parser.add_argument('--nodes',     type=int,  default=1, help='Number of nodes')
-    # parser.add_argument('--mem',       type=int,  default=-1, help='gb of memory')
-    # parser.add_argument('--disk',      type=int,  default=-1, help='gb of scratch disk space')
+    # parser.add_argument('--mem',       type=int,  default=-1, help='Maximum gb of memory needed')
+    # parser.add_argument('--disk',      type=int,  default=-1, help='Maximum gb of scratch disk space needed')
     # see https://crc.pitt.edu/documentation/h2p/ for more information
     parser.add_argument('--cluster',   type=str,  default='smp', help='Queue (cluster) to submit to')
     parser.add_argument('--partition', type=str,  default='smp', help='Queue (hardware) within cluster')
@@ -61,8 +61,8 @@ def get_arguments(args=None):
     parser.add_argument('--saveslurm', action='store_true', help='Save submission script (SLURM file) when set')
     parser.add_argument('--save',      action='store_true', help='Save scratch directory when set')
     parser.add_argument('--dry',       action='store_true', help='Do not run sbatch on SLURM file when True')
-    parser.add_argument('--email',     type=str,  default='off', help='Email address for job start/finish notifications, set to "off" to turn off')
-    parser.add_argument('--jobname',   type=str,  default='off', help='jobname to display in queue')
+    parser.add_argument('--email',     type=str,  default='off', help='Full email address for job start/finish notifications, set to "off" to turn off')
+    parser.add_argument('--jobname',   type=str,  default='off', help='Jobname to display in queue')
     # parser.add_argument('--qcrc',      type=str,  default='off', help='qcrc path, defaults to qcrc instead of checking for Q-Chem modules, \'auto\' will find the last modified qcrc')
 
     opts = parser.parse_args(args)
@@ -95,7 +95,9 @@ def writeslurm(opts, job):
     fileh.write("#SBATCH --output=" + job_name + ".slurmout\n")
 
     fileh.write("#SBATCH --nodes=" + str(opts.nodes) + "\n")
-    fileh.write("#SBATCH --ntasks-per-node=" + str(opts.ppn) + "\n")
+    # fileh.write("#SBATCH --ntasks-per-node=" + str(opts.ppn) + "\n")
+    fileh.write("#SBATCH --ntasks=" + str(opts.nodes) + "\n")
+    fileh.write("#SBATCH --cpus-per-task=" + str(opts.ppn) + "\n")
     fileh.write("#SBATCH --time=" + opts.walltime + "\n")
 
     # Memory
@@ -127,23 +129,31 @@ def writeslurm(opts, job):
 
     # Modules / qcrc - module manually updated
     # This will load lexicograpically greatest version
-    module = "qchem/dlambrecht"
-    moduleavail = "modulecmd bash avail " + module
-    status = sp.check_output(shlex.split(moduleavail), stderr=sp.STDOUT).decode()
+    # TODO modules aren't working properly right now.
+    # module = "qchem/dlambrecht"
+    # moduleavail = "modulecmd bash avail " + module
+    # status = sp.check_output(shlex.split(moduleavail), stderr=sp.STDOUT).decode()
 
     opts.qcrc = '/ihome/dlambrecht/erb74/opt/apps/qchem/haswell/5.0.2-r26631-20171216-i2017.1.132/qcrc_erb74'
-    if module in status and opts.qcrc == 'off':
-        fileh.write("module load " + module + "\n")
-    elif opts.qcrc == 'auto' or opts.qcrc == 'off':
-        qcrc = os.path.join(opts.path, 'qcrc')
+    # if module in status and opts.qcrc == 'off':
+    #     fileh.write("module load " + module + "\n")
+    # elif opts.qcrc == 'auto' or opts.qcrc == 'off':
+    #     qcrc = os.path.join(opts.path, 'qcrc')
+    #     fileh.write("source " + qcrc + "\n")
+    # else:
+    #     qcrc = opts.qcrc
+    #     if os.path.isfile(qcrc):
+    #         fileh.write("source " + qcrc + "\n")
+    #     else:
+    #         print(qcrc, 'does not exist')
+    #         raise FileNotFoundError
+    qcrc = opts.qcrc
+    if os.path.isfile(qcrc):
         fileh.write("source " + qcrc + "\n")
     else:
-        qcrc = opts.qcrc
-        if os.path.isfile(qcrc):
-            fileh.write("source " + qcrc + "\n")
-        else:
-            print(qcrc, 'does not exist')
-            raise FileNotFoundError
+        print(qcrc, 'does not exist')
+        raise FileNotFoundError
+
 
     fileh.write("\n")
 
@@ -166,10 +176,9 @@ def writeslurm(opts, job):
 
     parallel_string = ""
     if int(opts.nodes) > 1:
-        # total_cores = str(int(opts.nodes) * int(opts.ppn))
-        parallel_string = "-np " + str(opts.nodes) + " -nt " + str(opts.ppn)
+        parallel_string += " -np " + str(opts.nodes) + " -nt " + str(opts.ppn)
     elif int(opts.ppn) > 1:
-        parallel_string = "-nt ${PPN} "
+        parallel_string += " -nt " + str(opts.ppn)
 
     save_string = ""
     if opts.save:

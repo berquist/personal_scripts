@@ -18,20 +18,23 @@ def template_slurmfile_qchem(inpfile, ppn, time, save, debug, release, sam):
     if debug:
         module = 'qchem/trunk_intel_debug'
     if sam:
-        module = 'qchem/sam/4.3'
+        module = 'qchem/5.0'
     return '''#!/bin/bash
 
 #SBATCH --job-name={inpfile}
 #SBATCH --output={inpfile}.slurmout
 #SBATCH --nodes=1
-#SBATCH --ntasks-per-node={ppn}
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task={ppn}
 #SBATCH --time=0-{time}:00:00
 #SBATCH --partition=smp
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user={username}@pitt.edu
 
 module purge
 module load {module}
 
-$(which qchem) {saveflag}-nt $SLURM_NTASKS_PER_NODE "{inpfile}.in" "$SLURM_SUBMIT_DIR/{inpfile}.out"{scratchdir}
+$(which qchem) {saveflag}-nt $SLURM_CPUS_PER_TASK "{inpfile}.in" "$SLURM_SUBMIT_DIR/{inpfile}.out"{scratchdir}
 chmod 644 "$SLURM_SUBMIT_DIR/{inpfile}.out"
 '''.format(inpfile=inpfile,
            ppn=ppn,
@@ -52,12 +55,12 @@ if __name__ == '__main__':
                         nargs='*')
     parser.add_argument('--ppn',
                         type=int,
-                        default=12,
-                        help='number of cores to run on (max 12)')
+                        default=1,
+                        help='number of cores to run on (max 24)')
     parser.add_argument('--time',
                         type=int,
-                        default=24,
-                        help='walltime to reserve (max 144 hours)')
+                        default=1,
+                        help='walltime to reserve (max 72 hours)')
     parser.add_argument('--save',
                         action='store_true',
                         help='save the scratch directory')
