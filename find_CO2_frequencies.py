@@ -188,7 +188,7 @@ def main(args):
             vibirs = data.vibirs
             vibdisps = data.vibdisps
         except AttributeError:
-            print("Couldn't parse frquencies from {}".format(filename), file=sys.stderr)
+            print("Couldn't parse frequencies from {}".format(filename), file=sys.stderr)
             continue
 
         for start in start_indices:
