@@ -77,6 +77,7 @@ packages=(
     openssh
     parallel
     perl-term-readkey # git-svn
+    reflector
     rlwrap
     swig
     tcsh
@@ -231,6 +232,7 @@ done
 
 # sudo pacman -Syyu
 
+# TODO replace with yay
 # sudo pacman -S yaourt
 
 packages=(
@@ -285,10 +287,10 @@ packages=(
 )
 
 # for package in ${packages[@]}; do
-#     yaourt -S ${package}
+#     yay -S ${package}
 # done
 
-## The following packages should't use yaourt:
+## The following packages should't use yay:
 # mathematica
 # vmd
 

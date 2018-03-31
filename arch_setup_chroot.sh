@@ -1,6 +1,7 @@
 #!/bin/bash
 
 export CHROOT=/media/Backup/chroot
+# mkdir -p $CHROOT
 # mkarchroot $CHROOT/root base-devel
 arch-nspawn $CHROOT/root pacman -Syyu
 
