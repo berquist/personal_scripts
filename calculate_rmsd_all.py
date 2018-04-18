@@ -20,5 +20,7 @@ for i in range(len(xyzfilenames)):
             fname2 = xyzfilenames[j]
             print('file 1: {}'.format(fname1))
             print('file 2: {}'.format(fname2))
-            sp.call(['calculate_rmsd', fname1, fname2])
+            # shell out, because `rmsd` may not be in PYTHONPATH for
+            # import
+            sp.call(['calculate_rmsd.py', fname1, fname2])
             print('=' * 78)
