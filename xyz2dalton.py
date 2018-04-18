@@ -29,7 +29,7 @@ def xyz2dalton_from_splitlines(xyzfile_splitlines, totalcharge=0):
     DALTON's MOLECULE input section.
     """
 
-    from scripts.periodic_table import AtomicNum
+    from periodic_table import AtomicNum
 
     outfilelines = []
     atomtypes = 0
@@ -60,32 +60,46 @@ def main():
     """If used as a script, the main routine."""
 
     import argparse
+    import os.path
     import sys
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('convertor', choices=('builtin', 'openbabel', 'cclib'))
-    parser.add_argument('xyzfilename', nargs='+')
-    parser.add_argument('--charge', type=int, default=0)
+    arg = parser.add_argument
+    arg('convertor', choices=('builtin', 'openbabel', 'cclib'))
+    arg('xyzfilename', nargs='+')
+    arg('--to-files', action='store_true')
+    arg('--charge', type=int, default=0)
 
     args = parser.parse_args()
     xyzfilenames = args.xyzfilename
 
     for xyzfilename in xyzfilenames:
 
+        outfilename = ''.join([os.path.splitext(xyzfilename)[0], '.dal'])
+
         if args.convertor == 'openbabel':
             import subprocess as sp
-            ob_output = sp.check_output(['obabel', '-ixyz', xyzfilename, '-odalmol']).decode('utf-8')
+            ob_output = sp.check_output(['obabel',
+                                         '-ixyz', xyzfilename,
+                                         '-odalmol']).decode('utf-8')
             ob_splitlines = ob_output.splitlines()
-            print(ob_splitlines)
+            output = '\n'.join(ob_splitlines)
         elif args.convertor == 'cclib':
             print("cclib-based converter not implemented yet", file=sys.stderr)
-            sys.exit()
+            sys.exit(1)
         elif args.convertor == 'builtin':
             output = xyz2dalton_from_file(xyzfilename, args.charge)
-            print(output)
         else:
             sys.exit()
+
+        if args.to_files:
+            _file = open(outputfilename, 'w')
+        else:
+            _file = sys.stdout
+        print(output, file=_file)
+        if args.to_files:
+            _file.close()
 
 
 if __name__ == "__main__":
