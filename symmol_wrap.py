@@ -17,7 +17,7 @@ from __future__ import print_function
 from docopt import docopt
 from itertools import count
 
-from scripts.xyz_rotate_by_angle import read_xyz_file
+from xyz_rotate_by_angle import read_xyz_file
 
 
 def create_formatted_symmol_input(structure, tol1, tol2, comment=''):

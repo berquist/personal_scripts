@@ -130,7 +130,7 @@ def getargs():
 def main(args):
     import os
     import sys
-    from scripts.utils import make_file_iterator
+    from utils import make_file_iterator
     import cclib
     import numpy as np
     if args.actually_plot:

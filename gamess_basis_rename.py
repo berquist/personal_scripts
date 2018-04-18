@@ -6,7 +6,7 @@ basis set file from symbols from full names to symbols.
 
 from __future__ import print_function
 
-from scripts.periodic_table import Name as s2n
+from periodic_table import Name as s2n
 
 
 def invert_dict(d):

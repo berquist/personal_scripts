@@ -2,7 +2,7 @@
 
 from __future__ import print_function
 
-from scripts.utils import make_file_iterator
+from utils import make_file_iterator
 
 
 def getargs():

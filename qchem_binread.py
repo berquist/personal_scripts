@@ -8,7 +8,7 @@ import os
 import shutil
 import struct
 
-from scripts.dump_bytes import read_binary
+from dump_bytes import read_binary
 
 
 def getargs():

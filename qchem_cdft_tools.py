@@ -1,8 +1,7 @@
 from __future__ import print_function
 import numpy as np
 from cclib.io import ccopen
-from scripts.utils import make_file_iterator
-# from scripts.qchem_make_opt_input_from_opt import
+from utils import make_file_iterator
 
 
 
