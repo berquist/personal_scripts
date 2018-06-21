@@ -76,6 +76,7 @@ packages=(
     openmpi
     openssh
     parallel
+    pbzip2
     perl-term-readkey # git-svn
     reflector
     rlwrap
@@ -207,6 +208,8 @@ packages=(
     python2-neovim
 
     # GUI-based
+    discord-canary
+    jmol
     leafpad
     firefox
     thunderbird
@@ -217,6 +220,7 @@ packages=(
     thunar-archive-plugin
     gimp
     meld
+    slack
 )
 
 for package in ${packages[@]}; do
@@ -240,6 +244,7 @@ packages=(
     dropbox
     fftw2
     figlet-fonts
+    git-lfs
     haguichi
     libgfortran6
     logmein-hamachi
