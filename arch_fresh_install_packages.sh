@@ -199,6 +199,8 @@ packages=(
     python-xlwt
     python2-xlwt
     jupyter-nbconvert
+    autopep8
+    yapf
 
     # editors
     emacs
@@ -267,15 +269,17 @@ packages=(
     ftnchek
 
     # Programming: C++
-    # armadillo
+    armadillo
     blitz
 
     # Programming: Ruby
     gist
+    ruby-mdl
     travis-lint
 
     # Programming: Python
     mypy-git
+    proselint
     python-ase
     # python2-ase
     python-llvmlite
@@ -289,6 +293,7 @@ packages=(
     python2-seaborn
     python-unp
     snakemake
+    yamllint
 )
 
 # for package in ${packages[@]}; do
