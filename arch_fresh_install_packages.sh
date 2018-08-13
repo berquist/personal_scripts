@@ -1,15 +1,9 @@
 #!/bin/bash
 
-### Keep track of my preferred packages and install them on a fresh
-### Arch instance.
+### Keep track of my preferred Arch Linux packages.
 
-# sudo pacman -Syyu
-
-packages=(
+packages_default=(
     # low-level
-    abs
-    base
-    base-devel
     compton
     cuda
     gcc-fortran
@@ -115,106 +109,58 @@ packages=(
     # If something is commented out here, then it's probably a split
     # package.
     cython
-    cython2
     ipython
-    ipython2
-    ipython-notebook
-    ipython2-notebook
+    jupyter-notebook
     pygmentize
-    pypy
     pypy3
     python
-    python2
     python-bottleneck
-    python2-bottleneck
     python-docopt
-    python2-docopt
     flake8
-    python2-flake8
     python-gmpy2
-    python2-gmpy2
     python-h5py
-    python2-h5py
     python-joblib
-    python2-joblib
     python-matplotlib
-    python2-matplotlib
     python-mdanalysis
-    python2-mdanalysis
     python-mpmath
-    python2-mpmath
     python-nose
-    python2-nose
     python-numexpr
-    python2-numexpr
     python-numpy
-    python2-numpy
     python-openbabel
-    python2-openbabel
     python-opengl
-    python2-opengl
     python-openpyxl
-    python2-openpyxl
     python-pandas
-    python2-pandas
     python-periodictable
-    # python-periodictable
     python-pillow
-    python2-pillow
     python-pint
-    python2-pint
     python-pip
-    python2-pip
     python-pycuda
-    python2-pycuda
     python-pylint
-    python2-pylint
     python-pyqt4
-    python2-pyqt4
     python-pyqt5
-    python2-pyqt5
     python-pytables
-    python2-pytables
     python-scikit-learn
     python-scipy
-    python2-scipy
     python-sh
-    python2-sh
     python-sphinx
-    python2-sphinx
     python-statsmodels
-    python2-statsmodels
     python-sympy
-    python2-sympy
     python-terminado
-    python2-terminado
     python-virtualenv
-    python2-virtualenv
     python-virtualenvwrapper
-    # python2-virtualenvwrapper
     python-xlrd
-    python2-xlrd
     python-xlsxwriter
-    python2-xlsxwriter
     python-xlwt
-    python2-xlwt
     jupyter-nbconvert
     autopep8
     yapf
 
     # editors
     emacs
-    gvim
-    neovim
-    python-neovim
-    python2-neovim
 
     # GUI-based
-    discord-canary
     jmol
-    leafpad
     firefox
-    thunderbird
     pymol
     transmission
     ristretto
@@ -222,40 +168,24 @@ packages=(
     thunar-archive-plugin
     gimp
     meld
-    slack
 )
 
-for package in ${packages[@]}; do
-    sudo pacman -S ${package}
-done
-
-# sudo abs
-
-# echo "[archlinuxfr]
-# SigLevel = Never
-# Server = http://repo.archlinux.fr/$arch
-# " >> /etc/pacman.conf
-
-# sudo pacman -Syyu
-
-# TODO replace with yay
-# sudo pacman -S yaourt
-
-packages=(
+packages_aur=(
     avogadro-git
+    discord-canary
     dropbox
     fftw2
     figlet-fonts
     git-lfs
     haguichi
     libgfortran6
+    lmod
     logmein-hamachi
     lzip
-    modules
     molden
     multimarkdown
     pandoc-bin
-    pelican
+    slack-desktop
     swig2
     symlinks
     tmux-git
@@ -281,28 +211,13 @@ packages=(
     mypy-git
     proselint
     python-ase
-    # python2-ase
     python-llvmlite
-    python2-llvmlite
     python-memory_profiler
     python-numba
-    python2-numba
     python-proselint
     python-pythonpy
     python-seaborn
-    python2-seaborn
     python-unp
     snakemake
     yamllint
 )
-
-# for package in ${packages[@]}; do
-#     yay -S ${package}
-# done
-
-## The following packages should't use yay:
-# mathematica
-# vmd
-
-# What to do about these?
-# udisks2 dosfstools
