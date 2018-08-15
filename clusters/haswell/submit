@@ -186,7 +186,7 @@ def writeslurm(opts, job):
 
     fileh.write("\n")
     fileh.write("$(which qchem)" + parallel_string + save_string + " " + job + " ${SLURM_SUBMIT_DIR}/" + job_name + ".out " + job_name + "." + JOB_ID + "\n")
-    fileh.write("chmod 640 ${SLURM_SUBMIT_DIR}/" + job_name + ".out\n")
+    fileh.write("chmod 644 ${SLURM_SUBMIT_DIR}/" + job_name + ".out\n")
     fileh.write("\n")
 
     if opts.save:
