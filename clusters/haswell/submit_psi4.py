@@ -9,7 +9,7 @@ from __future__ import print_function
 
 def template_slurmfile_psi4(inpfile, ppn, time, as_python):
     """The template for a SLURM jobfile that calls Psi4."""
-    command = '$(which psi4) -n $SLURM_NTASKS_PER_NODE "{inpfile}.in"'.format(inpfile=inpfile)
+    command = '$(which psi4) -n $SLURM_CPUS_PER_TASK "{inpfile}.in"'.format(inpfile=inpfile)
     if as_python:
         command = 'OMP_NUM_THREADS={ppn} $(which python) "{inpfile}.py"'.format(inpfile=inpfile)
     return '''#!/bin/bash
@@ -17,7 +17,8 @@ def template_slurmfile_psi4(inpfile, ppn, time, as_python):
 #SBATCH --job-name={inpfile}
 #SBATCH --output={inpfile}.slurmout
 #SBATCH --nodes=1
-#SBATCH --ntasks-per-node={ppn}
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task={ppn}
 #SBATCH --time=0-{time}:00:00
 #SBATCH --partition=smp
 
