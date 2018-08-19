@@ -18,78 +18,6 @@ packages_default=(
     nvidia-libgl
     valgrind
 
-    # groups
-    xfce4
-    texlive-most
-
-    # command-line tools and general libraries
-    ack
-    arb
-    arrayfire
-    aspell
-    aspell-en
-    atool
-    blas
-    boost
-    boost-libs
-    cblas
-    cmake
-    colordiff
-    cpio
-    cronie
-    ctags
-    diffoscope
-    dos2unix
-    # eigen
-    eigen2
-    freeimage
-    git
-    gnuplot
-    grace
-    gsl
-    hdf5
-    hub
-    keybase
-    keychain
-    htop
-    iotop
-    languagetool
-    lapack
-    lesspipe
-    lftp
-    lsb-release
-    markdown
-    mercurial
-    mlocate
-    mosh
-    mpdecimal
-    namcap
-    netcdf
-    netcdf-fortran
-    openbabel
-    openmpi
-    openssh
-    parallel
-    pbzip2
-    perl-term-readkey # git-svn
-    reflector
-    rlwrap
-    swig
-    tcsh
-    # tmux
-    tree
-    unrar
-    wget
-    xsel
-    xclip
-    zsh
-
-    # fonts
-    cowsay
-    figlet
-    ttf-inconsolata
-    ttf-sazanami
-
     # programming: C/C++
     clang
     clang-analyzer
@@ -99,8 +27,14 @@ packages_default=(
     julia
     julia-docs
 
-    # programming: Ruby
-    ruby
+    # programming: Lisp
+    chicken
+    clisp
+    cmucl
+    mit-scheme
+    racket
+    # racket-docs
+    sbcl
 
     # programming: Lua
     lua51
@@ -121,7 +55,10 @@ packages_default=(
     python-h5py
     python-joblib
     python-matplotlib
+    python-mccabe
     python-mdanalysis
+    # apparently there are problems with 3.x
+    python2-mdanalysis
     python-mpmath
     python-nose
     python-numexpr
@@ -134,6 +71,7 @@ packages_default=(
     python-pillow
     python-pint
     python-pip
+    python-pycodestyle
     python-pycuda
     python-pylint
     python-pyqt4
@@ -155,8 +93,87 @@ packages_default=(
     autopep8
     yapf
 
+    # programming: Ruby
+    ruby
+
+    # fonts
+    cowsay
+    figlet
+    ttf-inconsolata
+    ttf-sazanami
+
     # editors
     emacs
+
+    # groups
+    xfce4
+    texlive-most
+
+    # command-line tools and general libraries
+    ack
+    arb
+    arrayfire
+    aspell
+    aspell-en
+    atool
+    blas
+    boost
+    boost-libs
+    cblas
+    cmake
+    colordiff
+    cpio
+    cppcheck
+    cronie
+    ctags
+    diffoscope
+    dos2unix
+    # eigen
+    eigen2
+    freeimage
+    git
+    gnuplot
+    grace
+    gsl
+    hdf5
+    hub
+    keybase
+    keybase-gui
+    keychain
+    htop
+    iotop
+    jq
+    languagetool
+    lapack
+    lesspipe
+    lftp
+    lsb-release
+    markdown
+    mercurial
+    mlocate
+    mosh
+    mpdecimal
+    namcap
+    netcdf
+    netcdf-fortran
+    openbabel
+    openmpi
+    openssh
+    pacman-contrib
+    parallel
+    pbzip2
+    perl-term-readkey # git-svn
+    reflector
+    rlwrap
+    swig
+    tcsh
+    # tmux
+    tree
+    unrar
+    wget
+    xsel
+    xclip
+    zsh
 
     # GUI-based
     jmol
@@ -185,32 +202,39 @@ packages_aur=(
     molden
     multimarkdown
     pandoc-bin
+    shellcheck-static
     slack-desktop
     swig2
     symlinks
     tmux-git
     ttf-ms-fonts
+    yay
 
     # command-line simple tools
     checkbashisms
     pipman-git
 
-    # Programming: Fortran
-    ftnchek
-
     # Programming: C++
     armadillo
     blitz
+    cpplint
 
-    # Programming: Ruby
-    gist
-    ruby-mdl
-    travis-lint
+    # Programming: Fortran
+    ftnchek
+
+    # Programming: Lisp
+    chez-scheme-git
+    chibi-scheme-git
+    hy-git
+    roswell
 
     # Programming: Python
+    doc8
     mypy-git
     proselint
     python-ase
+    python-black
+    python-pyfiglet
     python-llvmlite
     python-memory_profiler
     python-numba
@@ -220,4 +244,10 @@ packages_aur=(
     python-unp
     snakemake
     yamllint
+
+    # Programming: Ruby
+    gist
+    ruby-mdl
+    travis-lint
+
 )
