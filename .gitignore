@@ -7,6 +7,7 @@
 # Python
 *.py[co]
 __pycache__
+.mypy_cache
 
 # C/C++
 *.o
