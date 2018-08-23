@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 
-from __future__ import division
-from __future__ import print_function
-
 import numpy as np
 np_formatter = {
     'float_kind': lambda x: '{:14.8f}'.format(x)
@@ -45,9 +42,13 @@ if __name__ == '__main__':
     times_hours_wall = times_hours[:, 0]
     times_hours_cpu = times_hours[:, 1]
     speedup = times_hours_cpu / times_hours_wall
+    print('times (hours):')
+    print('wall (sorted by) | cpu')
     print(times_hours)
+    print('speedup:')
     print(speedup)
     mmin, mmax = min(times_hours_wall), max(times_hours_wall)
     rng = mmax - mmin
+    print('min, max, range:')
     print(mmin, mmax, rng)
     print('mean +/- stdev: {:f} +/- {:f}'.format(np.mean(times_hours_wall), np.std(times_hours_wall)))
