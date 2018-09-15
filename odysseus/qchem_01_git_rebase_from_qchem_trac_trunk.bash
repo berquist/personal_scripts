@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # qchem_01_git_rebase_from_qchem_trac_trunk.sh
 # Run this script (usually via cron) to load the git-svn Q-Chem repository

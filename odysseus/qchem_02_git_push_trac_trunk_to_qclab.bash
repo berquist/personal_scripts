@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # qchem_02_git_push_trac_trunk_to_qclab.sh
 # Run this script (usually via cron) to load the git-svn Q-Chem repository
