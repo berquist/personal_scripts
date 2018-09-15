@@ -15,7 +15,7 @@ import argparse
 import os.path
 
 import cclib
-from cclib.io import ccopen
+from cclib.io import ccread
 from cclib.parser import utils
 
 
@@ -34,8 +34,7 @@ def main():
 
         stub = os.path.splitext(compchemfilename)[0]
 
-        job = ccopen(compchemfilename)
-        data = job.parse()
+        data = ccread(compchemfilename)
 
         fig, ax = plt.subplots()
 
