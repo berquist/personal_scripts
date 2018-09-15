@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # qchem_move_failed_to_converge.sh: Find Q-Chem calculations that
 # failed to converge the energy and move all files related to the

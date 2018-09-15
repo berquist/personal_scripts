@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # cfour_wrap.sh: Handle some of the dirty stuff when running a CFOUR
 # calculation.

@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 ### VirtualBox installation instructions!
 
 ## Installation

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # qchem_remove_guess_coefficients.bash: Old versions of the
 # fragment/EDA liked to print the block diagonal MO coefficients T

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 export CHROOT=/media/Backup/chroot
 # mkdir -p $CHROOT

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # gamess_wrap.sh: Handle some of the dirty stuff when running a GAMESS
 # calculation.

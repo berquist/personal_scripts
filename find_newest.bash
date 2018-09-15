@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # How to recursively find and list the latest modified files in a
 # directory with subdirectories and times?

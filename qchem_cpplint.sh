@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 # qchem_cpplint.sh: Run cpplint with the correct settings to handle
 # Q-Chem's C++ file extensions.

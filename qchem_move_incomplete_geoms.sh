@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # qchem_move_incomplete_geoms.sh: Find incomplete Q-Chem geometry
 # optimizations that otherwise terminated normally (just ran out of

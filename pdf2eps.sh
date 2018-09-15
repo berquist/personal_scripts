@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # $Id: pdf2eps,v 0.01 2005/10/28 00:55:46 Herbert Voss Exp $
 # Convert PDF to encapsulated PostScript.
 # usage:

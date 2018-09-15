@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 for i in `iconv -l`
 do

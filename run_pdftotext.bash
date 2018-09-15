@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # run_pdftotext.bash: Run `pdftotext` on all possible PDF files in the
 # current working directory.

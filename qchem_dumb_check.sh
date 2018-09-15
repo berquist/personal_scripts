@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 ls ./*.in | wc -w
 ls ./*.out | wc -w

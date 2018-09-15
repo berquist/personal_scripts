@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 while read pkg; do
     mapfile -t files < <(pacman -Qlq $pkg | grep -v /$)

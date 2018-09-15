@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 rm -f ./*.aoresp_fiao_b1
 rm -f ./*.b

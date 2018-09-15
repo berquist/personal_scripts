@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 filename="${1}"
 nproc="${2:$(nproc)}"
