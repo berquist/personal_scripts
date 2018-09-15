@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 rm ${HOME}/.bash_profile
 rm ${HOME}/.bashrc

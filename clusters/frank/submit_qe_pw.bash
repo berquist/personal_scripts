@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # This script submits Quantum Espresso jobs.
 # It also properly modifies the user's output location in the
@@ -17,7 +17,7 @@ IN=${JOBNAME}.in
 OUT=${JOBNAME}.out
 
 cat <<EOF > $PWD/run_qe_pw.${JOBNAME}.pbs
-#!/bin/bash
+#!/usr/bin/env bash
 
 #PBS -N ${JOBNAME}
 #PBS -q ishared

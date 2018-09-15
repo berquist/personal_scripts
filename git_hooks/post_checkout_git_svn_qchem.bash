@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # post_checkout_git_svn_qchem.bash: For Q-Chem git-svn repositories,
 # check out SVN externals and keep them up to date.

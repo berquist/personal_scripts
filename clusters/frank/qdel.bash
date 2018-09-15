@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # qdel range of values:
 echo "Kill these jobs? (c-C to quit)"

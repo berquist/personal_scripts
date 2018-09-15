@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #SBATCH --job-name=test
 #SBATCH --output=test.out
 #SBATCH --nodes=1
