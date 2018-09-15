@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ### Keep track of my preferred Arch Linux packages.
 
@@ -176,15 +176,15 @@ packages_default=(
     zsh
 
     # GUI-based
-    jmol
     firefox
-    pymol
-    transmission
-    ristretto
-    gnome-system-monitor
-    thunar-archive-plugin
     gimp
+    gnome-system-monitor
+    jmol
     meld
+    pymol
+    ristretto
+    thunar-archive-plugin
+    transmission
 )
 
 packages_aur=(
