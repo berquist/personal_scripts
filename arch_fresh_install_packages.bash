@@ -234,6 +234,7 @@ packages_aur=(
     proselint
     python-ase
     python-black
+    python-hypothesis
     python-pyfiglet
     python-llvmlite
     python-memory_profiler
@@ -242,6 +243,7 @@ packages_aur=(
     python-pythonpy
     python-seaborn
     python-unp
+    python-versioneer
     snakemake
     yamllint
 
@@ -251,3 +253,10 @@ packages_aur=(
     travis-lint
 
 )
+
+bash-language-server
+python-language-server
+kotlin
+scala
+
+ktlint
