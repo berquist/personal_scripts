@@ -64,6 +64,7 @@ packages_default=(
     # apparently there are problems with 3.x
     python2-mdanalysis
     python-mpmath
+    python-networkx
     python-nose
     python-numexpr
     python-numpy
@@ -251,6 +252,7 @@ packages_aur=(
     figlet-fonts
     git-lfs
     haguichi
+    intellij-idea-community-edition
     libgfortran6
     lmod
     logmein-hamachi
@@ -258,6 +260,7 @@ packages_aur=(
     molden
     multimarkdown
     pandoc-bin
+    pycharm-community-edition
     shellcheck-static
     slack-desktop
     swig2
