@@ -27,6 +27,10 @@ packages_default=(
     julia
     julia-docs
 
+    # programming: JVM
+    kotlin
+    scala
+
     # programming: Lisp
     chicken
     clisp
@@ -188,6 +192,58 @@ packages_default=(
 )
 
 packages_aur=(
+
+    # Programming: C++
+    armadillo
+    blitz
+    cpplint
+    pgi-compilers
+
+    # Programming: Fortran
+    ftnchek
+
+    # Programming: JVM
+    ktlint
+
+    # Programming: Lisp
+    chez-scheme-git
+    chibi-scheme-git
+    hy-git
+    roswell
+
+    # Programming: Python
+    doc8
+    mypy-git
+    proselint
+    python-ase
+    python-black
+    python-deepdiff
+    python-hypothesis
+    python-pyfiglet
+    python-language-server
+    python-llvmlite
+    python-memory_profiler
+    python-numba
+    python-proselint
+    python-pythonpy
+    python-seaborn
+    python-unp
+    python-versioneer
+    snakemake
+    yamllint
+
+    # Programming: Ruby
+    gist
+    ruby-mdl
+    travis-lint
+
+    # command-line simple tools
+    bash-language-server
+    checkbashisms
+    pipman-git
+    zerotier-one
+
+    # GUI tools
     avogadro-git
     discord-canary
     dropbox
@@ -208,55 +264,6 @@ packages_aur=(
     symlinks
     tmux-git
     ttf-ms-fonts
+    visual-studio-code-bin
     yay
-
-    # command-line simple tools
-    checkbashisms
-    pipman-git
-
-    # Programming: C++
-    armadillo
-    blitz
-    cpplint
-
-    # Programming: Fortran
-    ftnchek
-
-    # Programming: Lisp
-    chez-scheme-git
-    chibi-scheme-git
-    hy-git
-    roswell
-
-    # Programming: Python
-    doc8
-    mypy-git
-    proselint
-    python-ase
-    python-black
-    python-hypothesis
-    python-pyfiglet
-    python-llvmlite
-    python-memory_profiler
-    python-numba
-    python-proselint
-    python-pythonpy
-    python-seaborn
-    python-unp
-    python-versioneer
-    snakemake
-    yamllint
-
-    # Programming: Ruby
-    gist
-    ruby-mdl
-    travis-lint
-
 )
-
-bash-language-server
-python-language-server
-kotlin
-scala
-
-ktlint
