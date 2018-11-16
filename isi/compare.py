@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 
-from typing import List
+from typing import List, Mapping
 
-# import difflib
-# import filecmp
+import filecmp
 import hashlib
 from pathlib import Path
 
@@ -21,8 +20,12 @@ def getargs():
     return parser.parse_args()
 
 
-def get_files(dirname: Path) -> List[Path]:
-    return list(sorted(p for p in dirname.glob("*") if p.is_file()))
+def get_files(dirname: Path, common_files) -> Mapping[str, Path]:
+    return {
+        p.name: p
+        for p in sorted(dirname.glob("*"))
+        if p.is_file() and p.name in common_files
+    }
 
 
 def get_digests(filenames: List[Path]) -> List[str]:
@@ -36,24 +39,22 @@ def get_digests(filenames: List[Path]) -> List[str]:
 
 
 def main(dir1: Path, dir2: Path) -> None:
-    files1 = get_files(dir1)
-    files2 = get_files(dir2)
+    # For now, only take the common files.
+    dircmp = filecmp.dircmp(dir1, dir2)
+    files1 = get_files(dir1, dircmp.common_files)
+    files2 = get_files(dir2, dircmp.common_files)
 
     # For displaying full paths, calculate the needed column width from the
     # longest possible path.
-    width1 = max(len(str(p)) for p in files1)
-    width2 = max(len(str(p)) for p in files2)
+    width1 = max(len(str(p)) for p in files1.values())
+    width2 = max(len(str(p)) for p in files2.values())
+
+    digests1 = get_digests(files1.values())
+    digests2 = get_digests(files2.values())
 
     t = Terminal()
 
-    # common = set(p.name for p in files1) | set(p.name for p in files2)
-
-    # print(filecmp.cmpfiles(dir1, dir2, common))
-
-    digests1 = get_digests(files1)
-    digests2 = get_digests(files2)
-
-    for d1, d2, f1, f2 in zip(digests1, digests2, files1, files2):
+    for d1, d2, f1, f2 in zip(digests1, digests2, files1.values(), files2.values()):
         line = f"{d1} {d2} {str(f1):{width1}s} {str(f2):{width2}s}"
         if d1 != d2:
             # If a SCP file, there are internal paths that don't matter. Check
