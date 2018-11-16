@@ -52,7 +52,5 @@ if __name__ == '__main__':
     parser.add_argument('dir1')
     parser.add_argument('dir2')
     args = parser.parse_args()
-    dir1 = args.dir1
-    dir2 = args.dir2
 
-    blame_tree(dir1, dir2)
+    blame_tree(args.dir1, args.dir2)
