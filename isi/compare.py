@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from typing import List
+
 # import difflib
 # import filecmp
 import hashlib
@@ -19,7 +21,11 @@ def getargs():
     return parser.parse_args()
 
 
-def get_digests(filenames):
+def get_files(dirname: Path) -> List[Path]:
+    return list(sorted(p for p in dirname.glob("*") if p.is_file()))
+
+
+def get_digests(filenames: List[Path]) -> List[str]:
     digests = []
     for filename in filenames:
         m = hashlib.md5()
@@ -29,9 +35,14 @@ def get_digests(filenames):
     return digests
 
 
-def main(dir1, dir2):
-    files1 = [p for p in dir1.glob("*") if p.is_file()]
-    files2 = [p for p in dir2.glob("*") if p.is_file()]
+def main(dir1: Path, dir2: Path) -> None:
+    files1 = get_files(dir1)
+    files2 = get_files(dir2)
+
+    # For displaying full paths, calculate the needed column width from the
+    # longest possible path.
+    width1 = max(len(str(p)) for p in files1)
+    width2 = max(len(str(p)) for p in files2)
 
     t = Terminal()
 
@@ -43,11 +54,11 @@ def main(dir1, dir2):
     digests2 = get_digests(files2)
 
     for d1, d2, f1, f2 in zip(digests1, digests2, files1, files2):
-        line = f"{d1} {d2} {f1} {f2}"
+        line = f"{d1} {d2} {str(f1):{width1}s} {str(f2):{width2}s}"
         if d1 != d2:
+            # If a SCP file, there are internal paths that don't matter. Check
+            # them separately.
             if f1.suffix == f2.suffix == ".scp" and diff_scp_lines(f1, f2):
-                # If a SCP file, there are internal paths that don't
-                # matter. Check them separately.
                 print(t.cyan(line))
             else:
                 print(t.red(line))
