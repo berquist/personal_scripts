@@ -7,7 +7,7 @@ from pathlib import Path
 
 from blessings import Terminal
 
-from diff_cmvn import diff_scp_lines
+from diff_scp import diff_scp_lines
 
 
 def getargs():
@@ -29,11 +29,7 @@ def get_digests(filenames):
     return digests
 
 
-if __name__ == "__main__":
-    args = getargs()
-
-    dir1 = args.dir1
-    dir2 = args.dir2
+def main(dir1, dir2):
     files1 = [p for p in dir1.glob("*") if p.is_file()]
     files2 = [p for p in dir2.glob("*") if p.is_file()]
 
@@ -57,3 +53,10 @@ if __name__ == "__main__":
                 print(t.red(line))
         else:
             print(t.green(line))
+
+    return
+
+
+if __name__ == "__main__":
+    args = getargs()
+    main(args.dir1, args.dir2)
