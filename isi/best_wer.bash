@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-BEST_WER=/nas/material/users/jbilla/eesen/asr_egs/wsj/utils/best_wer.sh
+BEST_WER=/nas/home/berquist/opt/apps/build/kaldi/egs/wsj/s5/utils/best_wer.sh
 
 # find . -type d -name "decode_analysis1*" 2>/dev/null
 (for i in decode*analysis1*; do
