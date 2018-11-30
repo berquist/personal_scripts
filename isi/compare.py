@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
-from typing import List, Mapping
-
 import filecmp
 import hashlib
+from enum import Enum, unique
 from pathlib import Path
+from typing import List, Mapping
 
 from blessings import Terminal
 
@@ -38,6 +38,26 @@ def get_digests(filenames: List[Path]) -> List[str]:
     return digests
 
 
+@unique
+class Diff(Enum):
+    SAME = 0
+    SCP_PATHS_DIFFER = 1
+    SOMETHING_ELSE_DIFFERS = 2
+
+    @staticmethod
+    def from_names_and_digests(f1, f2, d1, d2) -> "Diff":
+        if d1 != d2:
+            # If a SCP file, there are internal paths that don't matter. Check
+            # them separately.
+            if f1.suffix == f2.suffix == ".scp" and diff_scp_lines(f1, f2):
+                return Diff.SCP_PATHS_DIFFER
+            else:
+                return Diff.SOMETHING_ELSE_DIFFERS
+        else:
+            return Diff.SAME
+        
+
+
 def main(dir1: Path, dir2: Path) -> None:
     # For now, only take the common files.
     dircmp = filecmp.dircmp(dir1, dir2)
@@ -54,18 +74,16 @@ def main(dir1: Path, dir2: Path) -> None:
 
     t = Terminal()
 
+    map_diff_to_color = {
+        Diff.SAME: t.green,
+        Diff.SCP_PATHS_DIFFER: t.cyan,
+        Diff.SOMETHING_ELSE_DIFFERS: t.red,
+    }
+
     for d1, d2, f1, f2 in zip(digests1, digests2, files1.values(), files2.values()):
         line = f"{d1} {d2} {str(f1):{width1}s} {str(f2):{width2}s}"
-        if d1 != d2:
-            # If a SCP file, there are internal paths that don't matter. Check
-            # them separately.
-            if f1.suffix == f2.suffix == ".scp" and diff_scp_lines(f1, f2):
-                print(t.cyan(line))
-            else:
-                print(t.red(line))
-        else:
-            print(t.green(line))
-
+        diff = Diff.from_names_and_digests(f1, f2, d1, d2)
+        print(map_diff_to_color[diff](line))
     return
 
 
