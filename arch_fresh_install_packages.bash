@@ -14,8 +14,11 @@ packages_default=(
     libclc
     libcl-headers
     libstdc++5
-    nvidia
-    nvidia-libgl
+    # nvidia
+    # nvidia-libgl
+    nvidia-340xx
+    opencl-nvidia-340xx
+    opencl-headers
     valgrind
 
     # programming: C/C++
@@ -47,16 +50,16 @@ packages_default=(
     # If something is commented out here, then it's probably a split
     # package.
     cython
-    ipython
     jupyter-notebook
     pygmentize
     pypy3
-    python
+    python-black
     python-bottleneck
     python-docopt
     flake8
     python-gmpy2
     python-h5py
+    python-hypothesis
     python-joblib
     python-matplotlib
     python-mccabe
@@ -84,6 +87,7 @@ packages_default=(
     python-pytables
     python-scikit-learn
     python-scipy
+    python-seaborn
     python-sh
     python-sphinx
     python-statsmodels
@@ -121,10 +125,12 @@ packages_default=(
     aspell
     aspell-en
     atool
+    bash-language-server
     blas
     boost
     boost-libs
     cblas
+    checkbashisms
     cmake
     colordiff
     cpio
@@ -136,9 +142,10 @@ packages_default=(
     # eigen
     eigen2
     freeimage
+    gist
     git
+    git-lfs
     gnuplot
-    grace
     gsl
     hdf5
     hub
@@ -153,6 +160,7 @@ packages_default=(
     lesspipe
     lftp
     lsb-release
+    lzip
     markdown
     mercurial
     mlocate
@@ -168,6 +176,7 @@ packages_default=(
     parallel
     pbzip2
     perl-term-readkey # git-svn
+    python-language-server
     reflector
     rlwrap
     swig
@@ -178,14 +187,17 @@ packages_default=(
     wget
     xsel
     xclip
+    zerotier-one
     zsh
 
     # GUI-based
     firefox
     gimp
     gnome-system-monitor
+    intellij-idea-community-edition
     jmol
     meld
+    pycharm-community-edition
     pymol
     ristretto
     thunar-archive-plugin
@@ -198,7 +210,7 @@ packages_aur=(
     armadillo
     blitz
     cpplint
-    pgi-compilers
+    # pgi-compilers
 
     # Programming: Fortran
     ftnchek
@@ -213,57 +225,46 @@ packages_aur=(
     roswell
 
     # Programming: Python
-    doc8
+    # doc8
     mypy-git
     proselint
     python-ase
-    python-black
     python-deepdiff
-    python-hypothesis
     python-pyfiglet
-    python-language-server
-    python-llvmlite
+    # python-llvmlite
     python-memory_profiler
-    python-numba
+    # python-numba
     python-proselint
     python-pythonpy
-    python-seaborn
-    python-unp
+    # python-unp
     python-versioneer
     snakemake
     yamllint
 
     # Programming: Ruby
-    gist
     ruby-mdl
     travis-lint
 
     # command-line simple tools
-    bash-language-server
-    checkbashisms
+    grace
+    multimarkdown
     pipman-git
-    zerotier-one
+    swig2
 
     # GUI tools
-    avogadro-git
+    # avogadro-git
     discord-canary
     dropbox
     fftw2
     figlet-fonts
-    git-lfs
     haguichi
-    intellij-idea-community-edition
     libgfortran6
     lmod
     logmein-hamachi
-    lzip
     molden
-    multimarkdown
     pandoc-bin
-    pycharm-community-edition
     shellcheck-static
     slack-desktop
-    swig2
     symlinks
     tmux-git
     ttf-ms-fonts
