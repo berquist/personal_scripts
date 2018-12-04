@@ -4,7 +4,7 @@ import filecmp
 import hashlib
 from enum import Enum, unique
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 from attr import attrib, attrs
 from blessings import Terminal
@@ -29,6 +29,13 @@ def getargs():
 #     ]
 
 
+def joinpaths(prefix: Path, paths: List[Union[Path, str]]) -> List[Path]:
+    return [
+        prefix.joinpath(Path(p)).resolve(strict=True)
+        for p in paths
+    ]
+
+
 def get_files_recursive(top: Path) -> List[Path]:
     def get_files_recursive_acc(top: Path, files: List[Path]) -> None:
         for f in top.iterdir():
@@ -49,25 +56,23 @@ def get_common_files_recursive(dir1: Path, dir2: Path) -> Tuple[List[Path], List
             dir1_only: List[Path], dir2_only: List[Path]
     ) -> None:
         dcmp = filecmp.dircmp(dir1, dir2)
-        files1.extend(dir1.joinpath(Path(p)).resolve(strict=True) for p in dcmp.common_files)
-        files2.extend(dir2.joinpath(Path(p)).resolve(strict=True) for p in dcmp.common_files)
+        files1.extend(joinpaths(dir1, dcmp.common_files))
+        files2.extend(joinpaths(dir2, dcmp.common_files))
         # What to do for directories that aren't in common? Gather all their
         # files.
-        dir1_only_paths = [dir1.joinpath(Path(p)).resolve(strict=True) for p in dcmp.left_only]
-        dir2_only_paths = [dir2.joinpath(Path(p)).resolve(strict=True) for p in dcmp.right_only]
-        for p in dir1_only_paths:
+        for p in joinpaths(dir1, dcmp.left_only):
             if p.is_file():
                 dir1_only.append(p)
             elif p.is_dir():
                 dir1_only.extend(get_files_recursive(p))
-        for p in dir2_only_paths:
+        for p in joinpaths(dir2, dcmp.right_only):
             if p.is_file():
                 dir2_only.append(p)
             elif p.is_dir():
                 dir2_only.extend(get_files_recursive(p))
         for common_dir in dcmp.common_dirs:
-            newdir1 = dir1.joinpath(Path(common_dir)).resolve(strict=True)
-            newdir2 = dir2.joinpath(Path(common_dir)).resolve(strict=True)
+            newdir1 = joinpaths(dir1, [common_dir])[0]
+            newdir2 = joinpaths(dir2, [common_dir])[0]
             get_common_files_recursive_acc(newdir1, newdir2, files1, files2, dir1_only, dir2_only)
         return
     files1, files2, dir1_only, dir2_only = [], [], [], []
