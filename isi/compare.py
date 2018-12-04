@@ -19,6 +19,7 @@ def getargs():
     arg = parser.add_argument
     arg("dir1", type=Path)
     arg("dir2", type=Path)
+    arg("--interleaved", action="store_true")
     return parser.parse_args()
 
 
@@ -50,7 +51,7 @@ def get_files_recursive(top: Path) -> List[Path]:
     return files
 
 
-def get_common_files_recursive(dir1: Path, dir2: Path) -> Tuple[List[Path], List[Path]]:
+def get_common_files_recursive(dir1: Path, dir2: Path) -> Tuple[List[Path], List[Path], List[Path], List[Path]]:
     def get_common_files_recursive_acc(
             dir1: Path, dir2: Path,
             files1: List[Path], files2: List[Path],
@@ -78,7 +79,7 @@ def get_common_files_recursive(dir1: Path, dir2: Path) -> Tuple[List[Path], List
         return
     files1, files2, dir1_only, dir2_only = [], [], [], []
     get_common_files_recursive_acc(dir1, dir2, files1, files2, dir1_only, dir2_only)
-    return files1, files2
+    return files1, files2, dir1_only, dir2_only
 
 
 def get_digests(filenames: List[Path]) -> List[str]:
@@ -136,12 +137,12 @@ def print_diff_files(dcmp) -> None:
 def main(dir1: Path, dir2: Path) -> None:
     # For now, only take the common files.
     dircmp = filecmp.dircmp(dir1, dir2)
-    files1, files2 = get_common_files_recursive(dir1, dir2)
+    files1, files2, dir1_only, dir2_only = get_common_files_recursive(dir1, dir2)
 
     # For displaying full paths, calculate the needed column width from the
     # longest possible path.
-    width1 = max(len(str(p)) for p in files1)
-    width2 = max(len(str(p)) for p in files2)
+    width1 = max(len(str(p)) for p in files1 + dir1_only)
+    width2 = max(len(str(p)) for p in files2 + dir2_only)
 
     t = Terminal()
 
@@ -155,9 +156,23 @@ def main(dir1: Path, dir2: Path) -> None:
         diff = Diff.from_files(f1, f2)
         line = f"{diff.d1} {diff.d2} {str(f1):{width1}s} {str(f2):{width2}s}"
         print(map_diff_to_color[diff.diff_type](line))
+    # Print the unique files separately. FIXME scope hack
+    for f1 in dir1_only:
+        line = f"{' ' * len(str(diff.d1))} {' ' * len(str(diff.d2))} {str(f1):{width1}s} {' ' * width2}"
+        print(t.magenta(line))
+    for f2 in dir2_only:
+        line = f"{' ' * len(str(diff.d1))} {' ' * len(str(diff.d2))} {' ' * width1} {str(f2):{width2}s}"
+        print(t.yellow(line))
+    return
+
+
+def main_interleaved(dir1: Path, dir2: Path) -> None:
     return
 
 
 if __name__ == "__main__":
     args = getargs()
-    main(args.dir1, args.dir2)
+    if args.interleaved:
+        main_interleaved(args.dir1, args.dir2)
+    else:
+        main(args.dir1, args.dir2)
