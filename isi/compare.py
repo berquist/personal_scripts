@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pylint: disable=R1711
 
 import filecmp
 import hashlib
@@ -126,8 +127,7 @@ class Diff:
 
 def print_diff_files(dcmp) -> None:
     for name in dcmp.diff_files:
-        print("diff_file %s found in %s and %s" % (name, dcmp.left,
-              dcmp.right))
+        print("diff_file %s found in %s and %s" % (name, dcmp.left, dcmp.right))
     for sub_dcmp in dcmp.subdirs.values():
         print_diff_files(sub_dcmp)
     return
@@ -142,10 +142,6 @@ def main(dir1: Path, dir2: Path) -> None:
     # longest possible path.
     width1 = max(len(str(p)) for p in files1)
     width2 = max(len(str(p)) for p in files2)
-
-    # TODO move collecting digest into Diff?
-    digests1 = get_digests(files1)
-    digests2 = get_digests(files2)
 
     t = Terminal()
 
