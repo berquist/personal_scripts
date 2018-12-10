@@ -20,7 +20,16 @@ def getargs():
     arg("dir1", type=Path)
     arg("dir2", type=Path)
     arg("--interleaved", action="store_true")
+    arg("--write-files", action="store_true")
     return parser.parse_args()
+
+
+def strip_common(paths):
+    paths_parts = (p.parts for p in paths)
+    for i, component in enumerate(zip(*paths_parts)):
+        if len(set(component)) > 1:
+            break
+    return [Path(*p.parts[i:]) for p in paths], i
 
 
 # def get_files(dirname: Path, common_files: List) -> List[Path]:
@@ -126,12 +135,12 @@ class Diff:
         return Diff(f1, f2, d1, d2)
 
 
-def print_diff_files(dcmp) -> None:
-    for name in dcmp.diff_files:
-        print("diff_file %s found in %s and %s" % (name, dcmp.left, dcmp.right))
-    for sub_dcmp in dcmp.subdirs.values():
-        print_diff_files(sub_dcmp)
-    return
+# def print_diff_files(dcmp) -> None:
+#     for name in dcmp.diff_files:
+#         print("diff_file %s found in %s and %s" % (name, dcmp.left, dcmp.right))
+#     for sub_dcmp in dcmp.subdirs.values():
+#         print_diff_files(sub_dcmp)
+#     return
 
 
 def main(dir1: Path, dir2: Path) -> None:
@@ -152,17 +161,33 @@ def main(dir1: Path, dir2: Path) -> None:
         DiffType.SOMETHING_ELSE_DIFFERS: t.red,
     }
 
+    diffs = []
     for f1, f2 in zip(files1, files2):
         diff = Diff.from_files(f1, f2)
+        diffs.append(diff)
         line = f"{diff.d1} {diff.d2} {str(f1):{width1}s} {str(f2):{width2}s}"
         print(map_diff_to_color[diff.diff_type](line))
-    # Print the unique files separately. FIXME scope hack
+    # Print the unique files separately. FIXME scope hack using the last diff
     for f1 in dir1_only:
         line = f"{' ' * len(str(diff.d1))} {' ' * len(str(diff.d2))} {str(f1):{width1}s} {' ' * width2}"
-        print(t.magenta(line))
+        print(t.yellow(line))
     for f2 in dir2_only:
         line = f"{' ' * len(str(diff.d1))} {' ' * len(str(diff.d2))} {' ' * width1} {str(f2):{width2}s}"
         print(t.yellow(line))
+
+    if args.write_files:
+        with open("compare_diff.txt", "w") as handle:
+            for diff in diffs:
+                if diff.diff_type == DiffType.SOMETHING_ELSE_DIFFERS:
+                    handle.write(f"{str(diff.f1)} {str(diff.f2)}\n")
+        # Write out the unique filenames.
+        with open("compare_dir1_only.txt", "w") as handle:
+            for f in dir1_only:
+                handle.write(f"{str(f)}\n")
+        with open("compare_dir2_only.txt", "w") as handle:
+            for f in dir2_only:
+                handle.write(f"{str(f)}\n")
+
     return
 
 
