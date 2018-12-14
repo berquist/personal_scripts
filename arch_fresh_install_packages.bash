@@ -4,6 +4,7 @@
 
 packages_default=(
     # low-level
+    arch-install-scripts
     compton
     cuda
     gcc-fortran
@@ -122,6 +123,7 @@ packages_default=(
     ack
     arb
     arrayfire
+    asp
     aspell
     aspell-en
     atool
@@ -137,8 +139,10 @@ packages_default=(
     cppcheck
     cronie
     ctags
+    devtools
     diffoscope
     dos2unix
+    doxygen
     # eigen
     eigen2
     freeimage
@@ -179,6 +183,7 @@ packages_default=(
     python-language-server
     reflector
     rlwrap
+    subversion
     swig
     tcsh
     # tmux
@@ -258,10 +263,10 @@ packages_aur=(
     fftw2
     figlet-fonts
     haguichi
-    libgfortran6
+    # libgfortran6
     lmod
     logmein-hamachi
-    molden
+    # molden
     pandoc-bin
     shellcheck-static
     slack-desktop
