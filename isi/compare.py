@@ -5,7 +5,7 @@ import filecmp
 import hashlib
 from enum import Enum, unique
 from pathlib import Path
-from typing import List, Tuple, Union
+from typing import Collection, List, Tuple, Union
 
 from attr import attrib, attrs
 from blessings import Terminal
@@ -21,6 +21,7 @@ def getargs():
     arg("dir2", type=Path)
     arg("--interleaved", action="store_true")
     arg("--write-files", action="store_true")
+    arg("--nonrecursive", action="store_true")
     return parser.parse_args()
 
 
@@ -32,12 +33,12 @@ def strip_common(paths):
     return [Path(*p.parts[i:]) for p in paths], i
 
 
-# def get_files(dirname: Path, common_files: List) -> List[Path]:
-#     return [
-#         p.resolve()
-#         for p in sorted(dirname.glob("*"))
-#         if p.is_file() and p.name in common_files
-#     ]
+def get_common_files_nonrecursive(dirname: Path, common_files: List) -> List[Path]:
+    return [
+        p.resolve()
+        for p in sorted(dirname.glob("*"))
+        if p.is_file() and p.name in common_files
+    ]
 
 
 def joinpaths(prefix: Path, paths: List[Union[Path, str]]) -> List[Path]:
@@ -128,25 +129,22 @@ class Diff:
         else:
             return DiffType.SAME
 
-
     @staticmethod
     def from_files(f1: Path, f2: Path) -> "Diff":
         d1, d2 = get_digests([f1, f2])
         return Diff(f1, f2, d1, d2)
 
 
-# def print_diff_files(dcmp) -> None:
-#     for name in dcmp.diff_files:
-#         print("diff_file %s found in %s and %s" % (name, dcmp.left, dcmp.right))
-#     for sub_dcmp in dcmp.subdirs.values():
-#         print_diff_files(sub_dcmp)
-#     return
-
-
-def main(dir1: Path, dir2: Path) -> None:
+def main(dir1: Path, dir2: Path, recursive: bool) -> None:
     # For now, only take the common files.
     dircmp = filecmp.dircmp(dir1, dir2)
-    files1, files2, dir1_only, dir2_only = get_common_files_recursive(dir1, dir2)
+    if recursive:
+        files1, files2, dir1_only, dir2_only = get_common_files_recursive(dir1, dir2)
+    else:
+        files1 = get_common_files_nonrecursive(dir1, dircmp.common_files)
+        files2 = get_common_files_nonrecursive(dir2, dircmp.common_files)
+        dir1_only = [f for f in joinpaths(dir1, dircmp.left_only) if f.is_file()]
+        dir2_only = [f for f in joinpaths(dir2, dircmp.right_only) if f.is_file()]
 
     # For displaying full paths, calculate the needed column width from the
     # longest possible path.
@@ -182,11 +180,13 @@ def main(dir1: Path, dir2: Path) -> None:
                     handle.write(f"{str(diff.f1)} {str(diff.f2)}\n")
         # Write out the unique filenames.
         with open("compare_dir1_only.txt", "w") as handle:
-            for f in dir1_only:
-                handle.write(f"{str(f)}\n")
+            if dir1_only:
+                for f in dir1_only:
+                    handle.write(f"{str(f)}\n")
         with open("compare_dir2_only.txt", "w") as handle:
-            for f in dir2_only:
-                handle.write(f"{str(f)}\n")
+            if dir2_only:
+                for f in dir2_only:
+                    handle.write(f"{str(f)}\n")
 
     return
 
@@ -200,4 +200,4 @@ if __name__ == "__main__":
     if args.interleaved:
         main_interleaved(args.dir1, args.dir2)
     else:
-        main(args.dir1, args.dir2)
+        main(args.dir1, args.dir2, not args.nonrecursive)
