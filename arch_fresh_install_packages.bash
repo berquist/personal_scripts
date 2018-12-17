@@ -56,6 +56,7 @@ packages_default=(
     pypy3
     python-black
     python-bottleneck
+    python-cookiecutter
     python-docopt
     flake8
     python-gmpy2
@@ -86,6 +87,7 @@ packages_default=(
     python-pyqt4
     python-pyqt5
     python-pytables
+    python-pytest-cov
     python-scikit-learn
     python-scipy
     python-seaborn
@@ -173,6 +175,7 @@ packages_default=(
     namcap
     netcdf
     netcdf-fortran
+    obs-studio
     openbabel
     openmpi
     openssh
@@ -189,6 +192,7 @@ packages_default=(
     # tmux
     tree
     unrar
+    vlc
     wget
     xsel
     xclip
