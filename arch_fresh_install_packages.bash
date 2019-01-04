@@ -254,11 +254,12 @@ packages_aur=(
     ruby-mdl
     travis-lint
 
-    # command-line simple tools
+    # command-line tools
     grace
     multimarkdown
     pipman-git
     swig2
+    watchman
 
     # GUI tools
     # avogadro-git
