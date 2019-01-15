@@ -151,15 +151,22 @@ if __name__ == "__main__":
         if not derived_uids_uid_info.issubset(inner_file_sources):
             # This might be Twitter data, in which case it's ok, because that
             # couldn't be distributed.
-            child_ids = derived_uids_uid_info - inner_file_sources
+            missing_child_ids = derived_uids_uid_info - inner_file_sources
             # These are child IDs, and twitter_info.tab corresponds to parent
             # IDs. However, there may also be child IDs that come from
             # Twitter.
-            mask_uid_info = uid_info.loc[:, "derived_uid"].replace(np.nan, "").apply(lambda x: x in child_ids)
+            mask_uid_info = uid_info.loc[:, "derived_uid"].replace(np.nan, "").apply(
+                lambda x: x in missing_child_ids
+            )
             child_ids_uid_info = uid_info[mask_uid_info]
-            assert child_ids_uid_info.loc[:, "url"].apply(lambda url: "twitter.com" in url).all()
             try:
-                assert len(child_ids.symmetric_difference(child_ids_uid_info.loc[:, "derived_uid"])) == 0
+                assert child_ids_uid_info.loc[:, "url"].apply(
+                    lambda url: "twitter.com" in url
+                ).all()
+            except AssertionError:
+                logging.info("Not all missing root documents come from Twitter")
+            try:
+                assert len(missing_child_ids.symmetric_difference(child_ids_uid_info.loc[:, "derived_uid"])) == 0
             except AssertionError:
                 logging.error("There are children in `uid_info.tab` that aren't in original sources!")
             try:
