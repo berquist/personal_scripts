@@ -11,6 +11,7 @@ from attr import attrib, attrs
 from blessings import Terminal
 
 from diff_scp import diff_scp_lines
+from diff_seg import diff_seg_lines
 
 
 def getargs():
@@ -95,6 +96,7 @@ def get_common_files_recursive(dir1: Path, dir2: Path) -> Tuple[List[Path], List
 def get_digests(filenames: List[Path]) -> List[str]:
     digests = []
     for filename in filenames:
+        # TODO what's faster, this or shelling out to md5/md5sum?
         m = hashlib.md5()
         with open(filename, "rb") as handle:
             m.update(handle.read())
@@ -105,25 +107,31 @@ def get_digests(filenames: List[Path]) -> List[str]:
 @unique
 class DiffType(Enum):
     SAME = 0
-    SCP_PATHS_DIFFER = 1
+    INNER_PATHS_DIFFER = 1
     SOMETHING_ELSE_DIFFERS = 2
 
 
-@attrs
+SUFFIX_TO_CMP_FUNCTION = {
+    ".scp": diff_scp_lines,
+    ".seg": diff_seg_lines,
+}
+
+
+@attrs(auto_attribs=True, frozen=True, slots=True)
 class Diff:
-    f1: Path = attrib()
-    f2: Path = attrib()
-    d1: str = attrib()
-    d2: str = attrib()
+    f1: Path
+    f2: Path
+    d1: str
+    d2: str
     diff_type: DiffType = attrib(init=False)
 
     @diff_type.default
     def init_diff_type(self) -> DiffType:
         if self.d1 != self.d2:
-            # If a SCP file, there are internal paths that don't matter. Check
-            # them separately.
-            if self.f1.suffix == self.f2.suffix == ".scp" and diff_scp_lines(self.f1, self.f2):
-                return DiffType.SCP_PATHS_DIFFER
+            # If a SCP or a segmentation file, there are internal paths that
+            # don't matter. Check them separately.
+            if self.f1.suffix == self.f2.suffix and self.f1.suffix in SUFFIX_TO_CMP_FUNCTION and SUFFIX_TO_CMP_FUNCTION[self.f1.suffix](self.f1, self.f2):
+                return DiffType.INNER_PATHS_DIFFER
             else:
                 return DiffType.SOMETHING_ELSE_DIFFERS
         else:
@@ -155,7 +163,7 @@ def main(dir1: Path, dir2: Path, recursive: bool) -> None:
 
     map_diff_to_color = {
         DiffType.SAME: t.green,
-        DiffType.SCP_PATHS_DIFFER: t.cyan,
+        DiffType.INNER_PATHS_DIFFER: t.cyan,
         DiffType.SOMETHING_ELSE_DIFFERS: t.red,
     }
 

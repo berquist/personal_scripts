@@ -46,4 +46,4 @@ def diff_scp_lines(filename_scp1, filename_scp2):
 
 if __name__ == "__main__":
     args = getargs()
-    diff_scp_lines(args.scp1, args.scp2)
+    print(diff_scp_lines(args.scp1, args.scp2))
