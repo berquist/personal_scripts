@@ -32,6 +32,10 @@ packages_default=(
     julia-docs
 
     # programming: JVM
+    jdk8-openjdk
+    jdk-openjdk
+    openjdk8-src
+    openjdk-src
     kotlin
     scala
 
@@ -83,11 +87,14 @@ packages_default=(
     python-pip
     python-pycodestyle
     python-pycuda
+    python-pydocstyle
     python-pylint
     python-pyqt4
     python-pyqt5
     python-pytables
     python-pytest-cov
+    python-pytest-shutil
+    python-rope
     python-scikit-learn
     python-scipy
     python-seaborn
@@ -143,6 +150,7 @@ packages_default=(
     ctags
     devtools
     diffoscope
+    docker
     dos2unix
     doxygen
     # eigen
@@ -183,6 +191,7 @@ packages_default=(
     parallel
     pbzip2
     perl-term-readkey # git-svn
+    pybind11
     python-language-server
     reflector
     rlwrap
@@ -210,7 +219,8 @@ packages_default=(
     pymol
     ristretto
     thunar-archive-plugin
-    transmission
+    transmission-cli
+    transmission-remote-gtk
 )
 
 packages_aur=(
@@ -236,14 +246,18 @@ packages_aur=(
     # Programming: Python
     # doc8
     mypy-git
+    pjson
     proselint
     python-ase
     python-deepdiff
     python-pyfiglet
+    python-pylatex-git
     # python-llvmlite
     python-memory_profiler
     # python-numba
+    python-ordered-set
     python-proselint
+    python-pdbpp
     python-pythonpy
     # python-unp
     python-versioneer
@@ -252,6 +266,7 @@ packages_aur=(
 
     # Programming: Ruby
     ruby-mdl
+    ruby-travis
     travis-lint
 
     # command-line tools
