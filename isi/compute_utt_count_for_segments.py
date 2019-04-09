@@ -5,8 +5,10 @@ import argparse
 import numpy as np
 import scipy.stats.stats as st
 
+import gnuplotlib as gp
 
-def main():
+
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("segments_filename")
     args = parser.parse_args()
@@ -38,8 +40,4 @@ def main():
         num_segments = int(num_hours * 3600 / median)
         print("{:d} h: {:d} ({:d}) segments".format(num_hours, round(num_segments, -4), num_segments))
 
-    return
-
-
-if __name__ == "__main__":
-    main()
+    gp.plot((segment_lengths, {"histogram": "freq", "binwidth": 1}))
