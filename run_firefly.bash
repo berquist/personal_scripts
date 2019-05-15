@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
+set -x
 
 # run_firefly.bash: Given an input file with a name like `my_firefly_job.inp`,
 # make a directory called `my_firefly_job`, copy the input into
@@ -13,7 +14,6 @@ stub=${inputfilename%.*}
 
 firefly=$(realpath $(command -v firefly))
 fireflydir=$(dirname ${firefly})
-echo $fireflydir
 
 if [[ -d ${stub} ]]; then
     rm -rf ${stub}
@@ -22,10 +22,7 @@ mkdir ${stub} || exit 1
 cp -a ${fullpath} ${stub}/INPUT
 (
     cd ${stub}
-    # for extension in dftd.ex fastdiag.ex ffp2p.ex p4stuff.ex pcgp2p.ex; do
-    #     cp -a ${fireflydir}/${extension} .
-    # done
-    $(command -v firefly) -nompi -o OUTPUT
+    eval "$(firefly)" -nompi -ex ${fireflydir} -o OUTPUT
 )
 cp -a ${stub}/OUTPUT ${stub}.out
 rm -rf ${stub}
