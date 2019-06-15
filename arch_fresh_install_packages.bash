@@ -72,6 +72,7 @@ packages_default=(
     python-mdanalysis
     # apparently there are problems with 3.x
     python2-mdanalysis
+    python2-mock
     python-mpmath
     python-networkx
     python-nose
@@ -155,6 +156,8 @@ packages_default=(
     doxygen
     # eigen
     eigen2
+    exa
+    fd
     freeimage
     gist
     git
@@ -210,6 +213,7 @@ packages_default=(
 
     # GUI-based
     firefox
+    firefox-developer-edition
     gimp
     gnome-system-monitor
     intellij-idea-community-edition
@@ -232,9 +236,11 @@ packages_aur=(
     # pgi-compilers
 
     # Programming: Fortran
+    fortran-language-server
     ftnchek
 
     # Programming: JVM
+    kotlin-language-server
     ktlint
 
     # Programming: Lisp
