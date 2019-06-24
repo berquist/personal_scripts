@@ -254,6 +254,7 @@ packages_aur=(
     mypy-git
     pjson
     proselint
+    python-algopy
     python-ase
     python-deepdiff
     python-pyfiglet
