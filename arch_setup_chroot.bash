@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-export CHROOT=/media/ArchData/eric/chroot
+export CHROOT=/home/eric/data/chroot
 mkdir -p $CHROOT
 mkarchroot $CHROOT/root base-devel
 arch-nspawn $CHROOT/root pacman -Syyu
