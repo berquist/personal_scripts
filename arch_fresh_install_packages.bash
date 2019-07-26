@@ -206,6 +206,7 @@ packages_default=(
     unrar
     vlc
     wget
+    words
     xsel
     xclip
     zerotier-one
@@ -281,6 +282,7 @@ packages_aur=(
     multimarkdown
     pipman-git
     swig2
+    wakatime
     watchman
 
     # GUI tools
