@@ -15,10 +15,8 @@ packages_default=(
     libclc
     libcl-headers
     libstdc++5
-    # nvidia
-    # nvidia-libgl
-    nvidia-340xx
-    opencl-nvidia-340xx
+    nvidia
+    nvidia-libgl
     opencl-headers
     valgrind
 
@@ -26,6 +24,10 @@ packages_default=(
     clang
     clang-analyzer
     gdb
+    lldb
+
+    # programming: Crystal
+    crystal
 
     # programming: Julia
     julia
@@ -42,6 +44,7 @@ packages_default=(
     # programming: Lisp
     chicken
     clisp
+    clojure
     cmucl
     mit-scheme
     racket
@@ -86,6 +89,7 @@ packages_default=(
     python-pillow
     python-pint
     python-pip
+    python-pipenv
     python-pycodestyle
     python-pycuda
     python-pydocstyle
@@ -112,6 +116,7 @@ packages_default=(
     jupyter-nbconvert
     autopep8
     yapf
+    poetry
 
     # programming: Ruby
     ruby
@@ -209,6 +214,7 @@ packages_default=(
     words
     xsel
     xclip
+    yamllint
     zerotier-one
     zsh
 
@@ -245,9 +251,11 @@ packages_aur=(
     ktlint
 
     # Programming: Lisp
+    carp-git
     chez-scheme-git
     chibi-scheme-git
     hy-git
+    leiningen
     roswell
 
     # Programming: Python
@@ -257,6 +265,7 @@ packages_aur=(
     proselint
     python-algopy
     python-ase
+    python-asv
     python-deepdiff
     python-pyfiglet
     python-pylatex-git
@@ -270,7 +279,6 @@ packages_aur=(
     # python-unp
     python-versioneer
     snakemake
-    yamllint
 
     # Programming: Ruby
     ruby-mdl
