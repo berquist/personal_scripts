@@ -15,6 +15,7 @@ packages_default=(
     libclc
     libcl-headers
     libstdc++5
+    linux-headers
     nvidia
     nvidia-libgl
     opencl-headers
@@ -41,7 +42,7 @@ packages_default=(
     kotlin
     scala
 
-    # programming: Lisp
+    # programming: Lisp/Scheme
     chicken
     clisp
     clojure
@@ -57,8 +58,10 @@ packages_default=(
     # programming: Python
     # If something is commented out here, then it's probably a split
     # package.
+    pyenv
     cython
     jupyter-notebook
+    mypy
     pygmentize
     pypy3
     python-black
@@ -78,6 +81,8 @@ packages_default=(
     python2-mock
     python-mpmath
     python-networkx
+    python-nltk
+    nltk-data
     python-nose
     python-numexpr
     python-numpy
@@ -136,6 +141,8 @@ packages_default=(
 
     # command-line tools and general libraries
     ack
+    ansible
+    ansible-lint
     arb
     arrayfire
     asp
@@ -171,6 +178,7 @@ packages_default=(
     gsl
     hdf5
     hub
+    hugo
     keybase
     keybase-gui
     keychain
@@ -209,6 +217,7 @@ packages_default=(
     # tmux
     tree
     unrar
+    vagrant
     vlc
     wget
     words
@@ -232,6 +241,11 @@ packages_default=(
     thunar-archive-plugin
     transmission-cli
     transmission-remote-gtk
+    virtualbox
+
+    # SLURM
+    ipmitool
+    rrdtool
 )
 
 packages_aur=(
@@ -250,7 +264,7 @@ packages_aur=(
     kotlin-language-server
     ktlint
 
-    # Programming: Lisp
+    # Programming: Lisp/Scheme
     carp-git
     chez-scheme-git
     chibi-scheme-git
@@ -260,13 +274,16 @@ packages_aur=(
 
     # Programming: Python
     # doc8
-    mypy-git
+    pyenv-virtualenv
+    pyenv-virtualenvwrapper
     pjson
     proselint
+    pyre-check-bin
     python-algopy
     python-ase
     python-asv
     python-deepdiff
+    python-mmh3
     python-pyfiglet
     python-pylatex-git
     # python-llvmlite
@@ -286,12 +303,16 @@ packages_aur=(
     travis-lint
 
     # command-line tools
+    cask
     grace
     multimarkdown
     pipman-git
     swig2
     wakatime
     watchman
+
+    # SLURM
+    slurm-llnl
 
     # GUI tools
     # avogadro-git
