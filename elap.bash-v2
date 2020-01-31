@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 #
 # Elap bash source file Version 2
 # Based on /proc/timer_list only
