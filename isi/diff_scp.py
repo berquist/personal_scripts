@@ -26,7 +26,6 @@ def get_scp_lines(scp_filename) -> Tuple[List[str], List[str]]:
     except IndexError:
         offsets = []
     return ids, offsets
-    
 
 
 def diff_scp_lines(filename_scp1, filename_scp2):
