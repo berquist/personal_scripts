@@ -282,7 +282,9 @@ packages_aur=(
     python-algopy
     python-ase
     python-asv
+    python-autograd
     python-deepdiff
+    python-jax
     python-mmh3
     python-pyfiglet
     python-pylatex-git
