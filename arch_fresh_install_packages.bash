@@ -207,6 +207,7 @@ packages_default=(
     parallel
     pbzip2
     perl-term-readkey # git-svn
+    proselint
     pybind11
     python-language-server
     reflector
@@ -277,7 +278,6 @@ packages_aur=(
     pyenv-virtualenv
     pyenv-virtualenvwrapper
     pjson
-    proselint
     pyre-check-bin
     python-algopy
     python-ase
@@ -292,7 +292,6 @@ packages_aur=(
     python-memory_profiler
     # python-numba
     python-ordered-set
-    python-proselint
     python-pdbpp
     python-pythonpy
     # python-unp
