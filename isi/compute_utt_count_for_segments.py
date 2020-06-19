@@ -5,7 +5,7 @@ import argparse
 import numpy as np
 import scipy.stats.stats as st
 
-import gnuplotlib as gp
+# import gnuplotlib as gp
 
 
 if __name__ == "__main__":
@@ -40,4 +40,4 @@ if __name__ == "__main__":
         num_segments = int(num_hours * 3600 / median)
         print("{:d} h: {:d} ({:d}) segments".format(num_hours, round(num_segments, -4), num_segments))
 
-    gp.plot((segment_lengths, {"histogram": "freq", "binwidth": 1}))
+    # gp.plot((segment_lengths, {"histogram": "freq", "binwidth": 1}))
