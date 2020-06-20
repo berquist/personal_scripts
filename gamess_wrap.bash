@@ -25,6 +25,6 @@ for ext in ${exts[@]}; do
     rm "${scrdir}/${stub}.${ext}"
 done
 
-$(which rungms) "${input}" 01 "${ppn}" > "${stub}".out
+$(which rungms) "${input}" 00 "${ppn}" > "${stub}".out
 
 mv "${scrdir}/${stub}.dat" .
