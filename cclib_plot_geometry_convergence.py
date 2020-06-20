@@ -50,7 +50,7 @@ def main():
             # parsing, so fail out.
             assert len(scfenergies) == len(gradients)
 
-            steps = range(1, len(scfenergies) + 1)
+            steps = list(range(1, len(scfenergies) + 1))
 
             # ax.plot(steps, scfenergies, label='SCF energy')
             ax.plot(steps, gradients, label='max gradient')
@@ -59,6 +59,7 @@ def main():
 
             ax.set_title(stub)
             ax.set_xlabel('optimization step #')
+            ax.set_xlim((steps[0], steps[-1]))
 
         elif type(job) == cclib.parser.orcaparser.ORCA:
 
