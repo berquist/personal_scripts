@@ -210,10 +210,14 @@ packages_default=(
     proselint
     pybind11
     python-language-server
+    rclone
     reflector
+    restic
     rlwrap
+    strace
     subversion
     swig
+    sysstat
     tcsh
     # tmux
     tree
@@ -288,9 +292,8 @@ packages_aur=(
     python-mmh3
     python-pyfiglet
     python-pylatex-git
-    # python-llvmlite
     python-memory_profiler
-    # python-numba
+    python-numba
     python-ordered-set
     python-pdbpp
     python-pythonpy
@@ -305,6 +308,7 @@ packages_aur=(
 
     # command-line tools
     cask
+    direnv
     grace
     multimarkdown
     pipman-git
@@ -334,4 +338,8 @@ packages_aur=(
     ttf-ms-fonts
     visual-studio-code-bin
     yay
+
+    # other
+    dftbplus
+    gamess
 )
