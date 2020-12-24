@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-# jmol_make_qcjson.bash: Given a filename, convert to QCJSON using Jmol.
+# jmol_make_qcjson.bash: Given a filename, convert to QCJSON/MolSSI QCSchema
+# using Jmol.
 
 stub=${1%.*}
 
