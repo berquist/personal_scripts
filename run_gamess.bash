@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# gamess_wrap.bash: Handle some of the dirty stuff when running a GAMESS
+# run_gamess.bash: Handle some of the dirty stuff when running a GAMESS
 # calculation.
 
 # Run gamess using the following commands:

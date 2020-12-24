@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 
-images=`ls *.tga`
-
-for image in ${images}
+for image in *.tga
 do
     filename=${image%.*}
     echo ${filename}

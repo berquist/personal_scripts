@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-'''symmol_generate_input.py: Generate an input appropriate for the
+"""run_symmol.py: Generate an input appropriate for the
 Fortran 77 program SYMMOL. Send the input to stdout.
 
 Usage:
@@ -10,9 +10,7 @@ Options:
   --tol1=TOL1   Set the tolerance for ... [Default: 1.0]
   --tol2=TOL2   Set the tolerance for ... [Default: 1.0]
   --print_args  Print the docopt argument block.
-'''
-
-from __future__ import print_function
+"""
 
 from docopt import docopt
 from itertools import count
@@ -59,7 +57,7 @@ def main():
 
     # Read in the XYZ file.
     xyzfilename = args['<xyzfilename>']
-    natoms, comment, structure = read_xyz_file(xyzfilename)
+    _, _, structure = read_xyz_file(xyzfilename)
 
     tol1 = float(args['--tol1'])
     tol2 = float(args['--tol2'])

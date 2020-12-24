@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# cfour_wrap.sh: Handle some of the dirty stuff when running a CFOUR
+# run_cfour.bash: Handle some of the dirty stuff when running a CFOUR
 # calculation.
 
 # Strip off the file extension to get the root name of the
