@@ -14,12 +14,12 @@ def xyz2dalton_from_ccdata(atomnos, atomcoords, totalcharge=0):
     coordinates (shape [natom, 3]), format the file contents into a second
     suitable for DALTON's MOLECULE input section.
     """
+    from cclib.parser.utils import PeriodicTable
 
-    from periodic_table import Element
-
+    pt = PeriodicTable()
     outfilelines = []
     atomtypes = 0
-    atomsymbols = [Element[atomnum] for atomnum in atomnos]
+    atomsymbols = [pt.element[atomnum] for atomnum in atomnos]
     oldcharge = ''
     count = 0
     for i, s, n, c in zip(counter(start=1), atomsymbols, atomnos, atomcoords):
@@ -64,13 +64,14 @@ def xyz2dalton_from_splitlines(xyzfile_splitlines, totalcharge=0):
     DALTON's MOLECULE input section.
     """
 
-    from periodic_table import AtomicNum
+    from cclib.parser.utils import PeriodicTable
 
+    pt = PeriodicTable()
     outfilelines = []
     atomtypes = 0
     atomsymbols = [line.split()[0] for line in xyzfile_splitlines
                    if line.strip() != '']
-    atomnums = [float(AtomicNum[symbol]) for symbol in atomsymbols]
+    atomnums = [float(pt.number[symbol]) for symbol in atomsymbols]
     oldcharge = ''
     count = 0
     for i, atomnum, line in zip(counter(start=1), atomnums, xyzfile_splitlines):
@@ -137,7 +138,7 @@ def main():
                 except cclib.method.calculationmethod.MissingAttributeError:
                     charge = 0
             else:
-                charge = int(args.charge)    
+                charge = int(args.charge)
             output = xyz2dalton_from_ccdata(atomnos, atomcoords, charge)
         elif args.convertor == 'builtin':
             output = xyz2dalton_from_file(xyzfilename, args.charge)

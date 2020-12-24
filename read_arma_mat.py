@@ -16,8 +16,6 @@ def arma_ascii_header_to_dtype(header):
     else:
         return np.float64
 
-    return dtype
-
 
 def read_arma_mat_ascii(armaasciifilename):
     """Given a file name, read it in as an ASCII-formatted Armadillo matrix.

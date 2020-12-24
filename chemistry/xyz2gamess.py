@@ -36,7 +36,8 @@ def main():
             print("cclib-based converter not implemented yet", file=sys.stderr)
             sys.exit(1)
         elif args.convertor == 'builtin':
-            from periodic_table import AtomicNum
+            from cclib.parser.utils import PeriodicTable
+            pt = PeriodicTable()
             with open(xyzfilename) as xyzfile:
                 xyzfile_contents = xyzfile.read()
             xyzfile_splitlines = xyzfile_contents.splitlines()[2:]
@@ -44,7 +45,7 @@ def main():
             for line in xyzfile_splitlines:
                 sline = line.strip().split()
                 symbol, x, y, z = sline
-                atomnum = float(AtomicNum[symbol])
+                atomnum = float(pt.number[symbol])
                 atom = ' {} {} {} {} {}'.format(symbol, atomnum, x, y, z)
                 atoms.append(atom)
             output = '\n'.join(atoms)

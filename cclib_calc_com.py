@@ -41,12 +41,13 @@ def main():
     """
     import argparse
     from cclib.io import ccopen
-    import periodic_table as pt
+    from cclib.parser.utils import PeriodicTable
 
     parser = argparse.ArgumentParser()
     parser.add_argument('filename', nargs='+')
     args = parser.parse_args()
 
+    pt = PeriodicTable()
     for filename in args.filename:
 
         job = ccopen(filename)
@@ -54,7 +55,8 @@ def main():
 
         # pylint: disable=E1101
         elementnums = data.atomnos
-        elementmasses = [pt.Mass[pt.Element[i]] for i in elementnums]
+        # FIXME averaged mass
+        elementmasses = [pt.Mass[pt.element[i]] for i in elementnums]
         coords = data.atomcoords[-1]
 
         print(elementnums)

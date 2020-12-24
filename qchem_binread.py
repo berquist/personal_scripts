@@ -1,9 +1,7 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import numpy as np
 import os
-import shutil
 import struct
 
 from dump_bytes import read_binary
