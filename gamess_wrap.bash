@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# gamess_wrap.sh: Handle some of the dirty stuff when running a GAMESS
+# gamess_wrap.bash: Handle some of the dirty stuff when running a GAMESS
 # calculation.
 
 # Run gamess using the following commands:
@@ -25,6 +25,6 @@ for ext in ${exts[@]}; do
     rm "${scrdir}/${stub}.${ext}"
 done
 
-$(which rungms) "${input}" 00 "${ppn}" > "${stub}".out
+$(command -v rungms) "${input}" 00 "${ppn}" > "${stub}".out
 
 mv "${scrdir}/${stub}.dat" .

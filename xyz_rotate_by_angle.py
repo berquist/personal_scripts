@@ -9,37 +9,7 @@ from math import sin, cos, sqrt
 import sys
 
 
-def rotation(theta):
-    """Generate a rotation matrix from theta = (alpha, beta, gamma).
-    """
-    tx, ty, tz = theta
-    cx = cos(tx)
-    sx = sin(tx)
-    cy = cos(ty)
-    sy = sin(ty)
-    cz = cos(tz)
-    sz = sin(tz)
-    # pylint: disable=W0612
-    Rx = np.array([[1, 0, 0], [0, cx, -sx], [0, sx, cx]])
-    Ry = np.array([[cy, 0, -sy], [0, 1, 0], [sy, 0, cy]])
-    Rz = np.array([[cz, -sz, 0], [sz, cz, 0], [0, 0, 1]])
-    # return np.dot(Rx, np.dot(Ry, Rz))
-    return np.dot(Rz, np.dot(Ry, Rz))
-
-
-# This is an alternative way of ding it.
-# def rotation(theta, R=np.zeros(shape=(3, 3))):
-#     """Generate a rotation matrix from theta = (alpha, beta, gamma).
-#     """
-#     cx, cy, cz = np.cos(theta)
-#     sx, sy, sz = np.sin(theta)
-#     R.flat = (cx*cz - sx*cy*sz, cx*sz + sx*cy*cz, sx*sy,
-#               -sx*cz - cx*cy*sz, -sx*sz + cx*cy*cz,
-#               cx*sy, sy*sz, -sy*cz, cy)
-#     return R
-
-
-def rotation_matrix(angle, axis):
+def rotation_matrix(angle, axis, small=1.0e-10):
     """Generate a rotation matrix for rotating around an axis by a
     certain angle.
     """
@@ -61,7 +31,6 @@ def rotation_matrix(angle, axis):
 
     mag = sqrt(x*x + y*y + z*z)
 
-    small = 1.0e-10
     if abs(mag) < small:
         unitmat = [[1.0, 0.0, 0.0],
                    [0.0, 1.0, 0.0],

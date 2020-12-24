@@ -5,8 +5,6 @@ suitable for a GAMESS calculation, with the option to use either the
 built-in periodic table, cclib, or Open Babel.
 """
 
-from __future__ import print_function
-
 
 def main():
     """If used as a script, the main routine."""
@@ -26,8 +24,6 @@ def main():
     xyzfilenames = args.xyzfilename
 
     for xyzfilename in xyzfilenames:
-
-        outfilename = ''.join([os.path.splitext(xyzfilename)[0], '.inp'])
 
         if args.convertor == 'openbabel':
             import subprocess as sp
@@ -56,7 +52,7 @@ def main():
             sys.exit()
 
         if args.to_files:
-            _file = open(outputfilename, 'w')
+            _file = open(''.join([os.path.splitext(xyzfilename)[0], '.inp']), 'w')
         else:
             _file = sys.stdout
         print(output, file=_file)

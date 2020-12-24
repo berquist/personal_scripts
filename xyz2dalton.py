@@ -107,14 +107,12 @@ def main():
     arg('convertor', choices=('builtin', 'openbabel', 'cclib'))
     arg('xyzfilename', nargs='+')
     arg('--to-files', action='store_true')
-    arg('--charge')
+    arg('--charge', type=int, default=0)
 
     args = parser.parse_args()
     xyzfilenames = args.xyzfilename
 
     for xyzfilename in xyzfilenames:
-
-        outfilename = ''.join([os.path.splitext(xyzfilename)[0], '.dal'])
 
         if args.convertor == 'openbabel':
             # shell out rather than try and use pybel
@@ -147,7 +145,7 @@ def main():
             sys.exit()
 
         if args.to_files:
-            _file = open(outfilename, 'w')
+            _file = open(''.join([os.path.splitext(xyzfilename)[0], '.dal']), 'w')
         else:
             _file = sys.stdout
         print(output, file=_file)
