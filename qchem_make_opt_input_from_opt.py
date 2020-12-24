@@ -11,7 +11,6 @@ will write an input file called '*opt(\d*)+1.in', with the previous
 number incremented by one.
 """
 
-from __future__ import print_function
 
 import re
 import os.path

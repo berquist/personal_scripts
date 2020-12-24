@@ -5,7 +5,6 @@ SLURM scheduler.
 
 """
 
-from __future__ import print_function
 
 
 def template_slurmfile_molpro(inpfile, ppn, time):

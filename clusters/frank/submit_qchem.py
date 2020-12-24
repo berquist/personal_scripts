@@ -3,7 +3,6 @@
 """submit_qchem.py: A standalone script for submitting Q-Chem jobs to
 Frank's PBS scheduler."""
 
-from __future__ import print_function
 
 
 def template_pbsfile_qchem(inpfile, ppn, time, queue, save, lowqos):

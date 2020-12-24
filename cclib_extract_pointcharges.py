@@ -9,7 +9,6 @@ The format of the output is two columns, the first being the atomic
 symbol, the second being the magnitude of the charge.
 """
 
-from __future__ import print_function
 import argparse
 import os.path
 from cclib.io import ccopen

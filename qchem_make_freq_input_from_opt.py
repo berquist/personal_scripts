@@ -9,7 +9,6 @@ The script assumes the output file being read from is called
 script will write an input file called '*freq*.in'.
 """
 
-from __future__ import print_function
 
 import re
 import os.path

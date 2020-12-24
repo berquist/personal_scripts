@@ -13,7 +13,6 @@ New version requires Python 2.7+ (for argparse)
 
 """
 # Python3 compatibility
-from __future__ import print_function
 
 # Required to check version
 import sys

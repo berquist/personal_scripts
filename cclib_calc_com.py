@@ -5,7 +5,6 @@ nuclear charge for the final geometry of one or more quantum chemical
 output files (using cclib).
 """
 
-from __future__ import print_function
 
 
 def centerofmass(coords, masses):

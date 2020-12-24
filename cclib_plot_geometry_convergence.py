@@ -5,7 +5,6 @@ logfile for a geometry optimization, plot how the convergence
 parameters change over the course of the optimization.
 """
 
-from __future__ import print_function
 
 import matplotlib as mpl
 mpl.use('Agg')

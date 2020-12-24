@@ -4,7 +4,6 @@
 Frank's PBS scheduler.
 """
 
-from __future__ import print_function
 
 import logging
 import sys

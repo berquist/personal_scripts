@@ -12,7 +12,6 @@ Options:
   --print_args            Print the parsed argument block.
 '''
 
-from __future__ import print_function
 
 from docopt import docopt
 from cclib.io import ccopen

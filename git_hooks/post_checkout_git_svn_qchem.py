@@ -8,7 +8,6 @@
 # Modified from http://stackoverflow.com/a/8040405/3249688 then ported
 # to Python.
 
-from __future__ import print_function
 
 import os
 import re

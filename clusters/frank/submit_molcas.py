@@ -4,7 +4,6 @@
 Frank's PBS scheduler.
 """
 
-from __future__ import print_function
 
 
 def template_pbsfile_molcas(inpfile, ppn, time, queue, extrafiles, save):

@@ -3,7 +3,6 @@
 """cclib.check_conv_geom.py: Check if a geometry optimization job
 has converged."""
 
-from __future__ import print_function
 
 from .utils import find_string_in_file
 

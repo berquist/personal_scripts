@@ -6,7 +6,6 @@ filesystem matches, determine which results don't have matches
 the result.
 """
 
-from __future__ import print_function
 
 import argparse
 import os

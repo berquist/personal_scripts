@@ -42,7 +42,6 @@ Examples:
  end
 '''
 
-from __future__ import print_function
 
 from vmd_templates import pad_left_zeros_l
 

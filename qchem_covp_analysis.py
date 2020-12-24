@@ -15,7 +15,6 @@ Options:
   --print_args                 Print the argument block.
 '''
 
-from __future__ import print_function
 
 import numpy as np
 import os.path

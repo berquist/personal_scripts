@@ -2,7 +2,6 @@
 
 """match_opt_and_freq.py: Given ..."""
 
-from __future__ import print_function
 
 import os
 import re

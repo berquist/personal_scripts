@@ -5,7 +5,6 @@ from a QCT-AIMD job where:
  aimd_qct_which_trajectory = -n and
  aimd_qct_initpos = -n.'''
 
-from __future__ import print_function
 
 import argparse
 import os.path

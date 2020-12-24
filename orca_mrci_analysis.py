@@ -10,7 +10,6 @@ Options:
   --print_args             Print the argument block.
 '''
 
-from __future__ import print_function
 
 from docopt import docopt
 import os.path

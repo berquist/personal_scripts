@@ -4,7 +4,6 @@
 belonging to the given user(s).
 """
 
-from __future__ import print_function
 
 import argparse
 import subprocess as sp

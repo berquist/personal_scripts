@@ -3,7 +3,6 @@
 """submit-gamess.py: A standalone script for submitting GAMESS jobs to
 Frank's PBS scheduler."""
 
-from __future__ import print_function
 
 
 def template_pbsfile_gamess(inpfile, ppn, time, queue, extrafiles):

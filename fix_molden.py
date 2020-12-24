@@ -19,7 +19,6 @@ Attempt to fix these malformed inputs, knowing what possible section
 headers/keys are and what the 'official' Molden output looks like.
 """
 
-from __future__ import print_function
 
 
 bfs = ('[5D]', '[5D10F]', '[7F]', '[5D7F]', '[9G]')

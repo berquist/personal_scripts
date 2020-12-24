@@ -6,7 +6,6 @@ cclib. Name is the same stub, with the file extension replaced by
 '.xyz'.
 """
 
-from __future__ import print_function
 
 import os.path
 

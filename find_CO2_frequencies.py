@@ -6,7 +6,6 @@ calculation which include a significant fraction of CO2
 displacement.
 """
 
-from __future__ import print_function
 
 import sys
 

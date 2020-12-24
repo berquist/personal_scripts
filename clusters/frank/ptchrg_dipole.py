@@ -3,7 +3,6 @@
 """ptchrg_dipole.py: Given a file of ORCA point charges, calculate
 their collective dipole moment."""
 
-from __future__ import print_function
 
 import numpy as np
 

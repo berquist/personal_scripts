@@ -5,7 +5,6 @@ set, generate Q-Chem inputs for most of the possible excited state
 methods.
 """
 
-from __future__ import print_function
 
 import sys
 

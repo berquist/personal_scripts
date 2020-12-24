@@ -4,7 +4,6 @@
 Haswell's SLURM scheduler.
 """
 
-from __future__ import print_function
 
 
 def template_slurmfile_psi4(inpfile, ppn, time, as_python):

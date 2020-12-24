@@ -14,7 +14,6 @@ Options:
   --print_args  Print the argument block.
 '''
 
-from __future__ import print_function
 
 from collections import OrderedDict
 from itertools import count

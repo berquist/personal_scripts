@@ -5,7 +5,6 @@ which ones don't have matching partners (in the current directory),
 and print the result.
 """
 
-from __future__ import print_function
 
 import argparse
 import os

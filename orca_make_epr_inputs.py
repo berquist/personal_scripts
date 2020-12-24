@@ -3,7 +3,6 @@
 """orca_gen_epr_input.py: For a given molecule and basis set, generate
 ORCA inputs for most of the possible EPR options."""
 
-from __future__ import print_function
 
 
 # TODO:

@@ -3,7 +3,6 @@
 """qchem_delete_big_scratch.py: Delete 'big' scratch files created by
 Q-Chem that we probably won't ever want to read from."""
 
-from __future__ import print_function
 
 import argparse
 import os

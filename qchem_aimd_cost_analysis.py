@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-from __future__ import print_function
-from __future__ import division
 
 from qchem_aimd_tools import make_file_iterator
 from qchem_aimd_tools import get_qchem_aimd_data

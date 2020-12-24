@@ -8,7 +8,6 @@ Authors: Daniel   Lambrecht (original)
          Eric      Berquist (rewritten for SLURM)
 """
 
-from __future__ import print_function
 
 import sys
 
