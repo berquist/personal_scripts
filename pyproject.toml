@@ -1,0 +1,35 @@
+[tool.black]
+line-length = 100
+target-version = ['py38']
+
+[tool.isort]
+profile = "black"
+# default is FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER
+# Placing third-party imports at the end makes their inclusion more obvious
+sections = ["FUTURE", "STDLIB", "ATTRS", "FIRSTPARTY", "THIRDPARTY", "LOCALFOLDER"]
+known_attrs = ["attr"]
+
+[tool.towncrier]
+    package="REPONAME"
+    filename="CHANGELOG.md"
+    issue_format = "`#{issue} <https://github.com/berquist/REPONAME/issues/{issue}>`_"
+
+    [[tool.towncrier.type]]
+        directory = "breaking"
+        name = "Backward-incompatible Changes"
+        showcontent = true
+
+    [[tool.towncrier.type]]
+        directory = "deprecation"
+        name = "Deprecations"
+        showcontent = true
+
+    [[tool.towncrier.type]]
+        directory = "feature"
+        name = "New Features"
+        showcontent = true
+
+    [[tool.towncrier.type]]
+        directory = "bugfix"
+        name = "Bug Fixes"
+        showcontent = true
