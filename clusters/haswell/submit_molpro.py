@@ -6,10 +6,9 @@ SLURM scheduler.
 """
 
 
-
 def template_slurmfile_molpro(inpfile, ppn, time):
     """The template for a SLURM jobfile that calls Q-Chem."""
-    return '''#!/bin/bash
+    return """#!/bin/bash
 
 #SBATCH --job-name={inpfile}
 #SBATCH --output={inpfile}.slurmout
@@ -24,10 +23,9 @@ module load molpro/2015.1.7
 
 $(which molpro) -t ${{SLURM_CPUS_PER_TASK}} -d ${{SLURM_SCRATCH}} -o ${{SLURM_SUBMIT_DIR}}/{inpfile}.out {inpfile}.in
 chmod 644 ${{SLURM_SUBMIT_DIR}}/{inpfile}.out
-'''.format(inpfile=inpfile,
-           ppn=ppn,
-           time=time,
-           username=os.environ['USER'])
+""".format(
+        inpfile=inpfile, ppn=ppn, time=time, username=os.environ["USER"]
+    )
 
 
 if __name__ == "__main__":
@@ -35,26 +33,16 @@ if __name__ == "__main__":
     import os.path
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('inpfilename',
-                        help='the Molpro input file to submit',
-                        nargs='*')
-    parser.add_argument('--ppn',
-                        type=int,
-                        default=12,
-                        help='number of cores to run on (max 12)')
-    parser.add_argument('--time',
-                        type=int,
-                        default=24,
-                        help='walltime to reserve (max 72 hours)')
+    parser.add_argument("inpfilename", help="the Molpro input file to submit", nargs="*")
+    parser.add_argument("--ppn", type=int, default=12, help="number of cores to run on (max 12)")
+    parser.add_argument("--time", type=int, default=24, help="walltime to reserve (max 72 hours)")
     args = parser.parse_args()
 
     for inpfilename in args.inpfilename:
         inpfilename = os.path.splitext(inpfilename)[0]
 
-        slurmfilename = inpfilename + '.slurm'
-        with open(slurmfilename, 'w') as slurmfile:
-            slurmfile.write(template_slurmfile_molpro(inpfilename,
-                                                      args.ppn,
-                                                      args.time))
+        slurmfilename = inpfilename + ".slurm"
+        with open(slurmfilename, "w") as slurmfile:
+            slurmfile.write(template_slurmfile_molpro(inpfilename, args.ppn, args.time))
 
         print(slurmfilename)

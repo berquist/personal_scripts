@@ -7,10 +7,10 @@ import os.path
 def template_slurmfile_batch(**jobvars):
     """The template for a SLURM jobfile ..."""
 
-    jobvars['module'] = 'qchem/trunk_intel_release'
+    jobvars["module"] = "qchem/trunk_intel_release"
 
-    cluster = jobvars['cluster']
-    partition = jobvars['partition']
+    cluster = jobvars["cluster"]
+    partition = jobvars["partition"]
 
     return """#!/bin/bash
 
@@ -32,7 +32,9 @@ export LC_COLLATE=C
 
 {jobstrings}
 wait
-""".format(**jobvars)
+""".format(
+        **jobvars
+    )
 
 
 def getargs():
@@ -42,34 +44,30 @@ def getargs():
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("inputfile",
-                        nargs="+",
-                        help="""One or more Q-Chem calculation input files to run in the batch job.""")
-    parser.add_argument("--ppj",
-                        type=int,
-                        default=1,
-                        help="""The number of cores to use per individual calculation.""")
-    parser.add_argument("--cluster",
-                        default="smp",
-                        help="""TODO""")
-    parser.add_argument("--partition",
-                        default="smp",
-                        help="""TODO""")
-    parser.add_argument("--walltime",
-                        type=int,
-                        default=144,
-                        help="""The amount of time in hours to reserve (generally max 144).""")
-    parser.add_argument("--ppn",
-                        type=int,
-                        default=28,
-                        help="""The number of core per node to request.""")
-    parser.add_argument("--batchname",
-                        default="batch",
-                        help="""TODO""")
-    parser.add_argument("--nnodes",
-                        type=int,
-                        default=1,
-                        help="""The number of nodes to request.""")
+    parser.add_argument(
+        "inputfile",
+        nargs="+",
+        help="""One or more Q-Chem calculation input files to run in the batch job.""",
+    )
+    parser.add_argument(
+        "--ppj",
+        type=int,
+        default=1,
+        help="""The number of cores to use per individual calculation.""",
+    )
+    parser.add_argument("--cluster", default="smp", help="""TODO""")
+    parser.add_argument("--partition", default="smp", help="""TODO""")
+    parser.add_argument(
+        "--walltime",
+        type=int,
+        default=144,
+        help="""The amount of time in hours to reserve (generally max 144).""",
+    )
+    parser.add_argument(
+        "--ppn", type=int, default=28, help="""The number of core per node to request."""
+    )
+    parser.add_argument("--batchname", default="batch", help="""TODO""")
+    parser.add_argument("--nnodes", type=int, default=1, help="""The number of nodes to request.""")
 
     args = parser.parse_args()
 
@@ -97,17 +95,17 @@ def main(args):
 
     jobvars = dict()
 
-    if args.cluster == 'smp':
-        assert args.partition in ('smp', 'high-mem')
-        if args.partition == 'smp':
+    if args.cluster == "smp":
+        assert args.partition in ("smp", "high-mem")
+        if args.partition == "smp":
             ppn = 24
-        elif args.partition == 'high-mem':
+        elif args.partition == "high-mem":
             ppn = 12
         assert args.ppn <= ppn
         assert args.ppj <= ppn
         assert args.nnodes == 1
-    elif args.cluster == 'mpi':
-        assert args.partition in ('opa',)
+    elif args.cluster == "mpi":
+        assert args.partition in ("opa",)
         ppn = 28
         assert args.ppn <= ppn
         assert args.ppj <= ppn
@@ -117,19 +115,19 @@ def main(args):
 
     job_commands_section = make_command_block_from_inputs(args.inputfile, args.nnodes, args.ppj)
 
-    jobvars['cluster'] = args.cluster
-    jobvars['partition'] = args.partition
-    jobvars['nnodes'] = args.nnodes
-    jobvars['ppn'] = args.ppn
-    jobvars['ppj'] = args.ppj
-    jobvars['time'] = args.walltime
+    jobvars["cluster"] = args.cluster
+    jobvars["partition"] = args.partition
+    jobvars["nnodes"] = args.nnodes
+    jobvars["ppn"] = args.ppn
+    jobvars["ppj"] = args.ppj
+    jobvars["time"] = args.walltime
     # jobvars['ntasks'] = int((args.ppn * args.nnodes) / args.ppj)
     # *Maximum* number of tasks. Total is actually above. As long as
     # *cpus-per-task is set, this can't be oversubscribed.
-    jobvars['ntasks'] = int(args.ppn * args.nnodes)
-    jobvars['username'] = os.environ['USER']
-    jobvars['jobstrings'] = job_commands_section
-    jobvars['batchname'] = args.batchname
+    jobvars["ntasks"] = int(args.ppn * args.nnodes)
+    jobvars["username"] = os.environ["USER"]
+    jobvars["jobstrings"] = job_commands_section
+    jobvars["batchname"] = args.batchname
 
     with open("{0}.slurm".format(args.batchname), "w") as slurmfile:
         slurmfile.write(template_slurmfile_batch(**jobvars))

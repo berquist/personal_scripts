@@ -5,7 +5,6 @@ Haswell's SLURM scheduler.
 """
 
 
-
 def template_slurmfile_dalton(inpfile, ppn, time, extrafiles):
     """The template for a SLURM jobfile that calls DALTON."""
 
@@ -20,8 +19,8 @@ def template_slurmfile_dalton(inpfile, ppn, time, extrafiles):
         joined_extrafiles = "".join(copy_strings)
     else:
         joined_extrafiles = copy_string_template.format(extrafiles)
-    module = 'dalton/2016.2-i2017.1-mkl_parallel-omp'
-    return '''#!/bin/bash
+    module = "dalton/2016.2-i2017.1-mkl_parallel-omp"
+    return """#!/bin/bash
 
 #SBATCH --job-name={inpfile}
 #SBATCH --output={inpfile}.slurmout
@@ -49,12 +48,14 @@ trap run_on_exit EXIT
 
 $(which dalton) -omp {ppn} -noarch -nobackup -d -ow -w "$SLURM_SUBMIT_DIR" {inpfile}.dal
 chmod 644 "$SLURM_SUBMIT_DIR"/{inpfile}.out
-'''.format(inpfile=inpfile,
-           ppn=ppn,
-           time=time,
-           module=module,
-           username=os.environ['USER'],
-           extrafiles=joined_extrafiles)
+""".format(
+        inpfile=inpfile,
+        ppn=ppn,
+        time=time,
+        module=module,
+        username=os.environ["USER"],
+        extrafiles=joined_extrafiles,
+    )
 
 
 if __name__ == "__main__":
@@ -62,30 +63,21 @@ if __name__ == "__main__":
     import os.path
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('inpfilename',
-                        help='the DALTON input file to submit',
-                        nargs='*')
-    parser.add_argument('--ppn',
-                        type=int,
-                        default=12,
-                        help='number of cores to run on (max 12)')
-    parser.add_argument('--time',
-                        type=int,
-                        default=24,
-                        help='walltime to reserve (max 144 hours)')
-    parser.add_argument('--extrafiles',
-                        help='An arbitrary number of files to copy to $LOCAL.',
-                        nargs='*')
+    parser.add_argument("inpfilename", help="the DALTON input file to submit", nargs="*")
+    parser.add_argument("--ppn", type=int, default=12, help="number of cores to run on (max 12)")
+    parser.add_argument("--time", type=int, default=24, help="walltime to reserve (max 144 hours)")
+    parser.add_argument(
+        "--extrafiles", help="An arbitrary number of files to copy to $LOCAL.", nargs="*"
+    )
     args = parser.parse_args()
 
     for inpfilename in args.inpfilename:
         inpfilename = os.path.splitext(inpfilename)[0]
 
-        slurmfilename = inpfilename + '.slurm'
-        with open(slurmfilename, 'w') as slurmfile:
-            slurmfile.write(template_slurmfile_dalton(inpfilename,
-                                                      args.ppn,
-                                                      args.time,
-                                                      args.extrafiles))
+        slurmfilename = inpfilename + ".slurm"
+        with open(slurmfilename, "w") as slurmfile:
+            slurmfile.write(
+                template_slurmfile_dalton(inpfilename, args.ppn, args.time, args.extrafiles)
+            )
 
         print(slurmfilename)
