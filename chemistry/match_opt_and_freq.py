@@ -13,18 +13,22 @@ def getargs():
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--debug', action='store_true')
-    parser.add_argument('--debug-big', action='store_true')
+    parser.add_argument("--debug", action="store_true")
+    parser.add_argument("--debug-big", action="store_true")
 
-    parser.add_argument('--dir-opt', default='.')
-    parser.add_argument('--dir-freq', default='.')
+    parser.add_argument("--dir-opt", default=".")
+    parser.add_argument("--dir-freq", default=".")
 
-    parser.add_argument('--print-opt-outputs-missing-freq-outputs',
-                        action='store_true',
-                        help="""useful for direct input into `qchem_make_freq_input_from_opt.py`""")
-    parser.add_argument('--print-opt-outputs-missing-freq-inputs',
-                        action='store_true',
-                        help="""useful for direct input into `qchem_make_freq_input_from_opt.py`""")
+    parser.add_argument(
+        "--print-opt-outputs-missing-freq-outputs",
+        action="store_true",
+        help="""useful for direct input into `qchem_make_freq_input_from_opt.py`""",
+    )
+    parser.add_argument(
+        "--print-opt-outputs-missing-freq-inputs",
+        action="store_true",
+        help="""useful for direct input into `qchem_make_freq_input_from_opt.py`""",
+    )
 
     args = parser.parse_args()
 
@@ -48,7 +52,7 @@ def get_files_from_path(path, ext=".out"):
     return sorted(matchfiles)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     import sys
 
@@ -61,14 +65,18 @@ if __name__ == '__main__':
         print("dir_opt : {}".format(dir_opt), file=sys.stderr)
         print("dir_freq: {}".format(dir_freq), file=sys.stderr)
 
-    inputs_opt = [f for f in get_files_from_path(dir_opt, ext=".in")
-                  if "opt" in os.path.basename(f)]
-    inputs_freq = [f for f in get_files_from_path(dir_freq, ext=".in")
-                   if "freq" in os.path.basename(f)]
-    outputs_opt = [f for f in get_files_from_path(dir_opt, ext=".out")
-                   if "opt" in os.path.basename(f)]
-    outputs_freq = [f for f in get_files_from_path(dir_freq, ext=".out")
-                    if "freq" in os.path.basename(f)]
+    inputs_opt = [
+        f for f in get_files_from_path(dir_opt, ext=".in") if "opt" in os.path.basename(f)
+    ]
+    inputs_freq = [
+        f for f in get_files_from_path(dir_freq, ext=".in") if "freq" in os.path.basename(f)
+    ]
+    outputs_opt = [
+        f for f in get_files_from_path(dir_opt, ext=".out") if "opt" in os.path.basename(f)
+    ]
+    outputs_freq = [
+        f for f in get_files_from_path(dir_freq, ext=".out") if "freq" in os.path.basename(f)
+    ]
 
     if args.debug_big:
         pprint(inputs_opt, "inputs_opt")
@@ -79,7 +87,7 @@ if __name__ == '__main__':
     # Master loop over all completed geometry optimization output
     # files.
     for output_opt in outputs_opt:
-        opt_repl_freq = os.path.basename(re.sub('opt\d*', 'freq', output_opt))
+        opt_repl_freq = os.path.basename(re.sub("opt\d*", "freq", output_opt))
         if args.print_opt_outputs_missing_freq_outputs:
             if opt_repl_freq not in outputs_freq:
                 print(os.path.relpath(output_opt))

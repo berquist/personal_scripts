@@ -20,6 +20,7 @@ cfour_files=(
     NEWMOS
     NTOTAL
     OLDMOS
+    VMLSYM
 )
 
 for cfour_file in ${cfour_files[@]}; do

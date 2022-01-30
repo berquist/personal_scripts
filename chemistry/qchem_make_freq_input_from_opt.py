@@ -10,30 +10,31 @@ script will write an input file called '*freq*.in'.
 """
 
 
-import re
 import os.path
-
+import re
 from collections import OrderedDict
 from copy import deepcopy
+
+from qchem_make_opt_input_from_opt import (
+    form_molecule_section,
+    form_molecule_section_from_fragments,
+    make_file_iterator,
+    parse_fragments_from_molecule,
+    parse_user_input,
+)
 
 import cclib
 from cclib.parser.utils import PeriodicTable
 
-from qchem_make_opt_input_from_opt import \
-    (form_molecule_section, form_molecule_section_from_fragments,
-     make_file_iterator, parse_user_input, parse_fragments_from_molecule)
-
 
 def template_input_freq(molecule, **rem_keywords):
     """The template for a input file that performs a frequency calculation."""
-    avoid_these_keywords = (
-        'jobtype',
-    )
+    avoid_these_keywords = ("jobtype",)
     rem_pieces = []
     for k in rem_keywords:
         if k not in avoid_these_keywords:
-            rem_pieces.append(' {} = {}'.format(k, rem_keywords[k]))
-    rem_str = '\n'.join(rem_pieces)
+            rem_pieces.append(" {} = {}".format(k, rem_keywords[k]))
+    rem_str = "\n".join(rem_pieces)
     # Return a string, which is the contents of the new input file,
     # with the '{}' fields appropriately replaced.
     return """$rem
@@ -44,7 +45,9 @@ $end
 $molecule
 {molecule}
 $end
-""".format(rem_str=rem_str, molecule=molecule)
+""".format(
+        rem_str=rem_str, molecule=molecule
+    )
 
 
 def clean_up_rem(rem, do_fragment=False):
@@ -59,25 +62,25 @@ def clean_up_rem(rem, do_fragment=False):
 
     newrem = deepcopy(rem)
 
-    if 'thresh' in newrem:
-        if int(newrem['thresh']) < min_thresh:
-            newrem['thresh'] = min_thresh
-    if 'scf_convergence' in newrem:
-        if int(newrem['scf_convergence']) < min_scf_convergence:
-            newrem['scf_convergence'] = min_scf_convergence
+    if "thresh" in newrem:
+        if int(newrem["thresh"]) < min_thresh:
+            newrem["thresh"] = min_thresh
+    if "scf_convergence" in newrem:
+        if int(newrem["scf_convergence"]) < min_scf_convergence:
+            newrem["scf_convergence"] = min_scf_convergence
 
     # If doing a no charge transfer fragment calculation, we can't use
     # analytic Hessians, so switch to numerical ones.
     if do_fragment:
-        if 'frgm_lpcorr' in newrem:
-            if int(newrem['frgm_lpcorr']) == 0:
-                newrem['ideriv'] = 1
+        if "frgm_lpcorr" in newrem:
+            if int(newrem["frgm_lpcorr"]) == 0:
+                newrem["ideriv"] = 1
     # If we aren't doing a fragment calculation at all, certain
     # keywords need to be removed.
     else:
         keywords_to_remove = (
-            'frgm_method',
-            'frgm_lpcorr',
+            "frgm_method",
+            "frgm_lpcorr",
         )
         for k in keywords_to_remove:
             if k in newrem:
@@ -94,9 +97,9 @@ def getargs():
     # pylint: disable=C0103
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('outputfilename', nargs='+')
+    parser.add_argument("outputfilename", nargs="+")
 
-    parser.add_argument('--fragment', action='store_true')
+    parser.add_argument("--fragment", action="store_true")
 
     args = parser.parse_args()
 
@@ -112,27 +115,27 @@ def parse_rem_section(outputfilename):
 
     rem = []
 
-    line = ''
-    while line.strip().lower() != '$rem':
+    line = ""
+    while line.strip().lower() != "$rem":
         line = next(outputfile)
     line = next(outputfile)
-    while '$end' not in line:
+    while "$end" not in line:
         sline = line.split()
-        k = sline[0].replace('=', '').lower()
-        v = sline[-1].replace('=', '').lower()
+        k = sline[0].replace("=", "").lower()
+        v = sline[-1].replace("=", "").lower()
         rem.append((k, v))
         line = next(outputfile)
 
     return OrderedDict(rem)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     args = getargs()
 
     pt = PeriodicTable()
     # Format string template for the XYZ section.
-    s = '{:3s} {:15.10f} {:15.10f} {:15.10f}'
+    s = "{:3s} {:15.10f} {:15.10f} {:15.10f}"
 
     for outputfilename in args.outputfilename:
 
@@ -143,13 +146,13 @@ if __name__ == '__main__':
         # this is to deal with the Q-Chem parser not handling
         # incomplete SCF cycles properly
         except StopIteration:
-            print('no output made: StopIteration in {}'.format(outputfilename))
+            print("no output made: StopIteration in {}".format(outputfilename))
             continue
 
         # Determine the name of the file we're writing.
-        assert outputfilename.endswith('.out')
-        inputfilename = re.sub(r'opt\d*', 'freq', outputfilename)
-        inputfilename = inputfilename.replace('.out', '.in')
+        assert outputfilename.endswith(".out")
+        inputfilename = re.sub(r"opt\d*", "freq", outputfilename)
+        inputfilename = inputfilename.replace(".out", ".in")
         inputfilename = os.path.basename(inputfilename)
 
         rem = parse_rem_section(outputfilename)
@@ -165,15 +168,21 @@ if __name__ == '__main__':
         element_list = [pt.element[Z] for Z in data.atomnos]
         last_geometry = data.atomcoords[-1]
         if args.fragment:
-            charges, multiplicities, start_indices = parse_fragments_from_molecule(user_input['molecule'])
+            charges, multiplicities, start_indices = parse_fragments_from_molecule(
+                user_input["molecule"]
+            )
             charges.insert(0, data.charge)
             multiplicities.insert(0, data.mult)
-            molecule_section = form_molecule_section_from_fragments(element_list, last_geometry, charges, multiplicities, start_indices)
+            molecule_section = form_molecule_section_from_fragments(
+                element_list, last_geometry, charges, multiplicities, start_indices
+            )
         else:
-            molecule_section = form_molecule_section(element_list, last_geometry, data.charge, data.mult)
-        molecule = '\n'.join(molecule_section)
+            molecule_section = form_molecule_section(
+                element_list, last_geometry, data.charge, data.mult
+            )
+        molecule = "\n".join(molecule_section)
 
-        with open(inputfilename, 'w') as inputfile:
+        with open(inputfilename, "w") as inputfile:
             inputfile.write(template_input_freq(molecule, **rem))
 
         print(inputfilename)

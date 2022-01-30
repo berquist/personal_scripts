@@ -16,27 +16,27 @@ def main():
     parser = argparse.ArgumentParser()
 
     arg = parser.add_argument
-    arg('convertor', choices=('builtin', 'openbabel', 'cclib'))
-    arg('xyzfilename', nargs='+')
-    arg('--to-files', action='store_true')
+    arg("convertor", choices=("builtin", "openbabel", "cclib"))
+    arg("xyzfilename", nargs="+")
+    arg("--to-files", action="store_true")
 
     args = parser.parse_args()
     xyzfilenames = args.xyzfilename
 
     for xyzfilename in xyzfilenames:
 
-        if args.convertor == 'openbabel':
+        if args.convertor == "openbabel":
             import subprocess as sp
-            ob_output = sp.check_output(['obabel',
-                                         '-ixyz', xyzfilename,
-                                         '-ogamin']).decode('utf-8')
+
+            ob_output = sp.check_output(["obabel", "-ixyz", xyzfilename, "-ogamin"]).decode("utf-8")
             ob_splitlines = ob_output.splitlines()[5:-3]
-            output = '\n'.join(ob_splitlines)
-        elif args.convertor == 'cclib':
+            output = "\n".join(ob_splitlines)
+        elif args.convertor == "cclib":
             print("cclib-based converter not implemented yet", file=sys.stderr)
             sys.exit(1)
-        elif args.convertor == 'builtin':
+        elif args.convertor == "builtin":
             from cclib.parser.utils import PeriodicTable
+
             pt = PeriodicTable()
             with open(xyzfilename) as xyzfile:
                 xyzfile_contents = xyzfile.read()
@@ -46,14 +46,14 @@ def main():
                 sline = line.strip().split()
                 symbol, x, y, z = sline
                 atomnum = float(pt.number[symbol])
-                atom = ' {} {} {} {} {}'.format(symbol, atomnum, x, y, z)
+                atom = " {} {} {} {} {}".format(symbol, atomnum, x, y, z)
                 atoms.append(atom)
-            output = '\n'.join(atoms)
+            output = "\n".join(atoms)
         else:
             sys.exit()
 
         if args.to_files:
-            _file = open(''.join([os.path.splitext(xyzfilename)[0], '.inp']), 'w')
+            _file = open("".join([os.path.splitext(xyzfilename)[0], ".inp"]), "w")
         else:
             _file = sys.stdout
         print(output, file=_file)

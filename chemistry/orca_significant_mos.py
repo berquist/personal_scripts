@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-'''Parse the reduced MO blocks for ...
+"""Parse the reduced MO blocks for ...
 
 Usage:
   orca_significant_mos.py [options] <outputfilename>
@@ -10,13 +10,14 @@ Options:
   --max_orbital=MAX       Don't print anything above this orbital index. Default to 2*NOcc, can also specify 'all'.
   --dual=outputfilename2  Optionally compare two files.
   --print_args            Print the parsed argument block.
-'''
+"""
 
 
-from docopt import docopt
-from cclib.io import ccopen
-from itertools import zip_longest
 import re
+from itertools import zip_longest
+
+from cclib.io import ccopen
+from docopt import docopt
 
 
 def parse_line(line, max_mo_index, orbitals, spin):
@@ -25,7 +26,7 @@ def parse_line(line, max_mo_index, orbitals, spin):
     idx_atom_element = split[0]
     m = re.search("(\d*)", idx_atom_element)
     idx_atom = int(m.groups()[0])
-    element = split[0][m.lastindex:]
+    element = split[0][m.lastindex :]
     orbital_name = split[1]
     contribs = [float(x) for x in split[2:]]
     mo_indices = list(range(max_mo_index - len(contribs), max_mo_index))
@@ -74,7 +75,7 @@ def parse_block(outputfile, nmo, energies, occupations, orbitals, spin):
         line = next(outputfile)
         line = next(outputfile)
         # an arbitrary (>= 1) number of lines contains 9 columns; this is the goods!
-        while line != '\n':
+        while line != "\n":
             parse_line(line, counter + 1, orbitals, spin)
             line = next(outputfile)
 
@@ -97,17 +98,19 @@ def get_orbital_contribs_within_threshold(orbitals, threshold, max_orbital):
 
 def pretty_print_orbitals(energies, orbitals, nmo, has_beta):
     """Pretty-print a set of orbitals and their energies."""
-    spins = {0: 'alpha', 1: 'beta'}
+    spins = {0: "alpha", 1: "beta"}
     if not has_beta:
-        header_template  = ' {key} {en_alpha}'
-        contrib_template = '  {:3} {:2} {:5} {:5}'
+        header_template = " {key} {en_alpha}"
+        contrib_template = "  {:3} {:2} {:5} {:5}"
     else:
-        header_template  = ' {key} {en_alpha} {en_beta}'
-        contrib_template = '  {:3} {:2} {:5} {:5} {spin:5}'
+        header_template = " {key} {en_alpha} {en_beta}"
+        contrib_template = "  {:3} {:2} {:5} {:5} {spin:5}"
     for key in orbitals.keys():
-        header_dict = {'key': key,
-                       'en_alpha': energies[key],
-                       'en_beta': energies[key + (has_beta * nmo)]}
+        header_dict = {
+            "key": key,
+            "en_alpha": energies[key],
+            "en_beta": energies[key + (has_beta * nmo)],
+        }
         print(header_template.format(**header_dict))
         for contrib in orbitals[key]:
             print(contrib_template.format(*contrib[0:4], spin=spins[contrib[4]]))
@@ -115,43 +118,43 @@ def pretty_print_orbitals(energies, orbitals, nmo, has_beta):
 
 def pretty_print_orbitals_dual(results):
     """From two sets of results, print them side-by-side."""
-    energies1 = results['energies1']
-    energies2 = results['energies2']
-    occupations1 = results['occupations1']
-    occupations2 = results['occupations2']
-    orbitals1 = results['orbitals1']
-    orbitals2 = results['orbitals2']
+    energies1 = results["energies1"]
+    energies2 = results["energies2"]
+    occupations1 = results["occupations1"]
+    occupations2 = results["occupations2"]
+    orbitals1 = results["orbitals1"]
+    orbitals2 = results["orbitals2"]
     nmo1 = len(orbitals1)
     nmo2 = len(orbitals2)
-    if len(energies1) == 2*len(orbitals1):
+    if len(energies1) == 2 * len(orbitals1):
         has_beta = True
     else:
         has_beta = False
-    spins = {0: 'alpha', 1: 'beta'}
+    spins = {0: "alpha", 1: "beta"}
     # Handle the restricted case.
     if not has_beta:
         # header_template_full
         # contrib_template_full
-        header_template_left   = ' {key} {en_alpha}'
-        contrib_template_left  = '  {:3} {:2} {:5} {:5}'
+        header_template_left = " {key} {en_alpha}"
+        contrib_template_left = "  {:3} {:2} {:5} {:5}"
         # header_template_right
         # contrib_template_right
     # Handle the unrestricted case.
     else:
         # header_template_full
         # contrib_template_full
-        header_template_left   = ' {key} {en_alpha} {en_beta}'
-        contrib_template_left  = '  {:3} {:2} {:5} {:5} {spin:5}'
+        header_template_left = " {key} {en_alpha} {en_beta}"
+        contrib_template_left = "  {:3} {:2} {:5} {:5} {spin:5}"
         # header_template_right
         # contrib_template_right
     for key1, key2 in izip_longest(orbitals1.keys(), orbitals2.keys()):
         header_dict = {
-            'key1': key1,
-            'en_alpha1': energies1[key1],
-            'en_beta1': energies1[key1 + (has_beta * nmo1)],
-            'key2': key2,
-            'en_alpha2': energies2[key2],
-            'en_beta2': energies2[key2 + (has_beta * nmo2)]
+            "key1": key1,
+            "en_alpha1": energies1[key1],
+            "en_beta1": energies1[key1 + (has_beta * nmo1)],
+            "key2": key2,
+            "en_alpha2": energies2[key2],
+            "en_beta2": energies2[key2 + (has_beta * nmo2)],
         }
         print(header_template.format(**header_dict))
         for contrib in orbitals[key]:
@@ -164,13 +167,13 @@ def open_and_parse_outputfile(args, outputfilename):
     ncols = 6
 
     headers = [
-        'LOEWDIN ORBITAL POPULATIONS PER MO',
-        'LOEWDIN REDUCED ORBITAL POPULATIONS PER MO',
+        "LOEWDIN ORBITAL POPULATIONS PER MO",
+        "LOEWDIN REDUCED ORBITAL POPULATIONS PER MO",
         #'LOEWDIN REDUCED ORBITAL POPULATIONS PER UNO',
         # 'LOEWDIN REDUCED ORBITAL POPULATIONS PER UNSO',
         # This is equivalent to the reduced orbital population per MO, but
         # named differently within CASSCF/MRCI jobs.
-        'LOEWDIN ORBITAL-COMPOSITIONS'
+        "LOEWDIN ORBITAL-COMPOSITIONS",
     ]
 
     energies = list()
@@ -197,13 +200,13 @@ def open_and_parse_outputfile(args, outputfilename):
 
     # determine the last orbital we should be printing information
     # about
-    if not args['--max_orbital']:
-        args['--max_orbital'] = data.homos[0] * 2
-    if args['--max_orbital'] == 'all':
-        args['--max_orbital'] = nmo
-    max_orbital = int(args['--max_orbital'])
+    if not args["--max_orbital"]:
+        args["--max_orbital"] = data.homos[0] * 2
+    if args["--max_orbital"] == "all":
+        args["--max_orbital"] = nmo
+    max_orbital = int(args["--max_orbital"])
 
-    threshold = float(args['--threshold'])
+    threshold = float(args["--threshold"])
     filtered_mos = get_orbital_contribs_within_threshold(orbitals, threshold, max_orbital)
     print(parsed_header)
     pretty_print_orbitals(energies, filtered_mos, nmo, has_beta)
@@ -216,22 +219,18 @@ def main(args):
     output files
     ."""
 
-    outputfilename1 = args['<outputfilename>']
+    outputfilename1 = args["<outputfilename>"]
     energies1, occupations1, orbitals1 = open_and_parse_outputfile(args, outputfilename1)
     # If we're going to compare two output files side-by-side...
-    if args['--dual']:
-        outputfilename2 = args['--dual']
+    if args["--dual"]:
+        outputfilename2 = args["--dual"]
         energies2, occupations2, orbitals2 = open_and_parse_outputfile(args, outputfilename2)
 
-    results = {
-        'energies1'    : energies1,
-        'occupations1' : occupations1,
-        'orbitals1'    : orbitals1
-    }
-    if args['--dual']:
-        results['energies2']    = energies2
-        results['occupations2'] = occupations2
-        results['orbitals2']    = orbitals2
+    results = {"energies1": energies1, "occupations1": occupations1, "orbitals1": orbitals1}
+    if args["--dual"]:
+        results["energies2"] = energies2
+        results["occupations2"] = occupations2
+        results["orbitals2"] = orbitals2
         # If we parse two outputs, clearly we want to print their results
         # side-by-side.
         pretty_print_orbitals_dual(results)
@@ -243,7 +242,7 @@ if __name__ == "__main__":
 
     args = docopt(__doc__)
 
-    if args['--print_args']:
+    if args["--print_args"]:
         print(args)
 
     main(args)

@@ -22,7 +22,7 @@ def main():
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('compchemfilename', nargs='+')
+    parser.add_argument("compchemfilename", nargs="+")
 
     args = parser.parse_args()
     compchemfilenames = args.compchemfilename
@@ -38,16 +38,18 @@ def main():
 
         if type(job) == cclib.parser.qchemparser.QChem:
 
-            scfenergies = [utils.convertor(scfenergy, 'eV', 'hartree') for scfenergy in data.scfenergies]
+            scfenergies = [
+                utils.convertor(scfenergy, "eV", "hartree") for scfenergy in data.scfenergies
+            ]
             print(scfenergies)
             # scfenergies = [scfenergy for scfenergy in data.scfenergies]
 
             steps = range(1, len(scfenergies) + 1)
 
-            ax.plot(steps, scfenergies, label='SCF energy')
+            ax.plot(steps, scfenergies, label="SCF energy")
 
             ax.set_title(stub)
-            ax.set_xlabel('SCF step #')
+            ax.set_xlabel("SCF step #")
             ax.set_xticks(steps)
 
         elif type(job) == cclib.parser.orcaparser.ORCA:
@@ -57,9 +59,9 @@ def main():
         else:
             pass
 
-        ax.legend(loc='best', fancybox=True)
+        ax.legend(loc="best", fancybox=True)
 
-        fig.savefig(stub + '.pdf', bbox_inches='tight')
+        fig.savefig(stub + ".pdf", bbox_inches="tight")
 
 
 if __name__ == "__main__":

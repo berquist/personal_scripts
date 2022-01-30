@@ -5,8 +5,12 @@
 import argparse
 
 parser = argparse.ArgumentParser(description="")
-parser.add_argument(dest="mopacfname", metavar="<MOPAC-formatted Z-matrix filename>", type=str, help="")
-parser.add_argument(dest="orcafname", metavar="<ORCA-formatted Z-matrix filename>", type=str, help="")
+parser.add_argument(
+    dest="mopacfname", metavar="<MOPAC-formatted Z-matrix filename>", type=str, help=""
+)
+parser.add_argument(
+    dest="orcafname", metavar="<ORCA-formatted Z-matrix filename>", type=str, help=""
+)
 
 args = parser.parse_args()
 
@@ -31,6 +35,6 @@ for line in mopaccontents[3:-1]:
     par1 = float(entry[1])
     par2 = float(entry[3])
     par3 = float(entry[5])
-    print >> orcafile, s.format(symb, con1, con2, con3, par1, par2, par3)
+    print(s.format(symb, con1, con2, con3, par1, par2, par3), file=orcafile)
 
 orcafile.close()

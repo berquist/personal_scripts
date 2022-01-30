@@ -12,7 +12,7 @@ def template_slurmfile_batch(**jobvars):
     cluster = jobvars["cluster"]
     partition = jobvars["partition"]
 
-    return """#!/bin/bash
+    return """#!/usr/bin/env bash
 
 #SBATCH --job-name={batchname}
 #SBATCH --output={batchname}.slurmout

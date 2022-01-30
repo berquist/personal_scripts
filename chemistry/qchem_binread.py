@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
-import numpy as np
 import os
 import struct
 
 from dump_bytes import read_binary
+
+import numpy as np
 
 
 def getargs():
@@ -13,9 +14,9 @@ def getargs():
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('filename')
+    parser.add_argument("filename")
 
-    args = parser.parse_args()
+    return parser.parse_args()
 
     return args
 
@@ -37,7 +38,7 @@ def parse_196_file_normal_mode_number(filename, args):
 
     b = read_binary(filename)
 
-    nvib = struct.unpack('i', b)[0]
+    nvib = struct.unpack("i", b)[0]
 
     return nvib
 
@@ -111,7 +112,7 @@ def parse_389_file_normal_to_cart(filename, args):
     return normal_to_cart
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     np.set_printoptions(threshold=np.inf)
 
@@ -121,20 +122,20 @@ if __name__ == '__main__':
     basename = os.path.basename(filename)
 
     parsefuncs = [
-        ('195', parse_195_file_normal_mode),
-        ('196', parse_196_file_normal_mode_number),
-        ('197', parse_197_file_redmass),
-        ('198', parse_198_file_frequency),
-        ('199', parse_199_file_ir_intens),
-        ('200', parse_200_file_raman_intens),
-        ('388', parse_388_file_normal_to_mwc),
-        ('389', parse_389_file_normal_to_cart),
+        ("195", parse_195_file_normal_mode),
+        ("196", parse_196_file_normal_mode_number),
+        ("197", parse_197_file_redmass),
+        ("198", parse_198_file_frequency),
+        ("199", parse_199_file_ir_intens),
+        ("200", parse_200_file_raman_intens),
+        ("388", parse_388_file_normal_to_mwc),
+        ("389", parse_389_file_normal_to_cart),
     ]
 
     for (possible_filename, parsefunc) in parsefuncs:
-        if basename.split('.')[0] == possible_filename:
+        if basename.split(".")[0] == possible_filename:
             parse_qchem_binary_file = parsefunc
 
-    print('Parsing Q-Chem binary file: {}'.format(filename))
+    print("Parsing Q-Chem binary file: {}".format(filename))
     r = parse_qchem_binary_file(filename, args)
     print(r)

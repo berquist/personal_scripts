@@ -6,7 +6,6 @@ output files (using cclib).
 """
 
 
-
 def centerofmass(coords, masses):
     """Calculate the center of mass for the given coordinates and
     masses.
@@ -15,9 +14,9 @@ def centerofmass(coords, masses):
     mwc_x = masses * coords[:, 0]
     mwc_y = masses * coords[:, 1]
     mwc_z = masses * coords[:, 2]
-    com_x = sum(mwc_x)/total_mass
-    com_y = sum(mwc_y)/total_mass
-    com_z = sum(mwc_z)/total_mass
+    com_x = sum(mwc_x) / total_mass
+    com_y = sum(mwc_y) / total_mass
+    com_z = sum(mwc_z) / total_mass
     return (com_x, com_y, com_z)
 
 
@@ -29,9 +28,9 @@ def centerofnuccharge(coords, charges):
     mwc_x = charges * coords[:, 0]
     mwc_y = charges * coords[:, 1]
     mwc_z = charges * coords[:, 2]
-    com_x = sum(mwc_x)/total_mass
-    com_y = sum(mwc_y)/total_mass
-    com_z = sum(mwc_z)/total_mass
+    com_x = sum(mwc_x) / total_mass
+    com_y = sum(mwc_y) / total_mass
+    com_z = sum(mwc_z) / total_mass
     return (com_x, com_y, com_z)
 
 
@@ -40,11 +39,12 @@ def main():
     canter of nuclear charge for the final geometry.
     """
     import argparse
+
     from cclib.io import ccopen
     from cclib.parser.utils import PeriodicTable
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('filename', nargs='+')
+    parser.add_argument("filename", nargs="+")
     args = parser.parse_args()
 
     pt = PeriodicTable()

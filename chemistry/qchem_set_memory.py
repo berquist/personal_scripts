@@ -10,11 +10,11 @@ def getargs():
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('inputfile', nargs='+')
+    parser.add_argument("inputfile", nargs="+")
 
-    parser.add_argument('--mem_static', type=int)
-    parser.add_argument('--mem_total', type=int)
-    parser.add_argument('--cc_memory', type=int)
+    parser.add_argument("--mem_static", type=int)
+    parser.add_argument("--mem_total", type=int)
+    parser.add_argument("--cc_memory", type=int)
 
     args = parser.parse_args()
 
@@ -23,7 +23,7 @@ def getargs():
 
 def main(args):
 
-    t = ' {} = {}\n'.format
+    t = " {} = {}\n".format
 
     for inputfilename in args.inputfile:
 
@@ -31,21 +31,21 @@ def main(args):
             inputfile_lines = inputfile.readlines()
 
         for idx, line in enumerate(inputfile_lines):
-            if '$rem' in line:
+            if "$rem" in line:
                 iidx = idx + 1
                 if args.mem_static:
-                    inputfile_lines.insert(iidx, t('mem_static', args.mem_static))
+                    inputfile_lines.insert(iidx, t("mem_static", args.mem_static))
                 if args.mem_total:
-                    inputfile_lines.insert(iidx, t('mem_total', args.mem_total))
+                    inputfile_lines.insert(iidx, t("mem_total", args.mem_total))
                 if args.cc_memory:
-                    inputfile_lines.insert(iidx, t('cc_memory', args.cc_memory))
+                    inputfile_lines.insert(iidx, t("cc_memory", args.cc_memory))
 
-        with open(inputfilename, 'w') as inputfile:
-            inputfile.write(''.join(inputfile_lines))
+        with open(inputfilename, "w") as inputfile:
+            inputfile.write("".join(inputfile_lines))
 
     return locals()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     args = getargs()
     main_locals = main(args)

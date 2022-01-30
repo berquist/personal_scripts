@@ -7,16 +7,18 @@ import argparse
 import os
 import subprocess
 
-
-s = 'obabel -ismiles {}.smiles -oxyz -O {}.xyz --gen3d'
+s = "obabel -ismiles {}.smiles -oxyz -O {}.xyz --gen3d"
 
 parser = argparse.ArgumentParser()
-parser.add_argument(dest='filenames', nargs='+')
+parser.add_argument(dest="filenames", nargs="+")
 args = parser.parse_args()
 filenames = args.filenames
 
-stubs = list(os.path.splitext(filename)[0] for filename in filenames
-             if os.path.splitext(filename)[1] == '.smiles')
+stubs = list(
+    os.path.splitext(filename)[0]
+    for filename in filenames
+    if os.path.splitext(filename)[1] == ".smiles"
+)
 
 for stub in stubs:
     subprocess.call(s.format(stub, stub).split())

@@ -42,14 +42,16 @@ def main(args):
                 minima_energies_hartree.append(minimum_energy_hartree)
 
         if len(minima_energies_hartree) > 0:
-            minima_energies_ev = [(e*hartree_to_ev) for e in minima_energies_hartree]
+            minima_energies_ev = [(e * hartree_to_ev) for e in minima_energies_hartree]
 
             global_minimum_energy_hartree = minima_energies_hartree[0]
             global_minimum_energy_ev = minima_energies_ev[0]
-            relative_energies_hartree = sorted([(e - global_minimum_energy_hartree)
-                                                for e in minima_energies_hartree[1:]])
-            relative_energies_ev = sorted([(e - global_minimum_energy_ev)
-                                           for e in minima_energies_ev[1:]])
+            relative_energies_hartree = sorted(
+                [(e - global_minimum_energy_hartree) for e in minima_energies_hartree[1:]]
+            )
+            relative_energies_ev = sorted(
+                [(e - global_minimum_energy_ev) for e in minima_energies_ev[1:]]
+            )
 
             state_gap_energies_hartree = []
             for i, et in enumerate(relative_energies_hartree):
@@ -69,8 +71,8 @@ def main(args):
             for state_gap_energy_ev in state_gap_energies_ev:
                 print(" {:7.5f}".format(state_gap_energy_ev))
 
-
     return locals()
+
 
 if __name__ == "__main__":
     args = getargs()

@@ -48,10 +48,10 @@ def vmd_covp_load_xyzfile(xyzfilename, isoval=0.05):
     the default surface isovalues and colors.
     """
     # color IDs and their VMD names
-    color1 = 23 # blue2
-    color2 = 30 # red3
-    color3 = 21 # cyan2
-    color4 = 13 # mauve
+    color1 = 23  # blue2
+    color2 = 30  # red3
+    color3 = 21  # cyan2
+    color4 = 13  # mauve
     return """# load the base XYZ file
 mol new {{{xyzfilename}}} type {{xyz}} first 0 last -1 step 1 waitfor 1
 mol modcolor 0 0 Element
@@ -79,8 +79,9 @@ mol modmaterial 2 0 GlassBubble2
 mol modmaterial 3 0 GlassBubble2
 mol modmaterial 4 0 GlassBubble2
 
-""".format(color1=color1, color2=color2, color3=color3, color4=color4,
-           xyzfilename=xyzfilename)
+""".format(
+        color1=color1, color2=color2, color3=color3, color4=color4, xyzfilename=xyzfilename
+    )
 
 
 def vmd_covp_pair_load(moidx1, moidx2):
@@ -90,8 +91,9 @@ def vmd_covp_pair_load(moidx1, moidx2):
     return """
 mol addfile mo.{moidx1}.cube
 mol addfile mo.{moidx2}.cube
-""".format(moidx1=moidx1,
-           moidx2=moidx2)
+""".format(
+        moidx1=moidx1, moidx2=moidx2
+    )
 
 
 def vmd_covp_pair_render(moidx1, moidx2, vmdidx1, vmdidx2, isoval=0.05):
@@ -105,10 +107,9 @@ mol modstyle 2 0 Isosurface -{isoval} {vmdidx1} 0 0 1 1
 mol modstyle 3 0 Isosurface  {isoval} {vmdidx2} 0 0 1 1
 mol modstyle 4 0 Isosurface -{isoval} {vmdidx2} 0 0 1 1
 render TachyonInternal COVP_{moidx1}_{moidx2}.tga
-""".format(moidx1=moidx1,
-           moidx2=moidx2,
-           vmdidx1=vmdidx1,
-           vmdidx2=vmdidx2)
+""".format(
+        moidx1=moidx1, moidx2=moidx2, vmdidx1=vmdidx1, vmdidx2=vmdidx2
+    )
 
 
 def bash_covp_tga_convert_delete(moidx1, moidx2):
@@ -120,8 +121,9 @@ echo "convert COVP_{moidx1}_{moidx2}.tga COVP_{moidx1}_{moidx2}.png"
 convert COVP_{moidx1}_{moidx2}.tga COVP_{moidx1}_{moidx2}.png
 echo "rm -f COVP_{moidx1}_{moidx2}.tga"
 rm -f COVP_{moidx1}_{moidx2}.tga
-""".format(moidx1=moidx1,
-           moidx2=moidx2)
+""".format(
+        moidx1=moidx1, moidx2=moidx2
+    )
 
 
 def vmd_covp_write_file_load(loadfile, xyzfilename, mo_pairs, width):
@@ -136,12 +138,12 @@ def vmd_covp_write_file_load(loadfile, xyzfilename, mo_pairs, width):
 
 def vmd_covp_write_file_render(renderfile, mo_pairs, width):
     """The main driver for TODO"""
-    bashfile = open('vmd.covp.bash', 'w')
-    bashfile.write('#!/bin/bash\n')
+    bashfile = open("vmd.covp.bash", "w")
+    bashfile.write("#!/bin/env bash\n")
     for idx, mo_pair in enumerate(mo_pairs):
         moidx1 = pad_left_zeros(mo_pair[0], width)
         moidx2 = pad_left_zeros(mo_pair[1], width)
-        vmdidx1 = (2 * idx)
+        vmdidx1 = 2 * idx
         vmdidx2 = vmdidx1 + 1
         renderfile.write(vmd_covp_pair_render(moidx1, moidx2, vmdidx1, vmdidx2))
         bashfile.write(bash_covp_tga_convert_delete(moidx1, moidx2))
@@ -150,14 +152,14 @@ def vmd_covp_write_file_render(renderfile, mo_pairs, width):
 
 def vmd_covp_write_files(loadfile, renderfile, xyzfilename, mo_pairs, width):
     """The main driver for TODO"""
-    bashfile = open('vmd.covp.bash', 'w')
-    bashfile.write('#!/bin/bash\n')
+    bashfile = open("vmd.covp.bash", "w")
+    bashfile.write("#!/bin/env bash\n")
     loadfile.write(vmd_covp_base_template())
     loadfile.write(vmd_covp_load_xyzfile(xyzfilename))
     for idx, mo_pair in enumerate(mo_pairs):
         moidx1 = pad_left_zeros(mo_pair[0], width)
         moidx2 = pad_left_zeros(mo_pair[1], width)
-        vmdidx1 = (2 * idx)
+        vmdidx1 = 2 * idx
         vmdidx2 = vmdidx1 + 1
         loadfile.write(vmd_covp_pair_load(moidx1, moidx2))
         renderfile.write(vmd_covp_pair_render(moidx1, moidx2, vmdidx1, vmdidx2))
@@ -172,7 +174,7 @@ def pad_left_zeros(num, maxwidth):
     numwidth = len(str(num))
     if numwidth < maxwidth:
         numzeros = maxwidth - numwidth
-        numstr = (numzeros * '0') + str(num)
+        numstr = (numzeros * "0") + str(num)
     else:
         numstr = str(num)
     return numstr
@@ -193,8 +195,3 @@ def pad_left_zeros_l(numlist):
     for num in numlist:
         newnumlist.append(pad_left_zeros(num, maxlen))
     return newnumlist
-
-
-if __name__ == "__main__":
-    # Don't use this file as a standalone script.
-    pass

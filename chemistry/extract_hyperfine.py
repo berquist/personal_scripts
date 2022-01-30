@@ -7,28 +7,43 @@ the nitrogen closest to the copper period, so don't worry about other
 residues.
 """
 
+
 def get_gtensor():
     pass
+
 
 def get_atensor():
     pass
 
+
 def main():
     pass
+
 
 if __name__ == "__main__":
     import argparse
     import mmap
+
     import numpy as np
 
     parser = argparse.ArgumentParser(description="")
-    parser.add_argument(dest="orcaname", metavar="<orca output filename>", nargs="+", type=str, default=None, help="")
+    parser.add_argument(
+        dest="orcaname",
+        metavar="<orca output filename>",
+        nargs="+",
+        type=str,
+        default=None,
+        help="",
+    )
     args = parser.parse_args()
 
     orcaname = args.orcaname
 
-    print "{:>34s} {:>10s} {:>28s} {:>10s} {:>10s} {:>4s} {:<s}".format(
-        "g-tensor", "isotropic", "a-tensor", "isotropic", "distance", "nidx", "name")
+    print(
+        "{:>34s} {:>10s} {:>28s} {:>10s} {:>10s} {:>4s} {:<s}".format(
+            "g-tensor", "isotropic", "a-tensor", "isotropic", "distance", "nidx", "name"
+        )
+    )
 
     for name in orcaname:
 
@@ -74,16 +89,14 @@ if __name__ == "__main__":
         yx, yy, yz = s.readline().split()
         zx, zy, zz = s.readline().split()
 
-        gmatrix = np.array([[xx, xy, xz],
-                            [yx, yy, yz],
-                            [zx, zy, zz]], dtype=np.float64)
+        gmatrix = np.array([[xx, xy, xz], [yx, yy, yz], [zx, zy, zz]], dtype=np.float64)
 
         # this should just be a newline character
         s.readline()
 
         # gather the component breakdown
-        gel     = np.asanyarray(s.readline().split()[1:], dtype=np.float64)
-        grmc    = np.asanyarray(s.readline().split()[1:], dtype=np.float64)
+        gel = np.asanyarray(s.readline().split()[1:], dtype=np.float64)
+        grmc = np.asanyarray(s.readline().split()[1:], dtype=np.float64)
         gdso1el = np.asanyarray(s.readline().split()[1:], dtype=np.float64)
         gdso2el = np.asanyarray(s.readline().split()[1:], dtype=np.float64)
         gdsotot = np.asanyarray(s.readline().split()[1:], dtype=np.float64)
@@ -95,9 +108,9 @@ if __name__ == "__main__":
         s.readline()
         gtottmp = s.readline().split()[1:]
         delgtmp = s.readline().split()[1:]
-        x,  y,  z,  giso  = gtottmp[0], gtottmp[1], gtottmp[2], float(gtottmp[4])
+        x, y, z, giso = gtottmp[0], gtottmp[1], gtottmp[2], float(gtottmp[4])
         dx, dy, dz, dgiso = delgtmp[0], delgtmp[1], delgtmp[2], float(delgtmp[4])
-        gtensor    = np.array([x,  y,  z], dtype=np.float64)
+        gtensor = np.array([x, y, z], dtype=np.float64)
         delgtensor = np.array([dx, dy, dz], dtype=np.float64)
 
         # "Orientation:"
@@ -106,7 +119,7 @@ if __name__ == "__main__":
         gorix = np.asanyarray(s.readline().split()[1:], dtype=np.float64)
         goriy = np.asanyarray(s.readline().split()[1:], dtype=np.float64)
         goriz = np.asanyarray(s.readline().split()[1:], dtype=np.float64)
-        gori  = np.array([gorix, goriy, goriz])
+        gori = np.array([gorix, goriy, goriz])
 
         ######################################################################
 
@@ -126,11 +139,12 @@ if __name__ == "__main__":
         atomidx = 0
         while True:
             atom = s.readline().split()
-            if (len(atom) == 0): break
-            if (atom[0] == 'Cu'):
+            if len(atom) == 0:
+                break
+            if atom[0] == "Cu":
                 cu = np.array([atomidx, atom[1], atom[2], atom[3]], dtype=np.float64)
-            if (atom[0] == 'N'):
-                n  = np.array([atomidx, atom[1], atom[2], atom[3]], dtype=np.float64)
+            if atom[0] == "N":
+                n = np.array([atomidx, atom[1], atom[2], atom[3]], dtype=np.float64)
                 nitrogens.append(n)
             atomidx += 1
 
@@ -158,9 +172,7 @@ if __name__ == "__main__":
         yx, yy, yz = s.readline().split()
         zx, zy, zz = s.readline().split()
 
-        amatrix = np.array([[xx, xy, xz],
-                            [yx, yy, yz],
-                            [zx, zy, zz]], dtype=np.float64)
+        amatrix = np.array([[xx, xy, xz], [yx, yy, yz], [zx, zy, zz]], dtype=np.float64)
 
         # this should just be a blank line/newline character
         s.readline()
@@ -186,7 +198,10 @@ if __name__ == "__main__":
         aorix = np.asanyarray(s.readline().split()[1:], dtype=np.float64)
         aoriy = np.asanyarray(s.readline().split()[1:], dtype=np.float64)
         aoriz = np.asanyarray(s.readline().split()[1:], dtype=np.float64)
-        aori  = np.array([aorix, aoriy, aoriz])
+        aori = np.array([aorix, aoriy, aoriz])
 
-        print "{:>28s} {:>10.7f} {:>28s} {:>10.6f} {:>10.7f} {:>4d} {:<s}".format(
-            gtensor, giso, atensor, aiso, dist, int(nitrogenidx), name)
+        print(
+            "{:>28s} {:>10.7f} {:>28s} {:>10.6f} {:>10.7f} {:>4d} {:<s}".format(
+                gtensor, giso, atensor, aiso, dist, int(nitrogenidx), name
+            )
+        )

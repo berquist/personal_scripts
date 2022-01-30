@@ -1,17 +1,20 @@
 #!/usr/bin/env python
 
+
 def get_coords(orcamap):
     """
     Retrieve all the atoms from an ORCA output file and store them as molecules.
     """
     pass
 
+
 def get_gtensor(orcamap):
 
     orcamap.seek(0)
     searchstr = "ELECTRONIC G-MATRIX"
     startidx = orcamap.find(searchstr)
-    if (startidx == -1): return "[]", 0.0
+    if startidx == -1:
+        return "[]", 0.0
     orcamap.seek(startidx)
 
     # Here is a sample of what we would like to parse:
@@ -46,16 +49,14 @@ def get_gtensor(orcamap):
     yx, yy, yz = orcamap.readline().split()
     zx, zy, zz = orcamap.readline().split()
 
-    gmatrix = np.array([[xx, xy, xz],
-                        [yx, yy, yz],
-                        [zx, zy, zz]], dtype=np.float64)
+    gmatrix = np.array([[xx, xy, xz], [yx, yy, yz], [zx, zy, zz]], dtype=np.float64)
 
     # this should just be a newline character
     orcamap.readline()
 
     # gather the component breakdown
-    gel     = np.asanyarray(orcamap.readline().split()[1:], dtype=np.float64)
-    grmc    = np.asanyarray(orcamap.readline().split()[1:], dtype=np.float64)
+    gel = np.asanyarray(orcamap.readline().split()[1:], dtype=np.float64)
+    grmc = np.asanyarray(orcamap.readline().split()[1:], dtype=np.float64)
     gdso1el = np.asanyarray(orcamap.readline().split()[1:], dtype=np.float64)
     gdso2el = np.asanyarray(orcamap.readline().split()[1:], dtype=np.float64)
     gdsotot = np.asanyarray(orcamap.readline().split()[1:], dtype=np.float64)
@@ -67,9 +68,9 @@ def get_gtensor(orcamap):
     orcamap.readline()
     gtottmp = orcamap.readline().split()[1:]
     delgtmp = orcamap.readline().split()[1:]
-    x,  y,  z,  giso  = gtottmp[0], gtottmp[1], gtottmp[2], float(gtottmp[4])
+    x, y, z, giso = gtottmp[0], gtottmp[1], gtottmp[2], float(gtottmp[4])
     dx, dy, dz, dgiso = delgtmp[0], delgtmp[1], delgtmp[2], float(delgtmp[4])
-    gtensor    = np.array([x,  y,  z], dtype=np.float64)
+    gtensor = np.array([x, y, z], dtype=np.float64)
     delgtensor = np.array([dx, dy, dz], dtype=np.float64)
 
     # "Orientation:"
@@ -78,16 +79,18 @@ def get_gtensor(orcamap):
     gorix = np.asanyarray(orcamap.readline().split()[1:], dtype=np.float64)
     goriy = np.asanyarray(orcamap.readline().split()[1:], dtype=np.float64)
     goriz = np.asanyarray(orcamap.readline().split()[1:], dtype=np.float64)
-    gori  = np.array([gorix, goriy, goriz])
+    gori = np.array([gorix, goriy, goriz])
 
     return gtensor, giso
+
 
 def get_atensor(orcamap):
 
     orcamap.seek(0)
     searchstr = "CARTESIAN COORDINATES (ANGSTROEM)"
     startidx = orcamap.find(searchstr)
-    if (startidx == -1): return "[]", 0.0, 0.0, 0, 0
+    if startidx == -1:
+        return "[]", 0.0, 0.0, 0, 0
     orcamap.seek(startidx)
 
     # skip over 'CARTESIAN COORDINATES (ANGSTROEM)\n---------------------------------\n'
@@ -97,11 +100,12 @@ def get_atensor(orcamap):
     # from the coordinate block, gather the copper and all the nitrogen atoms
     while True:
         atom = orcamap.readline().split()
-        if (len(atom) == 0): break
-        if (atom[0] == 'Cu'):
+        if len(atom) == 0:
+            break
+        if atom[0] == "Cu":
             cu = np.array([atomidx, atom[1], atom[2], atom[3]], dtype=np.float64)
-        if (atom[0] == 'N'):
-            n  = np.array([atomidx, atom[1], atom[2], atom[3]], dtype=np.float64)
+        if atom[0] == "N":
+            n = np.array([atomidx, atom[1], atom[2], atom[3]], dtype=np.float64)
             nitrogens.append(n)
         atomidx += 1
 
@@ -120,11 +124,13 @@ def get_atensor(orcamap):
     searchstr = str(int(nitrogenidx)) + "N : A"
     orcamap.seek(0)
     startidx = orcamap.find(searchstr)
-    if (startidx == -1): return "[]", 0.0, 0.0, 0, 0
+    if startidx == -1:
+        return "[]", 0.0, 0.0, 0, 0
     orcamap.seek(startidx)
     searchstr = "Raw HFC matrix (all values in MHz):"
     startidx = orcamap.find(searchstr)
-    if (startidx == -1): return "[]", 0.0, 0.0, 0, 0
+    if startidx == -1:
+        return "[]", 0.0, 0.0, 0, 0
     orcamap.seek(startidx)
     orcamap.readline()
 
@@ -133,9 +139,7 @@ def get_atensor(orcamap):
     yx, yy, yz = orcamap.readline().split()
     zx, zy, zz = orcamap.readline().split()
 
-    amatrix = np.array([[xx, xy, xz],
-                        [yx, yy, yz],
-                        [zx, zy, zz]], dtype=np.float64)
+    amatrix = np.array([[xx, xy, xz], [yx, yy, yz], [zx, zy, zz]], dtype=np.float64)
 
     # this should just be a blank line/newline character
     orcamap.readline()
@@ -161,34 +165,50 @@ def get_atensor(orcamap):
     aorix = np.asanyarray(orcamap.readline().split()[1:], dtype=np.float64)
     aoriy = np.asanyarray(orcamap.readline().split()[1:], dtype=np.float64)
     aoriz = np.asanyarray(orcamap.readline().split()[1:], dtype=np.float64)
-    aori  = np.array([aorix, aoriy, aoriz])
+    aori = np.array([aorix, aoriy, aoriz])
 
     return atensor, aiso, dist, int(nitrogenidx), int(atomidx)
+
 
 def get_atensor_nitrogens():
     pass
 
+
 if __name__ == "__main__":
     import argparse
     import mmap
+
     import numpy as np
 
     parser = argparse.ArgumentParser(description="")
-    parser.add_argument(dest="orcaname", metavar="<orca output filename>", nargs="+", type=str, default=None, help="")
+    parser.add_argument(
+        dest="orcaname",
+        metavar="<orca output filename>",
+        nargs="+",
+        type=str,
+        default=None,
+        help="",
+    )
     args = parser.parse_args()
 
     orcaname = args.orcaname
 
-    print "{:>34s} {:>10s} {:>28s} {:>10s} {:>10s} {:>4s} {:>6s} {:<s}".format(
-        "g-tensor", "isotropic", "a-tensor", "isotropic", "distance", "nidx", "natoms", "name")
+    print(
+        "{:>34s} {:>10s} {:>28s} {:>10s} {:>10s} {:>4s} {:>6s} {:<s}".format(
+            "g-tensor", "isotropic", "a-tensor", "isotropic", "distance", "nidx", "natoms", "name"
+        )
+    )
 
     for name in orcaname:
 
         orcafile = open(name, "r+b")
         orcamap = mmap.mmap(orcafile.fileno(), 0, access=mmap.ACCESS_READ)
 
-        gtensor, giso                            = get_gtensor(orcamap)
+        gtensor, giso = get_gtensor(orcamap)
         atensor, aiso, dist, nitrogenidx, natoms = get_atensor(orcamap)
 
-        print "{:>28s} {:>10.7f} {:>28s} {:>10.6f} {:>10.7f} {:>4d} {:>6d} {:<s}".format(
-            gtensor, giso, atensor, aiso, dist, nitrogenidx, natoms, name)
+        print(
+            "{:>28s} {:>10.7f} {:>28s} {:>10.6f} {:>10.7f} {:>4d} {:>6d} {:<s}".format(
+                gtensor, giso, atensor, aiso, dist, nitrogenidx, natoms, name
+            )
+        )

@@ -5,11 +5,11 @@ every possible pair of XYZ files in the current working directory.
 """
 
 
-from glob import glob
 import subprocess as sp
+from glob import glob
 
 # pylint: disable=C0103
-xyzfilenames = glob('*.xyz')
+xyzfilenames = glob("*.xyz")
 print(xyzfilenames)
 
 for i in range(len(xyzfilenames)):
@@ -17,9 +17,9 @@ for i in range(len(xyzfilenames)):
         if i != j:
             fname1 = xyzfilenames[i]
             fname2 = xyzfilenames[j]
-            print('file 1: {}'.format(fname1))
-            print('file 2: {}'.format(fname2))
+            print("file 1: {}".format(fname1))
+            print("file 2: {}".format(fname2))
             # shell out, because `rmsd` may not be in PYTHONPATH for
             # import
-            sp.call(['calculate_rmsd.py', fname1, fname2])
-            print('=' * 78)
+            sp.call(["calculate_rmsd.py", fname1, fname2])
+            print("=" * 78)

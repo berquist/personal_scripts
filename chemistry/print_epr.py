@@ -3,10 +3,9 @@
 
 import os.path
 
+import cclib
 import numpy as np
 import numpy.linalg as npl
-
-import cclib
 from cclib.io import ccopen
 
 
@@ -55,12 +54,11 @@ def print_epr_orca(outputfile):
     with open(outputfile) as fh:
         for line in fh:
 
-            if 'Coordinates of the origin' in line:
+            if "Coordinates of the origin" in line:
                 origin = np.array(line.split()[5:8], dtype=float)
-                print('origin:', return_eigval_string(origin))
+                print("origin:", return_eigval_string(origin))
 
-
-            if 'ELECTRONIC G-MATRIX' in line:
+            if "ELECTRONIC G-MATRIX" in line:
 
                 for _ in range(3):
                     line = next(fh)
@@ -69,9 +67,7 @@ def print_epr_orca(outputfile):
                 yx, yy, yz = next(fh).split()
                 zx, zy, zz = next(fh).split()
 
-                g_matrix = np.array([[xx, xy, xz],
-                                     [yx, yy, yz],
-                                     [zx, zy, zz]], dtype=float)
+                g_matrix = np.array([[xx, xy, xz], [yx, yy, yz], [zx, zy, zz]], dtype=float)
 
                 for _ in range(1):
                     line = next(fh)
@@ -98,15 +94,15 @@ def print_epr_orca(outputfile):
 
                 assert (g_dso_1 + g_dso_2).all() == g_dso_t.all()
                 assert (g_pso_1 + g_pso_2).all() == g_pso_t.all()
-                g_sum = g_rmc*np.ones(3) + g_dso_1 + g_dso_2 + g_pso_1 + g_pso_2
+                g_sum = g_rmc * np.ones(3) + g_dso_1 + g_dso_2 + g_pso_1 + g_pso_2
                 assert g_sum.all() == del_g.all()
 
-                print('\delta g^{{RMC}}        :  {:12.7f}'.format(g_rmc))
-                print('\delta g^{GC(1e)}     :', return_eigval_string(g_dso_1))
-                print('\delta g^{GC(2e)}     :', return_eigval_string(g_dso_2))
-                print('\delta g^{OZ/SOC(1e)} :', return_eigval_string(g_pso_1))
-                print('\delta g^{OZ/SOC(2e)} :', return_eigval_string(g_pso_2))
-                print('\delta g              :', return_eigval_string(del_g))
+                print("\delta g^{{RMC}}        :  {:12.7f}".format(g_rmc))
+                print("\delta g^{GC(1e)}     :", return_eigval_string(g_dso_1))
+                print("\delta g^{GC(2e)}     :", return_eigval_string(g_dso_2))
+                print("\delta g^{OZ/SOC(1e)} :", return_eigval_string(g_pso_1))
+                print("\delta g^{OZ/SOC(2e)} :", return_eigval_string(g_pso_2))
+                print("\delta g              :", return_eigval_string(del_g))
 
                 break
 
@@ -120,11 +116,11 @@ def print_epr_dalton(outputfile):
     with open(outputfile) as fh:
         for line in fh:
 
-            if 'Gauge origin (electronic charge centroid)' in line:
+            if "Gauge origin (electronic charge centroid)" in line:
                 origin = np.array(line.split()[5:], dtype=float)
-                print('origin:', return_eigval_string(origin))
+                print("origin:", return_eigval_string(origin))
 
-            if 'G-shift components (ppm)' in line:
+            if "G-shift components (ppm)" in line:
 
                 for _ in range(3):
                     line = next(fh)
@@ -136,7 +132,13 @@ def print_epr_dalton(outputfile):
                 g_oz_soc_2_ppm = dalton_parse_line(next(fh))
                 g_tot_ppm = dalton_parse_line(next(fh))
 
-                g_sum_ppm = g_rmc_ppm*np.eye(3) + g_gc_1_ppm + g_gc_2_ppm + g_oz_soc_1_ppm + g_oz_soc_2_ppm
+                g_sum_ppm = (
+                    g_rmc_ppm * np.eye(3)
+                    + g_gc_1_ppm
+                    + g_gc_2_ppm
+                    + g_oz_soc_1_ppm
+                    + g_oz_soc_2_ppm
+                )
                 # This allows for 1 ppm error in every position.
                 assert np.sum(abs(g_tot_ppm - g_sum_ppm)) <= 9.0
 
@@ -153,21 +155,21 @@ def print_epr_dalton(outputfile):
                 g_oz_soc_2_eigvals_abs = g_eigvals(g_oz_soc_2_abs)
                 g_tot_eigvals_abs = g_eigvals(g_tot_abs)
 
-                print('One-electron gauge correction')
+                print("One-electron gauge correction")
                 print_matrix_ppm(g_gc_1_ppm)
-                print('Two-electron gauge correction')
+                print("Two-electron gauge correction")
                 print_matrix_ppm(g_gc_2_ppm)
-                print('One-electron spin-orbit+orbital-Zeeman contribution')
+                print("One-electron spin-orbit+orbital-Zeeman contribution")
                 print_matrix_ppm(g_oz_soc_1_ppm)
-                print('Two-electron spin-orbit+orbital-Zeeman contribution')
+                print("Two-electron spin-orbit+orbital-Zeeman contribution")
                 print_matrix_ppm(g_oz_soc_2_ppm)
 
-                print('\delta g^{{RMC}}        :  {:12.7f}'.format(g_rmc_abs))
-                print('\delta g^{GC(1e)}     :', return_eigval_string(g_gc_1_eigvals_abs))
-                print('\delta g^{GC(2e)}     :', return_eigval_string(g_gc_2_eigvals_abs))
-                print('\delta g^{OZ/SOC(1e)} :', return_eigval_string(g_oz_soc_1_eigvals_abs))
-                print('\delta g^{OZ/SOC(2e)} :', return_eigval_string(g_oz_soc_2_eigvals_abs))
-                print('\delta g              :', return_eigval_string(g_tot_eigvals_abs))
+                print("\delta g^{{RMC}}        :  {:12.7f}".format(g_rmc_abs))
+                print("\delta g^{GC(1e)}     :", return_eigval_string(g_gc_1_eigvals_abs))
+                print("\delta g^{GC(2e)}     :", return_eigval_string(g_gc_2_eigvals_abs))
+                print("\delta g^{OZ/SOC(1e)} :", return_eigval_string(g_oz_soc_1_eigvals_abs))
+                print("\delta g^{OZ/SOC(2e)} :", return_eigval_string(g_oz_soc_2_eigvals_abs))
+                print("\delta g              :", return_eigval_string(g_tot_eigvals_abs))
 
                 break
 
@@ -178,13 +180,11 @@ def dalton_parse_line(line):
     """Unpack a '@G' line from a DALTON output into a matrix."""
 
     # each field is 7 characters long
-    xx, yy, zz =  line[9:16], line[16:23], line[23:30]
+    xx, yy, zz = line[9:16], line[16:23], line[23:30]
     xy, yx, xz = line[30:37], line[37:44], line[44:51]
     zx, yz, zy = line[51:58], line[58:65], line[65:72]
 
-    arr = np.array([[xx, xy, xz],
-                    [yx, yy, yz],
-                    [zx, zy, zz]], dtype=float)
+    arr = np.array([[xx, xy, xz], [yx, yy, yz], [zx, zy, zz]], dtype=float)
 
     return arr
 
@@ -203,56 +203,45 @@ def print_epr_qchem(outputfile):
     with open(outputfile) as fh:
         for line in fh:
 
-            if 'ECC position:' in line:
+            if "ECC position:" in line:
                 origin = np.array(line.split()[2:], dtype=float)
-                print('origin:', return_eigval_string(origin))
+                print("origin:", return_eigval_string(origin))
 
-            if 'Relativistic mass correction' in line:
+            if "Relativistic mass correction" in line:
                 g_rmc_ppm = float(next(fh).strip())
 
-            if 'One-electron gauge correction' in line:
+            if "One-electron gauge correction" in line:
                 xx, xy, xz = next(fh).split()
                 yx, yy, yz = next(fh).split()
                 zx, zy, zz = next(fh).split()
-                g_gc_1_ppm = np.array([[xx, xy, xz],
-                                       [yx, yy, yz],
-                                       [zx, zy, zz]], dtype=float)
+                g_gc_1_ppm = np.array([[xx, xy, xz], [yx, yy, yz], [zx, zy, zz]], dtype=float)
 
-            if 'Two-electron gauge correction' in line:
+            if "Two-electron gauge correction" in line:
                 xx, xy, xz = next(fh).split()
                 yx, yy, yz = next(fh).split()
                 zx, zy, zz = next(fh).split()
-                g_gc_2_ppm = np.array([[xx, xy, xz],
-                                       [yx, yy, yz],
-                                       [zx, zy, zz]], dtype=float)
+                g_gc_2_ppm = np.array([[xx, xy, xz], [yx, yy, yz], [zx, zy, zz]], dtype=float)
 
-            if 'One-electron spin-orbit+orbital-Zeeman contribution' in line:
+            if "One-electron spin-orbit+orbital-Zeeman contribution" in line:
                 xx, xy, xz = next(fh).split()
                 yx, yy, yz = next(fh).split()
                 zx, zy, zz = next(fh).split()
-                g_oz_soc_1_ppm = np.array([[xx, xy, xz],
-                                           [yx, yy, yz],
-                                           [zx, zy, zz]], dtype=float)
+                g_oz_soc_1_ppm = np.array([[xx, xy, xz], [yx, yy, yz], [zx, zy, zz]], dtype=float)
 
-            if 'Two-electron spin-orbit+orbital-Zeeman contribution' in line:
+            if "Two-electron spin-orbit+orbital-Zeeman contribution" in line:
                 xx, xy, xz = next(fh).split()
                 yx, yy, yz = next(fh).split()
                 zx, zy, zz = next(fh).split()
-                g_oz_soc_2_ppm = np.array([[xx, xy, xz],
-                                           [yx, yy, yz],
-                                           [zx, zy, zz]], dtype=float)
+                g_oz_soc_2_ppm = np.array([[xx, xy, xz], [yx, yy, yz], [zx, zy, zz]], dtype=float)
 
-            if 'Total shift' in line:
+            if "Total shift" in line:
                 xx, xy, xz = next(fh).split()
                 yx, yy, yz = next(fh).split()
                 zx, zy, zz = next(fh).split()
-                g_tot_ppm = np.array([[xx, xy, xz],
-                                      [yx, yy, yz],
-                                      [zx, zy, zz]], dtype=float)
+                g_tot_ppm = np.array([[xx, xy, xz], [yx, yy, yz], [zx, zy, zz]], dtype=float)
 
-            if 'cpscfman end' in line:
+            if "cpscfman end" in line:
                 break
-
 
         g_rmc_abs = g_rmc_ppm / 1.0e6
         g_gc_1_abs = g_gc_1_ppm / 1.0e6
@@ -267,21 +256,21 @@ def print_epr_qchem(outputfile):
         g_oz_soc_2_eigvals_abs = g_eigvals(g_oz_soc_2_abs)
         g_tot_eigvals_abs = g_eigvals(g_tot_abs)
 
-        print('One-electron gauge correction')
+        print("One-electron gauge correction")
         print_matrix_ppm(g_gc_1_ppm)
-        print('Two-electron gauge correction')
+        print("Two-electron gauge correction")
         print_matrix_ppm(g_gc_2_ppm)
-        print('One-electron spin-orbit+orbital-Zeeman contribution')
+        print("One-electron spin-orbit+orbital-Zeeman contribution")
         print_matrix_ppm(g_oz_soc_1_ppm)
-        print('Two-electron spin-orbit+orbital-Zeeman contribution')
+        print("Two-electron spin-orbit+orbital-Zeeman contribution")
         print_matrix_ppm(g_oz_soc_2_ppm)
 
-        print('\delta g^{{RMC}}        :  {:12.7f}'.format(g_rmc_abs))
-        print('\delta g^{GC(1e)}     :', return_eigval_string(g_gc_1_eigvals_abs))
-        print('\delta g^{GC(2e)}     :', return_eigval_string(g_gc_2_eigvals_abs))
-        print('\delta g^{OZ/SOC(1e)} :', return_eigval_string(g_oz_soc_1_eigvals_abs))
-        print('\delta g^{OZ/SOC(2e)} :', return_eigval_string(g_oz_soc_2_eigvals_abs))
-        print('\delta g              :', return_eigval_string(g_tot_eigvals_abs))
+        print("\delta g^{{RMC}}        :  {:12.7f}".format(g_rmc_abs))
+        print("\delta g^{GC(1e)}     :", return_eigval_string(g_gc_1_eigvals_abs))
+        print("\delta g^{GC(2e)}     :", return_eigval_string(g_gc_2_eigvals_abs))
+        print("\delta g^{OZ/SOC(1e)} :", return_eigval_string(g_oz_soc_1_eigvals_abs))
+        print("\delta g^{OZ/SOC(2e)} :", return_eigval_string(g_oz_soc_2_eigvals_abs))
+        print("\delta g              :", return_eigval_string(g_tot_eigvals_abs))
 
     return d
 
@@ -293,25 +282,25 @@ def print_epr_adf(outputfilename):
 
     for line in outputfile:
         # matches if we are doing a perturbative SO calculation
-        if 'TOTAL EPR Delta g-matrix (ppt)' in line:
+        if "TOTAL EPR Delta g-matrix (ppt)" in line:
             print(os.path.abspath(outputfilename))
-            while 'Principal components' not in line:
+            while "Principal components" not in line:
                 line = next(outputfile)
             next(outputfile)
             line = next(outputfile)
             gprin_ppt = np.array(map(float, line.split()))
             gprin_full = (gprin_ppt / 1000) + 2.002319
-            print('  ppt: {:>11.3f} {:>11.3f} {:>11.3f}'.format(*gprin_ppt))
-            print(' full: {:>11.3f} {:>11.3f} {:>11.3f}'.format(*gprin_full))
+            print("  ppt: {:>11.3f} {:>11.3f} {:>11.3f}".format(*gprin_ppt))
+            print(" full: {:>11.3f} {:>11.3f} {:>11.3f}".format(*gprin_full))
             break
         # matches if we are doing a self-consistent SO calculation
-        if 'Principal g-values' in line:
+        if "Principal g-values" in line:
             print(os.path.abspath(outputfilename))
             gprin_full = np.array(map(float, line.split()[2:]))
             line = next(outputfile)
             gprin_ppt = np.array(map(float, line.split()[1:])) * 1000
-            print('  ppt: {:>11.3f} {:>11.3f} {:>11.3f}'.format(*gprin_ppt))
-            print(' full: {:>11.3f} {:>11.3f} {:>11.3f}'.format(*gprin_full))
+            print("  ppt: {:>11.3f} {:>11.3f} {:>11.3f}".format(*gprin_ppt))
+            print(" full: {:>11.3f} {:>11.3f} {:>11.3f}".format(*gprin_full))
             break
 
     return d
@@ -322,7 +311,7 @@ def print_matrix_abs(matrix):
 
     assert matrix.shape == (3, 3)
 
-    t = ' {:12.7f} {:12.7f} {:12.7f}'.format
+    t = " {:12.7f} {:12.7f} {:12.7f}".format
 
     for r in range(3):
         print(t(*matrix[r]))
@@ -335,7 +324,7 @@ def print_matrix_ppm(matrix):
 
     assert matrix.shape == (3, 3)
 
-    t = ' {:6.0f} {:6.0f} {:6.0f}'.format
+    t = " {:6.0f} {:6.0f} {:6.0f}".format
 
     for r in range(3):
         print(t(*matrix[r]))
@@ -346,18 +335,18 @@ def print_matrix_ppm(matrix):
 def return_eigval_string(eigvals):
     """"""
 
-    assert eigvals.shape == (3, )
+    assert eigvals.shape == (3,)
 
-    return ' {:12.7f} {:12.7f} {:12.7f}'.format(*eigvals)
+    return " {:12.7f} {:12.7f} {:12.7f}".format(*eigvals)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     import argparse
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('outputfile', nargs='+')
+    parser.add_argument("outputfile", nargs="+")
 
     args = parser.parse_args()
 

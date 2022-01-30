@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-'''Generate an ORCA input file specifically for plotting cube files.
+"""Generate an ORCA input file specifically for plotting cube files.
 
 Usage:
   orca_generate_plot_strings.py [options] [--canon=canon_list] [--uno=uno_list]
@@ -40,48 +40,44 @@ Examples:
  mo("example.mo.10a.cube", 10, 0);
  mo("example.mo.10b.cube", 10, 1);
  end
-'''
+"""
 
 
 from vmd_templates import pad_left_zeros_l
 
 
 def mo_string(prefix, mo_num, op_num):
-    '''Create the string for generating a cube of a molecular orbital.'''
+    """Create the string for generating a cube of a molecular orbital."""
     if op_num == 0:
-        spin = 'a'
+        spin = "a"
     elif op_num == 1:
-        spin = 'b'
+        spin = "b"
     else:
         return
     template = 'mo("{prefix}mo.{mo_num}{spin}.cube", {mo_num}, {op_num});'
-    return template.format(prefix=prefix,
-                           mo_num=mo_num,
-                           op_num=op_num,
-                           spin=spin)
+    return template.format(prefix=prefix, mo_num=mo_num, op_num=op_num, spin=spin)
 
 
 def uno_string(prefix, uno_num):
-    '''Create the string for generating a cube of a UHF natural orbital.'''
+    """Create the string for generating a cube of a UHF natural orbital."""
     template = 'uno("{prefix}uno.{uno_num}.cube", {uno_num});'
-    return template.format(prefix=prefix,
-                           uno_num=uno_num)
+    return template.format(prefix=prefix, uno_num=uno_num)
 
 
 def eldens_string(prefix):
-    '''Create the string for generating a cube of the electron density.'''
+    """Create the string for generating a cube of the electron density."""
     template = 'eldens("{prefix}density.el.cube");'
     return template.format(prefix=prefix)
 
 
 def spindens_string(prefix):
-    '''Create the string for generating a cube of the spin density.'''
+    """Create the string for generating a cube of the spin density."""
     template = 'spindens("{prefix}density.spin.cube");'
     return template.format(prefix=prefix)
 
+
 def arg_to_list(arg):
-    '''Convert the given argument to a list of a single element if it's an atom,
-    '''
+    """Convert the given argument to a list of a single element if it's an atom,"""
     if isinstance(arg, str):
         newarg = eval(arg)
         if isinstance(newarg, int):
@@ -93,98 +89,100 @@ def arg_to_list(arg):
         # we might be trouble if this ever gets reached...
         return list(arg)
 
+
 def generate_block(args):
-    '''Create the %plots block based upon command-line arguments passed in
+    """Create the %plots block based upon command-line arguments passed in
     through the args dictionary.
-    '''
+    """
     # Handle the file prefix first.
-    if args['--prefix'] is None:
-        prefix = ''
+    if args["--prefix"] is None:
+        prefix = ""
     else:
-        prefix = args['--prefix'] + '.'
+        prefix = args["--prefix"] + "."
 
     # The "block" will be formed by generating bunch of strings,
     # appending them to this list, then calling list.join once
     # everything's done.
-    block_parts = ['%plots']
+    block_parts = ["%plots"]
 
-    block_parts.append(' format gaussian_cube')
-    block_parts.append(' dim1 {}'.format(args['--dim']))
-    block_parts.append(' dim2 {}'.format(args['--dim']))
-    block_parts.append(' dim3 {}'.format(args['--dim']))
+    block_parts.append(" format gaussian_cube")
+    block_parts.append(" dim1 {}".format(args["--dim"]))
+    block_parts.append(" dim2 {}".format(args["--dim"]))
+    block_parts.append(" dim3 {}".format(args["--dim"]))
 
     # If we desire to use cclib and automate some things...
-    if args['--cclib']:
+    if args["--cclib"]:
         # pylint: disable=E1101
         from cclib.io import ccopen
-        job = ccopen(args['--cclib'])
+
+        job = ccopen(args["--cclib"])
         data = job.parse()
         plot_range = data.homos[0] * 2
-        if args['--cclib_all']:
+        if args["--cclib_all"]:
             plot_range = data.nmo
         # cclib-discovered values take precedence
-        if args['--canon']:
-            args['--canon'] = list(range(plot_range))
-        if args['--uno']:
-            args['--uno'] = list(range(plot_range))
+        if args["--canon"]:
+            args["--canon"] = list(range(plot_range))
+        if args["--uno"]:
+            args["--uno"] = list(range(plot_range))
 
-    if args['--eldens']:
-        block_parts.append(' ' + eldens_string(prefix))
-    if args['--spindens']:
-        block_parts.append(' ' + spindens_string(prefix))
+    if args["--eldens"]:
+        block_parts.append(" " + eldens_string(prefix))
+    if args["--spindens"]:
+        block_parts.append(" " + spindens_string(prefix))
 
     # Limit the number of orbitals we're going to generate.
-    if args['--max']:
-        maxorb = int(args['--max'])
-        if args['--canon']:
-            args['--canon'] = [i for i in args['--canon'] if i <= maxorb]
-        if args['--uno']:
-            args['--uno'] = [i for i in args['--uno'] if i <= maxorb]
+    if args["--max"]:
+        maxorb = int(args["--max"])
+        if args["--canon"]:
+            args["--canon"] = [i for i in args["--canon"] if i <= maxorb]
+        if args["--uno"]:
+            args["--uno"] = [i for i in args["--uno"] if i <= maxorb]
 
     # Plot the UNOs first due to an 'operator' bug in ORCA.
-    if args['--uno']:
+    if args["--uno"]:
         # We're always either a string or a list.
-        if isinstance(args['--uno'], str):
-            splitstr = args['--uno'].split(',')
+        if isinstance(args["--uno"], str):
+            splitstr = args["--uno"].split(",")
         else:
-            splitstr = args['--uno']
+            splitstr = args["--uno"]
         if len(splitstr) == 2:
-            args['--uno'] = pad_left_zeros_l(range(int(splitstr[0]), int(splitstr[1]) + 1))
+            args["--uno"] = pad_left_zeros_l(range(int(splitstr[0]), int(splitstr[1]) + 1))
         else:
-            args['--uno'] = pad_left_zeros_l(arg_to_list(args['--uno']))
-        for uno_num in args['--uno']:
-            block_parts.append(' ' + uno_string(prefix, uno_num))
+            args["--uno"] = pad_left_zeros_l(arg_to_list(args["--uno"]))
+        for uno_num in args["--uno"]:
+            block_parts.append(" " + uno_string(prefix, uno_num))
 
-    if args['--canon']:
+    if args["--canon"]:
         # We're always either a string or a list.
-        if isinstance(args['--canon'], str):
-            splitstr = args['--canon'].split(',')
+        if isinstance(args["--canon"], str):
+            splitstr = args["--canon"].split(",")
         else:
-            splitstr = args['--canon']
+            splitstr = args["--canon"]
         if len(splitstr) == 2:
-            args['--canon'] = pad_left_zeros_l(range(int(splitstr[0]), int(splitstr[1]) + 1))
+            args["--canon"] = pad_left_zeros_l(range(int(splitstr[0]), int(splitstr[1]) + 1))
         else:
-            args['--canon'] = pad_left_zeros_l(arg_to_list(args['--canon']))
-        for mo_num in args['--canon']:
-            block_parts.append(' ' + mo_string(prefix, mo_num, 0))
-            if args['--beta']:
-                block_parts.append(' ' + mo_string(prefix, mo_num, 1))
+            args["--canon"] = pad_left_zeros_l(arg_to_list(args["--canon"]))
+        for mo_num in args["--canon"]:
+            block_parts.append(" " + mo_string(prefix, mo_num, 0))
+            if args["--beta"]:
+                block_parts.append(" " + mo_string(prefix, mo_num, 1))
 
-    block_parts.append(' end')
+    block_parts.append(" end")
 
-    block = '\n'.join(block_parts)
+    block = "\n".join(block_parts)
 
     return block
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     from docopt import docopt
 
     # pylint: disable=C0103
     args = docopt(__doc__)
 
-    if args['--print_args']:
+    if args["--print_args"]:
         print(args)
 
     block = generate_block(args)

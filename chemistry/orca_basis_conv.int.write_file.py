@@ -14,7 +14,7 @@ if __name__ == "__main__":
 
     # pylint: disable=C0103
     parser = argparse.ArgumentParser()
-    parser.add_argument('inp_filename', nargs='+')
+    parser.add_argument("inp_filename", nargs="+")
     args = parser.parse_args()
 
     for inp_filename in args.inp_filename:
@@ -23,8 +23,8 @@ if __name__ == "__main__":
             inp_file_contents = inp_file.read()
 
         # making an assumption here...
-        basis_name = inp_filename.split('.')[1]
-        out_filename = 'orca.' + basis_name + '.bas'
-        with open(out_filename, 'w') as out_file:
+        basis_name = inp_filename.split(".")[1]
+        out_filename = "orca." + basis_name + ".bas"
+        with open(out_filename, "w") as out_file:
             out_file.write(orcaparse.basis_utils.convert_basis_int(inp_file_contents))
         print(out_filename)

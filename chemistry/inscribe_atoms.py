@@ -4,8 +4,9 @@
 # surround all the atoms.
 
 import argparse as ap
-import numpy as np
 import itertools
+
+import numpy as np
 
 parser = ap.ArgumentParser()
 parser.add_argument("namein", metavar="<input XYZ file>")

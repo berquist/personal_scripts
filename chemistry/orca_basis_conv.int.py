@@ -14,7 +14,7 @@ if __name__ == "__main__":
 
     # pylint: disable=C0103
     parser = argparse.ArgumentParser()
-    parser.add_argument('inp_filename')
+    parser.add_argument("inp_filename")
     args = parser.parse_args()
     inp_filename = args.inp_filename
 

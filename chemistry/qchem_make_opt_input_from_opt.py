@@ -12,9 +12,8 @@ number incremented by one.
 """
 
 
-import re
 import os.path
-
+import re
 from collections import OrderedDict
 
 import cclib
@@ -37,9 +36,9 @@ def getargs():
     # pylint: disable=C0103
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('outputfilename', nargs='+')
+    parser.add_argument("outputfilename", nargs="+")
 
-    parser.add_argument('--fragment', action='store_true')
+    parser.add_argument("--fragment", action="store_true")
 
     args = parser.parse_args()
 
@@ -58,20 +57,20 @@ def parse_user_input(outputfilename):
 
     outputfile = make_file_iterator(outputfilename)
 
-    line = ''
-    while 'User input:' not in line:
+    line = ""
+    while "User input:" not in line:
         line = next(outputfile)
     line = next(outputfile)
-    assert '----' in line
+    assert "----" in line
     line = next(outputfile)
-    while '--------------------------------------------------------------' not in line:
-        if line.strip() == '':
+    while "--------------------------------------------------------------" not in line:
+        if line.strip() == "":
             pass
-        elif line[0] == '$' and line.strip().lower() != '$end':
+        elif line[0] == "$" and line.strip().lower() != "$end":
             section_header = line[1:].lower()
             user_input[section_header] = []
-        elif line.strip().lower() == '$end':
-            user_input[section_header] = '\n'.join(user_input[section_header])
+        elif line.strip().lower() == "$end":
+            user_input[section_header] = "\n".join(user_input[section_header])
         else:
             user_input[section_header].append(line)
         line = next(outputfile)
@@ -95,7 +94,7 @@ def parse_fragments_from_molecule(molecule):
     # Gather the charges, spin multiplicities, and starting positions
     # of each fragment.
     for line in it:
-        if '--' in line:
+        if "--" in line:
             line = next(it)
             charge, multiplicity = line.split()
             charges.append(charge)
@@ -108,7 +107,9 @@ def parse_fragments_from_molecule(molecule):
     return charges, multiplicities, start_indices
 
 
-def form_molecule_section_from_fragments(elements, geometry, charges, multiplicities, start_indices):
+def form_molecule_section_from_fragments(
+    elements, geometry, charges, multiplicities, start_indices
+):
     """Form the Q-Chem $molecule section containing the charge,
     multiplicity, and atomic symbols and coordinates for multiple
     fragments.
@@ -118,15 +119,16 @@ def form_molecule_section_from_fragments(elements, geometry, charges, multiplici
 
     assert len(charges) == len(multiplicities) == (len(start_indices) + 1)
 
-    s = '{:3s} {:15.10f} {:15.10f} {:15.10f}'
+    s = "{:3s} {:15.10f} {:15.10f} {:15.10f}"
     # The first elements of the charge and multiplicity lists are for
     # the supersystem (whole molecule).
-    molecule_section = ['{} {}'.format(charges[0], multiplicities[0])]
+    molecule_section = ["{} {}".format(charges[0], multiplicities[0])]
 
     from itertools import count
+
     for (charge, multiplicity, idx_iter) in zip(charges[1:], multiplicities[1:], count(0)):
-        molecule_section.append('--')
-        molecule_section.append('{} {}'.format(charge, multiplicity))
+        molecule_section.append("--")
+        molecule_section.append("{} {}".format(charge, multiplicity))
         idx_start = start_indices[idx_iter]
         try:
             idx_end = start_indices[idx_iter + 1]
@@ -145,17 +147,19 @@ def form_molecule_section(elements, geometry, charge, multiplicity):
     Returns a list that will need to be joined with newlines.
     """
 
-    s = '{:3s} {:15.10f} {:15.10f} {:15.10f}'
-    molecule_section = ['{} {}'.format(charge, multiplicity)]
+    s = "{:3s} {:15.10f} {:15.10f} {:15.10f}"
+    molecule_section = ["{} {}".format(charge, multiplicity)]
 
-    for element, coords, in zip(elements, geometry):
+    for (
+        element,
+        coords,
+    ) in zip(elements, geometry):
         molecule_section.append(s.format(element, *coords))
 
     return molecule_section
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     args = getargs()
 
@@ -170,18 +174,18 @@ if __name__ == '__main__':
         # this is to deal with the Q-Chem parser not handling
         # incomplete SCF cycles properly
         except StopIteration:
-            print('no output made: StopIteration in {}'.format(outputfilename))
+            print("no output made: StopIteration in {}".format(outputfilename))
             continue
 
         # Determine the name of the file we're writing.
-        assert outputfilename.endswith('.out')
-        numstr = re.search(r'opt(\d*)', outputfilename).groups()[0]
-        if numstr == '':
+        assert outputfilename.endswith(".out")
+        numstr = re.search(r"opt(\d*)", outputfilename).groups()[0]
+        if numstr == "":
             optnum = 2
         else:
             optnum = int(numstr) + 1
-        inputfilename = re.sub(r'opt\d*', 'opt{}'.format(optnum), outputfilename)
-        inputfilename = inputfilename.replace('.out', '.in')
+        inputfilename = re.sub(r"opt\d*", "opt{}".format(optnum), outputfilename)
+        inputfilename = inputfilename.replace(".out", ".in")
         inputfilename = os.path.basename(inputfilename)
 
         user_input = parse_user_input(outputfilename)
@@ -191,18 +195,24 @@ if __name__ == '__main__':
         element_list = [pt.element[Z] for Z in data.atomnos]
         last_geometry = data.atomcoords[-1]
         if args.fragment:
-            charges, multiplicities, start_indices = parse_fragments_from_molecule(user_input['molecule'])
+            charges, multiplicities, start_indices = parse_fragments_from_molecule(
+                user_input["molecule"]
+            )
             charges.insert(0, data.charge)
             multiplicities.insert(0, data.mult)
-            molecule_section = form_molecule_section_from_fragments(element_list, last_geometry, charges, multiplicities, start_indices)
+            molecule_section = form_molecule_section_from_fragments(
+                element_list, last_geometry, charges, multiplicities, start_indices
+            )
         else:
-            molecule_section = form_molecule_section(element_list, last_geometry, data.charge, data.mult)
-        user_input['molecule'] = '\n'.join(molecule_section)
+            molecule_section = form_molecule_section(
+                element_list, last_geometry, data.charge, data.mult
+            )
+        user_input["molecule"] = "\n".join(molecule_section)
 
-        with open(inputfilename, 'w') as fh:
+        with open(inputfilename, "w") as fh:
             for section_header in user_input:
-                fh.write('${}\n'.format(section_header))
+                fh.write("${}\n".format(section_header))
                 fh.write(user_input[section_header])
-                fh.write('\n$end\n\n')
+                fh.write("\n$end\n\n")
 
         print(inputfilename)

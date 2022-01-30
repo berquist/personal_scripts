@@ -4,7 +4,6 @@
 Frank's PBS scheduler."""
 
 
-
 def template_pbsfile_gamess(inpfile, ppn, time, queue, extrafiles):
     """The template for a PBS jobfile that calls GAMESS."""
     copy_string_template = "cp $PBS_O_WORKDIR/{} $LOCAL\n"
@@ -18,7 +17,7 @@ def template_pbsfile_gamess(inpfile, ppn, time, queue, extrafiles):
         joined_extrafiles = "".join(copy_strings)
     else:
         joined_extrafiles = copy_string_template.format(extrafiles)
-    return """#!/bin/bash
+    return """#!/usr/bin/env bash
 
 #PBS -N {inpfile}
 #PBS -q {queue}
@@ -44,12 +43,14 @@ trap run_on_exit EXIT
 
 gms {inpfile}.inp >& ${{PBS_O_WORKDIR}}/{inpfile}.out
 chmod 644 ${{PBS_O_WORKDIR}}/{inpfile}.out
-""".format(inpfile=inpfile,
-           ppn=ppn,
-           time=time,
-           queue=queue,
-           username=os.environ['USER'],
-           extrafiles=joined_extrafiles)
+""".format(
+        inpfile=inpfile,
+        ppn=ppn,
+        time=time,
+        queue=queue,
+        username=os.environ["USER"],
+        extrafiles=joined_extrafiles,
+    )
 
 
 if __name__ == "__main__":
@@ -57,31 +58,27 @@ if __name__ == "__main__":
     import os.path
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('inpfilename',
-                        help='the GAMESS input file to submit')
-    parser.add_argument('--ppn',
-                        type=int,
-                        default=4,
-                        help='number of cores to run on (max shared=48, shared_large=16)')
-    parser.add_argument('--time',
-                        type=int,
-                        default=96,
-                        help='walltime to reserve (max 144 hours)')
-    parser.add_argument('--queue',
-                        default='shared',
-                        help='queue to run in (typically shared or shared_large')
-    parser.add_argument('--extrafiles',
-                        help='An arbitrary number of files to copy to $LOCAL.',
-                        nargs='*')
+    parser.add_argument("inpfilename", help="the GAMESS input file to submit")
+    parser.add_argument(
+        "--ppn",
+        type=int,
+        default=4,
+        help="number of cores to run on (max shared=48, shared_large=16)",
+    )
+    parser.add_argument("--time", type=int, default=96, help="walltime to reserve (max 144 hours)")
+    parser.add_argument(
+        "--queue", default="shared", help="queue to run in (typically shared or shared_large"
+    )
+    parser.add_argument(
+        "--extrafiles", help="An arbitrary number of files to copy to $LOCAL.", nargs="*"
+    )
     args = parser.parse_args()
     inpfilename = os.path.splitext(args.inpfilename)[0]
 
-    pbsfilename = inpfilename + '.pbs'
-    with open(pbsfilename, 'w') as pbsfile:
-        pbsfile.write(template_pbsfile_gamess(inpfilename,
-                                              args.ppn,
-                                              args.time,
-                                              args.queue,
-                                              args.extrafiles))
+    pbsfilename = inpfilename + ".pbs"
+    with open(pbsfilename, "w") as pbsfile:
+        pbsfile.write(
+            template_pbsfile_gamess(inpfilename, args.ppn, args.time, args.queue, args.extrafiles)
+        )
 
     print(pbsfilename)

@@ -5,10 +5,9 @@ Q-Chem that we probably won't ever want to read from."""
 
 
 import argparse
+import glob
 import os
 import os.path
-import glob
-
 
 # Each file has a glob at the end because each MPI process creates its
 # own copy; make sure we get them all.
@@ -19,7 +18,9 @@ SCRATCHFILES = (
 )
 
 parser = argparse.ArgumentParser()
-parser.add_argument('scratchdir', nargs='?', default='.', help='path to the top-level scratch directory')
+parser.add_argument(
+    "scratchdir", nargs="?", default=".", help="path to the top-level scratch directory"
+)
 args = parser.parse_args()
 scratchdir = args.scratchdir
 

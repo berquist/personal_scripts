@@ -4,15 +4,14 @@ import cclib
 from cclib.io import ccopen
 from cclib.parser.utils import convertor
 
-
 program_names = {
-    cclib.parser.daltonparser.DALTON: 'DALTON',
-    cclib.parser.gaussianparser.Gaussian: 'Gaussian',
-    cclib.parser.gamessparser.GAMESS: 'GAMESS',
-    cclib.parser.nwchemparser.NWChem: 'NWChem',
-    cclib.parser.orcaparser.ORCA: 'ORCA',
-    cclib.parser.psiparser.Psi: 'Psi',
-    cclib.parser.qchemparser.QChem: 'Q-Chem',
+    cclib.parser.daltonparser.DALTON: "DALTON",
+    cclib.parser.gaussianparser.Gaussian: "Gaussian",
+    cclib.parser.gamessparser.GAMESS: "GAMESS",
+    cclib.parser.nwchemparser.NWChem: "NWChem",
+    cclib.parser.orcaparser.ORCA: "ORCA",
+    cclib.parser.psiparser.Psi: "Psi",
+    cclib.parser.qchemparser.QChem: "Q-Chem",
 }
 
 
@@ -34,28 +33,28 @@ def getargs():
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('outputfilename', nargs='+')
+    parser.add_argument("outputfilename", nargs="+")
 
     args = parser.parse_args()
 
     return args
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     args = getargs()
 
     scfenergies = []
 
     for outputfilename in args.outputfilename:
-        if 'cfour' in outputfilename.lower():
-            program = 'CFOUR'
-            scfenergy = get_energy_nocclib(outputfilename, 'E(SCF)=', 1)
+        if "cfour" in outputfilename.lower():
+            program = "CFOUR"
+            scfenergy = get_energy_nocclib(outputfilename, "E(SCF)=", 1)
         else:
             job = ccopen(outputfilename)
             program = program_names[type(job)]
             data = job.parse()
-            scfenergy = convertor(data.scfenergies[0], 'eV', 'hartree')
+            scfenergy = convertor(data.scfenergies[0], "eV", "hartree")
         scfenergies.append((program, outputfilename, scfenergy))
 
     scfenergies = sorted(scfenergies, key=lambda x: x[2])

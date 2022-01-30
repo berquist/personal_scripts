@@ -8,7 +8,7 @@ SLURM scheduler.
 
 def template_slurmfile_molpro(inpfile, ppn, time):
     """The template for a SLURM jobfile that calls Q-Chem."""
-    return """#!/bin/bash
+    return """#!/usr/bin/env bash
 
 #SBATCH --job-name={inpfile}
 #SBATCH --output={inpfile}.slurmout

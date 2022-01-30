@@ -3,18 +3,17 @@
 import re
 
 import numpy as np
-
 from cclib.io import ccread
 
+re_time_scf = re.compile("^ SCF time:\s*CPU (\d*\.\d*)s\s*wall\s(\d*\.\d*)s")
+re_time_grad = re.compile("^ Gradient time:\s*CPU (\d*\.\d*) s\s*wall\s(\d*\.\d*) s")
 
-re_time_scf = re.compile('^ SCF time:\s*CPU (\d*\.\d*)s\s*wall\s(\d*\.\d*)s')
-re_time_grad = re.compile('^ Gradient time:\s*CPU (\d*\.\d*) s\s*wall\s(\d*\.\d*) s')
-
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     import argparse
+
     parser = argparse.ArgumentParser()
-    parser.add_argument('outputfile', nargs='*')
+    parser.add_argument("outputfile", nargs="*")
     args = parser.parse_args()
     outputfiles = args.outputfile
 
@@ -55,13 +54,13 @@ if __name__ == '__main__':
             pct = -1
         nsteps_remaining = nsteps - nsteps_current
 
-        print('=' * 78)
+        print("=" * 78)
         print(outputfilename)
-        print('-' * 78)
+        print("-" * 78)
         if couldnt_parse:
             print(" couldn't parse with cclib due to StopIteration")
         else:
-            print(' progress: {:d}/{:d} -> {:.2f}%'.format(nsteps_current, nsteps, pct))
+            print(" progress: {:d}/{:d} -> {:.2f}%".format(nsteps_current, nsteps, pct))
 
         times_scf /= 3600
         times_grad /= 3600
@@ -70,7 +69,7 @@ if __name__ == '__main__':
         tot_time_scf = np.sum(times_scf, axis=1)
         avg_time_scf = np.mean(times_scf, axis=1)
         std_time_scf = np.std(times_scf, axis=1)
-        print(' SCF count, totals, averages, standard deviations')
+        print(" SCF count, totals, averages, standard deviations")
         print(times_scf.shape[1])
         print(tot_time_scf)
         print(avg_time_scf)
@@ -79,7 +78,7 @@ if __name__ == '__main__':
         tot_time_grad = np.sum(times_grad, axis=1)
         avg_time_grad = np.mean(times_grad, axis=1)
         std_time_grad = np.std(times_grad, axis=1)
-        print(' Gradient count, totals, averages, standard deviations')
+        print(" Gradient count, totals, averages, standard deviations")
         print(times_grad.shape[1])
         print(tot_time_grad)
         print(avg_time_grad)
@@ -87,10 +86,10 @@ if __name__ == '__main__':
 
         tot_time = tot_time_scf + tot_time_grad
         avg_time = avg_time_scf + avg_time_grad
-        print(' Total time')
+        print(" Total time")
         print(tot_time)
-        print(' Average time per step')
+        print(" Average time per step")
         print(avg_time)
 
-        print(' Remaining time')
+        print(" Remaining time")
         print(avg_time * nsteps_remaining)

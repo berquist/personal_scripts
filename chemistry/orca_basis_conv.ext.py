@@ -13,8 +13,8 @@ if __name__ == "__main__":
 
     # pylint: disable=C0103
     parser = argparse.ArgumentParser()
-    parser.add_argument('inp_filename')
-    parser.add_argument('out_filename')
+    parser.add_argument("inp_filename")
+    parser.add_argument("out_filename")
     args = parser.parse_args()
     inp_filename = args.inp_filename
     out_filename = args.out_filename
@@ -22,5 +22,5 @@ if __name__ == "__main__":
     with open(inp_filename) as inp_file:
         inp_file_contents = inp_file.read()
 
-    with open(out_filename, 'w') as out_file:
+    with open(out_filename, "w") as out_file:
         out_file.write(orcaparse.basis_utils.convert_basis_ext(inp_file_contents))

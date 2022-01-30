@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 
 
-from qchem_aimd_tools import make_file_iterator
-from qchem_aimd_tools import get_qchem_aimd_data
+from qchem_aimd_tools import get_qchem_aimd_data, make_file_iterator
 
 
 def qchem_get_time_step(filename, searchstr, idx_cpu, idx_wall):
-    """Get the CPU and wall times for each step.
-    """
+    """Get the CPU and wall times for each step."""
 
     fi = make_file_iterator(filename)
 
@@ -29,10 +27,10 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('costfile', help="""""")
-    parser.add_argument('outputfile', help="""""")
-    parser.add_argument('--dump-cost', action='store_true')
-    parser.add_argument('--try-extrap-fock-analysis', action='store_true')
+    parser.add_argument("costfile", help="""""")
+    parser.add_argument("outputfile", help="""""")
+    parser.add_argument("--dump-cost", action="store_true")
+    parser.add_argument("--try-extrap-fock-analysis", action="store_true")
 
     args = parser.parse_args()
 
@@ -44,7 +42,9 @@ if __name__ == "__main__":
             nthreads = int(line.split()[1])
             break
 
-    header_lines, costdata = get_qchem_aimd_data(fi_cost, num_header_lines=1, num_columns=3, col_types=[int, float, float])
+    header_lines, costdata = get_qchem_aimd_data(
+        fi_cost, num_header_lines=1, num_columns=3, col_types=[int, float, float]
+    )
 
     time_step = list(range(1, len(costdata) + 1))
     scf_cycles = [p[0] for p in costdata]
@@ -56,11 +56,15 @@ if __name__ == "__main__":
             print(strtemplate(ts, nscf, cts))
 
     searchstr = "Time for this dynamics step:"
-    times_cpu_dynamics_step, times_wall_dynamics_step = qchem_get_time_step(args.outputfile, searchstr, 5, 8)
+    times_cpu_dynamics_step, times_wall_dynamics_step = qchem_get_time_step(
+        args.outputfile, searchstr, 5, 8
+    )
     searchstr = "SCF time:"
     times_cpu_scf_step, times_wall_scf_step = qchem_get_time_step(args.outputfile, searchstr, 3, 6)
     searchstr = "Gradient time:"
-    times_cpu_gradient_step, times_wall_gradient_step = qchem_get_time_step(args.outputfile, searchstr, 3, 6)
+    times_cpu_gradient_step, times_wall_gradient_step = qchem_get_time_step(
+        args.outputfile, searchstr, 3, 6
+    )
 
     # print(len(times_cpu_dynamics_step))
     # print(len(times_cpu_scf_step))

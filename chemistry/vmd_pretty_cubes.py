@@ -27,19 +27,18 @@ import argparse
 import os
 from glob import glob
 
+ifmt = "cube"
+ofmt = "tga"
 
-ifmt = 'cube'
-ofmt = 'tga'
-
-out = 'vmd.load_all_plt.vmd'
-plot = 'vmd.plot_all.vmd'
-conv = 'vmd.convert.bash'
-html = 'vmd.plots.html'
+out = "vmd.load_all_plt.vmd"
+plot = "vmd.plot_all.vmd"
+conv = "vmd.convert.bash"
+html = "vmd.plots.html"
 ncol = 4
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--nsurf', choices=[1, 2, 3], default=3, type=int)
-parser.add_argument('--maxiso', nargs='?', type=float)
+parser.add_argument("--nsurf", choices=[1, 2, 3], default=3, type=int)
+parser.add_argument("--maxiso", nargs="?", type=float)
 args = parser.parse_args()
 
 nsurf = args.nsurf
@@ -55,38 +54,38 @@ if not maxiso:
     elif nsurf == 3:
         maxiso = 0.0128
 
-outfile = open(out, 'w')
-plotfile = open(plot, 'w')
-convfile = open(conv, 'w')
-htmlfile = open(html, 'w')
+outfile = open(out, "w")
+plotfile = open(plot, "w")
+convfile = open(conv, "w")
+htmlfile = open(html, "w")
 
 # set the appropriate isovalues
-print('Using {} surfaces for isovalues:'.format(nsurf))
+print("Using {} surfaces for isovalues:".format(nsurf))
 if nsurf == 1:
     # an isovalue of 0.99 will produce no surface
     isov = [maxiso, 0.99, 0.99]
     print(isov[0])
 elif nsurf == 2:
     # an isovalue of 0.99 will produce no surface
-    isov = [maxiso, maxiso/8.0, 0.99]
+    isov = [maxiso, maxiso / 8.0, 0.99]
     print(isov[0], isov[1])
 elif nsurf == 3:
-    isov = [maxiso, maxiso/4.0, maxiso/16.0]
+    isov = [maxiso, maxiso / 4.0, maxiso / 16.0]
     print(isov[0], isov[1], isov[2])
 
 # set opacity and diffuseness based on the number of isosurfaces
 if nsurf == 1:
-    outfile.write('\n')
+    outfile.write("\n")
 elif nsurf == 2:
-    outfile.write('material change opacity Glass3 0.15\n')
-    outfile.write('material change diffuse Glass3 0.10\n')
+    outfile.write("material change opacity Glass3 0.15\n")
+    outfile.write("material change diffuse Glass3 0.10\n")
 elif nsurf == 3:
-    outfile.write('material change opacity Glass3 0.40\n')
+    outfile.write("material change opacity Glass3 0.40\n")
 
 # write the main portion of the VMD display file
 color1id = 23
 color2id = 29
-vmdrenderfile = '''
+vmdrenderfile = """
 # -*- mode: tcl -*-
 axes location off
 display resize 1050 1050
@@ -134,23 +133,24 @@ mol modmaterial 3 0 Glass3
 mol modmaterial 4 0 Glass3
 mol modmaterial 5 0 Ghost
 mol modmaterial 6 0 Ghost
-'''.format(isov1=isov[0], isov2=isov[1], isov3=isov[2],
-           color1=color1id, color2=color2id)
+""".format(
+    isov1=isov[0], isov2=isov[1], isov3=isov[2], color1=color1id, color2=color2id
+)
 outfile.write(vmdrenderfile)
 
-convfile.write('#!/bin/bash\n')
+convfile.write("#!/bin/env bash\n")
 os.chmod(conv, 0o755)
 
-htmlfile.write('<html>\n<head></head>\n<body>\n')
-htmlfile.write('<table>\n<tr>\n')
+htmlfile.write("<html>\n<head></head>\n<body>\n")
+htmlfile.write("<table>\n<tr>\n")
 
 N = 0
-for I in sorted(glob('*{}'.format(ifmt))):
+for I in sorted(glob("*{}".format(ifmt))):
 
-    vmdrenderfile = '''mol addfile {}\n'''.format(I)
+    vmdrenderfile = """mol addfile {}\n""".format(I)
     outfile.write(vmdrenderfile)
 
-    vmdplotfile = '''
+    vmdplotfile = """
 mol modstyle 1 0 Isosurface  {isov1} {N} 0 0 1 1
 mol modstyle 2 0 Isosurface -{isov1} {N} 0 0 1 1
 mol modstyle 3 0 Isosurface  {isov2} {N} 0 0 1 1
@@ -159,33 +159,38 @@ mol modstyle 5 0 Isosurface  {isov3} {N} 0 0 1 1
 mol modstyle 6 0 Isosurface -{isov3} {N} 0 0 1 1
 # render POV3 {I}.pov
 render TachyonInternal {I}.{ofmt}
-'''.format(I=I, N=N, ofmt=ofmt,
-           isov1=isov[0], isov2=isov[1], isov3=isov[2])
+""".format(
+        I=I, N=N, ofmt=ofmt, isov1=isov[0], isov2=isov[1], isov3=isov[2]
+    )
     plotfile.write(vmdplotfile)
 
-    imageconvfile = '''
+    imageconvfile = """
 echo "convert {I}.{ofmt} {I}.png"
 convert {I}.{ofmt} {I}.png
 echo "rm {I}.{ofmt}"
 rm {I}.{ofmt}
-'''.format(I=I, ofmt=ofmt)
+""".format(
+        I=I, ofmt=ofmt
+    )
     convfile.write(imageconvfile)
 
-    htmlentry = '''<td><img src=\"{I}.png\" border=\"1\" width=\"400\">
+    htmlentry = """<td><img src=\"{I}.png\" border=\"1\" width=\"400\">
 {I}<br></td>
-'''.format(I=I)
+""".format(
+        I=I
+    )
     htmlfile.write(htmlentry)
 
     N += 1
     if (N % ncol) == 0:
-        htmlfile.write('</tr><tr>\n')
+        htmlfile.write("</tr><tr>\n")
 
-htmlfile.write('</tr></table>\n')
-htmlfile.write('</body>\n</html>\n')
+htmlfile.write("</tr></table>\n")
+htmlfile.write("</body>\n</html>\n")
 
 outfile.close()
 plotfile.close()
 convfile.close()
 htmlfile.close()
 
-print('... finished.')
+print("... finished.")

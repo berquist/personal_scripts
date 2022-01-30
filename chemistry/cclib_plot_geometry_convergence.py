@@ -23,8 +23,8 @@ def main():
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('compchemfilename', nargs='+')
-    parser.add_argument('--scaling-energy-change', type=float, default=10.0)
+    parser.add_argument("compchemfilename", nargs="+")
+    parser.add_argument("--scaling-energy-change", type=float, default=10.0)
 
     args = parser.parse_args()
     compchemfilenames = args.compchemfilename
@@ -40,10 +40,14 @@ def main():
 
         if type(job) == cclib.parser.qchemparser.QChem:
 
-            scfenergies = [utils.convertor(scfenergy, 'eV', 'hartree') for scfenergy in data.scfenergies]
+            scfenergies = [
+                utils.convertor(scfenergy, "eV", "hartree") for scfenergy in data.scfenergies
+            ]
             gradients = [geovalue[0] for geovalue in data.geovalues]
             displacements = [geovalue[1] for geovalue in data.geovalues]
-            energy_changes = [(geovalue[2] * args.scaling_energy_change) for geovalue in data.geovalues]
+            energy_changes = [
+                (geovalue[2] * args.scaling_energy_change) for geovalue in data.geovalues
+            ]
 
             # If this isn't true, something funny happened during the
             # parsing, so fail out.
@@ -52,12 +56,12 @@ def main():
             steps = list(range(1, len(scfenergies) + 1))
 
             # ax.plot(steps, scfenergies, label='SCF energy')
-            ax.plot(steps, gradients, label='max gradient')
-            ax.plot(steps, displacements, label='max displacement')
-            ax.plot(steps, energy_changes, label='energy change')
+            ax.plot(steps, gradients, label="max gradient")
+            ax.plot(steps, displacements, label="max displacement")
+            ax.plot(steps, energy_changes, label="energy change")
 
             ax.set_title(stub)
-            ax.set_xlabel('optimization step #')
+            ax.set_xlabel("optimization step #")
             ax.set_xlim((steps[0], steps[-1]))
 
         elif type(job) == cclib.parser.orcaparser.ORCA:
@@ -67,9 +71,9 @@ def main():
         else:
             pass
 
-        ax.legend(loc='best', fancybox=True)
+        ax.legend(loc="best", fancybox=True)
 
-        fig.savefig(stub + '.pdf', bbox_inches='tight')
+        fig.savefig(stub + ".pdf", bbox_inches="tight")
 
 
 if __name__ == "__main__":

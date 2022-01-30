@@ -10,7 +10,7 @@ def template_slurmfile_psi4(inpfile, ppn, time, as_python):
     command = '$(which psi4) -n $SLURM_CPUS_PER_TASK "{inpfile}.in"'.format(inpfile=inpfile)
     if as_python:
         command = 'OMP_NUM_THREADS={ppn} $(which python) "{inpfile}.py"'.format(inpfile=inpfile)
-    return """#!/bin/bash
+    return """#!/usr/bin/env bash
 
 #SBATCH --job-name={inpfile}
 #SBATCH --output={inpfile}.slurmout

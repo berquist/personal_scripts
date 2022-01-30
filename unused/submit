@@ -12,11 +12,11 @@ Authors: Daniel   Lambrecht (original)
 import sys
 
 try:
-    import os
     import argparse
+    import os
     import shlex
-    from uuid import uuid4
     import subprocess as sp
+    from uuid import uuid4
 except ImportError:
     if sys.version_info < (2, 7):
         raise Exception("Python >= 2.7 required")
@@ -83,7 +83,7 @@ def writeslurm(opts, job):
 
     fileh = open(RUN, "w")
 
-    fileh.write("#!/bin/bash\n")
+    fileh.write("#!/usr/bin/env bash\n")
     fileh.write("\n")
 
     if opts.jobname == 'off':

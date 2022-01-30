@@ -53,7 +53,5 @@ if __name__ == "__main__":
     print("min, max, range:")
     print(mmin, mmax, rng)
     print(
-        "mean +/- stdev: {:f} +/- {:f}".format(
-            np.mean(times_hours_wall), np.std(times_hours_wall)
-        )
+        "mean +/- stdev: {:f} +/- {:f}".format(np.mean(times_hours_wall), np.std(times_hours_wall))
     )

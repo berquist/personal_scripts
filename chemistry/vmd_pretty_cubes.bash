@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Original script by Felix Plasser (http://www.chemical-quantum-images.blogspot.de)
 # Modified by Jan-Michael Mewes (http://workadayqc.blogspot.de)
-# 
+#
 # 0. $pointval mo 65-74 (Turbomole), plots (QChem), ...
 # 1. call this script (choose 2 or 3 surfaces)
 # 2. open the molecular structure file in VMD
@@ -47,7 +47,7 @@ then
   isov2=`echo $isov'/4' | bc -l`
   isov3=`echo $isov'/16' | bc -l`
   echo 'Using 3 surfaces for isovalues:'
-  echo $isov $isov2 $isov3 
+  echo $isov $isov2 $isov3
   echo "material change opacity Glass3 0.400000" > $out
 else
    echo "Please enter 2 or 3 for # of surfaces!"
@@ -56,7 +56,7 @@ else
    isov2=0.0032
    isov3=0.0008
   echo "Using standard isovalues: "
-  echo "Values: "$isov $isov2 $isov3 
+  echo "Values: "$isov $isov2 $isov3
   echo "material change opacity Glass3 0.400000" > $out
 fi
 
@@ -96,7 +96,7 @@ echo "mol modcolor 5 0 ColorID 0" >> $out
 echo "mol modcolor 6 0 ColorID 1" >> $out
 echo "" > $plot
 
-echo "#!/bin/bash" > $conv
+echo "#!/usr/bin/env bash" > $conv
 chmod +x $conv
 
 echo -e "<html>\n<head></head>\n<body>" > $html
@@ -131,5 +131,3 @@ echo -e "</tr></table>" >> $html
 echo -e "</body>\n</html>" >> $html
 
 echo "... finished."
-
-

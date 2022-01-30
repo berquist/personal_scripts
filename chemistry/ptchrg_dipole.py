@@ -33,25 +33,26 @@ def ptchrg_dipole(namein):
     dipole = np.zeros(3)
     for charge in charges:
         total += float(charge[0])
-        #print "charge, total:", float(charge[0]), total
+        # print "charge, total:", float(charge[0]), total
         position = np.array([float(charge[1]), float(charge[2]), float(charge[3])])
         rel = position - centroid
-        dipole += (float(charge[0]) * rel)
+        dipole += float(charge[0]) * rel
 
     print("total charge:", total)
     print("dipole:", dipole)
     norm = np.linalg.norm(dipole)
     print("||dipole||:", norm)
-    dipolenorm = dipole/norm
+    dipolenorm = dipole / norm
     print("dipole (unit):", dipolenorm)
 
     return (total, dipole, norm, dipolenorm)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     import argparse as ap
 
     parser = ap.ArgumentParser()
-    parser.add_argument('namein', metavar='<ptchrg xyz file>', default='ptchrg.xyz')
+    parser.add_argument("namein", metavar="<ptchrg xyz file>", default="ptchrg.xyz")
     args = parser.parse_args()
     namein = args.namein
 

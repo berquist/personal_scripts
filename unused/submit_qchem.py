@@ -17,7 +17,7 @@ def template_slurmfile_qchem(inpfile, ppn, time, save, debug, release, sam):
         module = "qchem/trunk_intel_debug"
     if sam:
         module = "qchem/5.0"
-    return """#!/bin/bash
+    return """#!/usr/bin/env bash
 
 #SBATCH --job-name={inpfile}
 #SBATCH --output={inpfile}.slurmout

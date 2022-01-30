@@ -11,24 +11,23 @@ symbol, the second being the magnitude of the charge.
 
 import argparse
 import os.path
+
 from cclib.io import ccopen
 from cclib.parser.utils import PeriodicTable
 
-
 parser = argparse.ArgumentParser()
 
-parser.add_argument('qmoutfiles',
-                    nargs='+')
-parser.add_argument('--ptchrgtype',
-                    choices=('mulliken', 'lowdin', 'chelpg', 'hirshfeld'),
-                    default='mulliken')
+parser.add_argument("qmoutfiles", nargs="+")
+parser.add_argument(
+    "--ptchrgtype", choices=("mulliken", "lowdin", "chelpg", "hirshfeld"), default="mulliken"
+)
 
 args = parser.parse_args()
 qmoutfiles = args.qmoutfiles
 
 pt = PeriodicTable()
 
-s = '{:3s} {:15.10f}'
+s = "{:3s} {:15.10f}"
 
 for qmoutfile in qmoutfiles:
 
@@ -38,10 +37,10 @@ for qmoutfile in qmoutfiles:
     element_list = [pt.element[Z] for Z in data.atomnos]
     pointcharges = data.atomcharges[args.ptchrgtype]
 
-    ptchrgfilename = ''.join([os.path.splitext(qmoutfile)[0], '.txt'])
+    ptchrgfilename = "".join([os.path.splitext(qmoutfile)[0], ".txt"])
 
-    with open(ptchrgfilename, 'w') as ptchrgfile:
+    with open(ptchrgfilename, "w") as ptchrgfile:
         for element, pointcharge in zip(element_list, pointcharges):
-            ptchrgfile.write(s.format(element, pointcharge) + '\n')
+            ptchrgfile.write(s.format(element, pointcharge) + "\n")
 
     print(ptchrgfilename)

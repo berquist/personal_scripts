@@ -20,7 +20,7 @@ def template_slurmfile_dalton(inpfile, ppn, time, extrafiles):
     else:
         joined_extrafiles = copy_string_template.format(extrafiles)
     module = "dalton/2016.2-i2017.1-mkl_parallel-omp"
-    return """#!/bin/bash
+    return """#!/usr/bin/env bash
 
 #SBATCH --job-name={inpfile}
 #SBATCH --output={inpfile}.slurmout
