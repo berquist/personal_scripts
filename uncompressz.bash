@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-filename="${1}"
-unzstd "${filename}".tar.zst
-tar xf "${filename}".tar
-rm "${filename}".tar
+# Uncompress a `.tar.zst` archive.
+
+basename="${1}"
+unzstd "${basename}".tar.zst
+tar xf "${basename}".tar
+rm "${basename}".tar
