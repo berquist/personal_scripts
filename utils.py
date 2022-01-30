@@ -7,7 +7,7 @@ import re
 
 def read_binary(binaryfilename):
     """Return the bytes present in the given binary file name."""
-    with open(binaryfilename, 'rb') as binaryfile:
+    with open(binaryfilename, "rb") as binaryfile:
         readbytes = binaryfile.read()
     return readbytes
 
@@ -21,8 +21,7 @@ def make_file_iterator(filename):
 
 
 def one_largest(inlist):
-    """Return the largest item from the sequence.
-    """
+    """Return the largest item from the sequence."""
     if len(inlist) == 1:
         return inlist[0]
     if inlist[0] > inlist[1]:
@@ -55,8 +54,7 @@ def two_largest(inlist):
 
 
 def one_smallest(inlist):
-    """Return the smallest item from the sequence.
-    """
+    """Return the smallest item from the sequence."""
     if len(inlist) == 1:
         return inlist[0]
     if inlist[0] < inlist[1]:
@@ -89,21 +87,17 @@ def two_smallest(inlist):
 
 
 def largest(inlist, n):
-    """Return the n largest items in the sequence.
-    """
+    """Return the n largest items in the sequence."""
     pass
 
 
 def smallest(inlist, n):
-    """Return the n smallest items in the sequence.
-    """
+    """Return the n smallest items in the sequence."""
     pass
 
 
 def only_numerics(seq):
-    """Return only numerics from the given sequence.
-
-    """
+    """Return only numerics from the given sequence."""
     seq_type = type(seq)
     return seq_type().join(filter(seq_type.isdigit, seq))
 
@@ -113,7 +107,7 @@ def get_string_index(list_of_strings, string_to_search, start_index=0):
     (case-sensitive)
     """
     for idx, line in enumerate(list_of_strings[start_index:]):
-        if (line.find(string_to_search) > -1):
+        if line.find(string_to_search) > -1:
             return idx
     return -1
 
@@ -123,7 +117,7 @@ def get_regex_index(list_of_strings, regex_to_search, start_index=0):
     expression string. (case-sensitive)
     """
     for idx, line in enumerate(list_of_strings[start_index:]):
-        if (re.search(regex_to_search, line) is not None):
+        if re.search(regex_to_search, line) is not None:
             return idx
     return -1
 
@@ -138,8 +132,3 @@ def find_string_in_file(filename, string):
             if string in line:
                 return True
     return False
-
-
-if __name__ == "__main__":
-    # Don't use this file as a standalone script.
-    pass

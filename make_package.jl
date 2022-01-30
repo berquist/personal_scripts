@@ -1,3 +1,5 @@
+# TOOD put this in REPL config
+
 using PkgTemplates
 
 t = Template(;

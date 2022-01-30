@@ -6,12 +6,13 @@ Armadillo C++ template library.
 """
 
 import sys
+
 import numpy as np
 
 
 def arma_ascii_header_to_dtype(header):
 
-    if 'IS004' in header:
+    if "IS004" in header:
         return np.int32
     else:
         return np.float64
@@ -62,20 +63,24 @@ def read_arma_mat_ascii(armaasciifilename):
     return arma_mat
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('armaasciifilename',
-                        help="""The file name corresponding to the Armadillo object to parse.""")
+    parser.add_argument(
+        "armaasciifilename",
+        help="""The file name corresponding to the Armadillo object to parse.""",
+    )
 
-    parser.add_argument('--print',
-                        action='store_true',
-                        help="""Print the parsed Armadillo object to stdout.""")
-    parser.add_argument('--npz',
-                        action='store_true',
-                        help="""Should it be re-saved to disk as a NumPy binary file?""")
+    parser.add_argument(
+        "--print", action="store_true", help="""Print the parsed Armadillo object to stdout."""
+    )
+    parser.add_argument(
+        "--npz",
+        action="store_true",
+        help="""Should it be re-saved to disk as a NumPy binary file?""",
+    )
 
     args = parser.parse_args()
 
@@ -87,5 +92,6 @@ if __name__ == '__main__':
 
     if args.npz:
         import os.path
+
         stub = os.path.splitext(args.armaasciifilename)[0]
-        np.savez_compressed(stub + '.npz', arma_mat)
+        np.savez_compressed(stub + ".npz", arma_mat)

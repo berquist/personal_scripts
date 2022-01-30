@@ -7,22 +7,21 @@ and print the result.
 
 
 import argparse
-import os
 import glob
-
+import os
 
 # pylint: disable=C0103
 parser = argparse.ArgumentParser()
-parser.add_argument('ext_inp', help='the extension for input files')
-parser.add_argument('ext_out', help='the extension for output files')
+parser.add_argument("ext_inp", help="the extension for input files")
+parser.add_argument("ext_out", help="the extension for output files")
 args = parser.parse_args()
 ext_inp = args.ext_inp
 ext_out = args.ext_out
 
 # Get the results from `ls`:
 directory = os.getcwd()
-inputs = [os.path.basename(f) for f in glob.glob(directory + '/*.' + ext_inp)]
-outputs = [os.path.basename(f) for f in glob.glob(directory + '/*.' + ext_out)]
+inputs = [os.path.basename(f) for f in glob.glob(directory + os.path.sep + "*." + ext_inp)]
+outputs = [os.path.basename(f) for f in glob.glob(directory + os.path.sep + "*." + ext_out)]
 
 # How should we compare the elements in each?
 # Turn everything into stubs (no extensions):
