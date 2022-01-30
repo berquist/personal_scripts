@@ -5,26 +5,17 @@
 Each vibrational mode is a dictionary whose keys represent the level of
 theory for which a result exists (harmonic, TOSH, VPT2, VCI). The number
 associated with any VCI entry refers to the number of quanta.
-
-Usage:
-  qchem_vci_analysis.py [options] <outputfilename>
-
-Options:
-  --print_dict  Print the parsed dictionary.
-  --print_args  Print the argument block.
 """
 
-
+import argparse
 from collections import OrderedDict
 from itertools import count
 
-from cclib.io import ccopen
-from docopt import docopt
+from cclib.io import ccread
 
 
 def parse_vibrational_anharmonic_analysis(outputfilename):
-    cclib_job = ccopen(outputfilename)
-    cclib_data = cclib_job.parse()
+    cclib_data = ccread(outputfilename)
 
     # If we can't even find harmonic frequencies, jump out here.
     try:
@@ -73,24 +64,20 @@ def parse_vibrational_anharmonic_analysis(outputfilename):
     return mode_dict
 
 
-def main(args=None, outputfilename=None):
-    if args["--print_args"]:
-        print(args)
-
-    outputfilename = args["<outputfilename>"]
-
-    mode_dict = parse_vibrational_anharmonic_analysis(outputfilename)
-
-    return mode_dict
-
-
 if __name__ == "__main__":
 
-    args = docopt(__doc__)
+    parser = argparse.ArgumentParser()
 
-    mode_dict = main(args=args)
+    parser.add_argument("outputfilename")
+    parser.add_argument("--print-dict", action="store_true")
+    parser.add_argument("--print-args", action="store_true")
+    args = parser.parse_args()
+    if args.print_args:
+        print(args)
 
-    if args["--print_dict"]:
+    mode_dict = parse_vibrational_anharmonic_analysis(args.outputfilename)
+
+    if args.print_dict:
         try:
             for mode in mode_dict:
                 print("Mode {}:".format(mode))
