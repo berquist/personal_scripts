@@ -8,14 +8,16 @@ from pathlib import Path
 from typing import Collection, List, Tuple, Union
 
 from attr import attrib, attrs
-from blessings import Terminal
 
 from diff_scp import diff_scp_lines
 from diff_seg import diff_seg_lines
 
+from blessings import Terminal
+
 
 def getargs():
     import argparse
+
     parser = argparse.ArgumentParser()
     arg = parser.add_argument
     arg("dir1", type=Path)
@@ -36,17 +38,12 @@ def strip_common(paths):
 
 def get_common_files_nonrecursive(dirname: Path, common_files: List) -> List[Path]:
     return [
-        p.resolve()
-        for p in sorted(dirname.glob("*"))
-        if p.is_file() and p.name in common_files
+        p.resolve() for p in sorted(dirname.glob("*")) if p.is_file() and p.name in common_files
     ]
 
 
 def joinpaths(prefix: Path, paths: List[Union[Path, str]]) -> List[Path]:
-    return [
-        prefix.joinpath(Path(p)).resolve(strict=True)
-        for p in paths
-    ]
+    return [prefix.joinpath(Path(p)).resolve(strict=True) for p in paths]
 
 
 def get_files_recursive(top: Path) -> List[Path]:
@@ -57,16 +54,22 @@ def get_files_recursive(top: Path) -> List[Path]:
             elif f.is_dir():
                 get_files_recursive_acc(f.resolve(strict=True), files)
         return
+
     files = []
     get_files_recursive_acc(top, files)
     return files
 
 
-def get_common_files_recursive(dir1: Path, dir2: Path) -> Tuple[List[Path], List[Path], List[Path], List[Path]]:
+def get_common_files_recursive(
+    dir1: Path, dir2: Path
+) -> Tuple[List[Path], List[Path], List[Path], List[Path]]:
     def get_common_files_recursive_acc(
-            dir1: Path, dir2: Path,
-            files1: List[Path], files2: List[Path],
-            dir1_only: List[Path], dir2_only: List[Path]
+        dir1: Path,
+        dir2: Path,
+        files1: List[Path],
+        files2: List[Path],
+        dir1_only: List[Path],
+        dir2_only: List[Path],
     ) -> None:
         dcmp = filecmp.dircmp(dir1, dir2)
         files1.extend(joinpaths(dir1, dcmp.common_files))
@@ -88,6 +91,7 @@ def get_common_files_recursive(dir1: Path, dir2: Path) -> Tuple[List[Path], List
             newdir2 = joinpaths(dir2, [common_dir])[0]
             get_common_files_recursive_acc(newdir1, newdir2, files1, files2, dir1_only, dir2_only)
         return
+
     files1, files2, dir1_only, dir2_only = [], [], [], []
     get_common_files_recursive_acc(dir1, dir2, files1, files2, dir1_only, dir2_only)
     return files1, files2, dir1_only, dir2_only
@@ -130,7 +134,11 @@ class Diff:
         if self.d1 != self.d2:
             # If a SCP or a segmentation file, there are internal paths that
             # don't matter. Check them separately.
-            if self.f1.suffix == self.f2.suffix and self.f1.suffix in SUFFIX_TO_CMP_FUNCTION and SUFFIX_TO_CMP_FUNCTION[self.f1.suffix](self.f1, self.f2):
+            if (
+                self.f1.suffix == self.f2.suffix
+                and self.f1.suffix in SUFFIX_TO_CMP_FUNCTION
+                and SUFFIX_TO_CMP_FUNCTION[self.f1.suffix](self.f1, self.f2)
+            ):
                 return DiffType.INNER_PATHS_DIFFER
             else:
                 return DiffType.SOMETHING_ELSE_DIFFERS
