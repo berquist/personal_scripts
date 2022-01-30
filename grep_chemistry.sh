@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 find ~/data/Chemistry -type f -name "*.in" -print0 2>/dev/null 1>find.log
 # sort find.log > find_sorted.log
