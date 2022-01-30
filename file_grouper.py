@@ -11,16 +11,9 @@ def getargs():
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('file',
-                        nargs='+',
-                        help="""""")
-    parser.add_argument('--num-per-group',
-                        type=int,
-                        default=0,
-                        help="""""")
-    parser.add_argument('--action',
-                        choices=('copy', 'move'),
-                        help="""""")
+    parser.add_argument("file", nargs="+", help="""""")
+    parser.add_argument("--num-per-group", type=int, default=0, help="""""")
+    parser.add_argument("--action", choices=("copy", "move"), help="""""")
 
     args = parser.parse_args()
 
@@ -35,19 +28,19 @@ def grouper(n, iterable, fillvalue=None):
 
 def main(args):
 
-    import shutil
     import os
+    import shutil
 
-    if args.action == 'copy':
+    if args.action == "copy":
         action = shutil.copy2
-    elif args.action == 'move':
+    elif args.action == "move":
         action = shutil.move
     else:
         action = print
 
     for groupnum, group in enumerate(grouper(args.num_per_group, args.file), start=1):
         try:
-            dest = os.path.join(os.getcwd(), 'group_{}'.format(groupnum))
+            dest = os.path.join(os.getcwd(), "group_{}".format(groupnum))
             os.mkdir(dest, mode=0o755)
         except:
             pass

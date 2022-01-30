@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+# TODO find the StackOverflow link this was adapted from
+
+# TOOD generalize beyond Q-Chem ($QCSVN)
+
+set -euo pipefail
+
 # This grabs a clean list of branches. I remove formatting spaces at the
 # beginning of each line, and I'm ignoring tags for now:
 git branch -r | sed 's|^[[:space:]]*||' | grep -v '^tags/' > git-branch-list
