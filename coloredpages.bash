@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Which pages in the given PDF are in color?
+
 # https://superuser.com/a/234500
 
 file="$1"

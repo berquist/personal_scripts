@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Which pages in the given PDF are in color?
+
 # https://superuser.com/questions/234408/count-bw-color-pages-in-pdf#comment1874045_721773
 
 file="$1"
