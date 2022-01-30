@@ -5,12 +5,9 @@ import filecmp
 import hashlib
 from enum import Enum, unique
 from pathlib import Path
-from typing import Collection, List, Tuple, Union
+from typing import List, Tuple, Union
 
 from attr import attrib, attrs
-
-from diff_scp import diff_scp_lines
-from diff_seg import diff_seg_lines
 
 from blessings import Terminal
 
@@ -115,12 +112,6 @@ class DiffType(Enum):
     SOMETHING_ELSE_DIFFERS = 2
 
 
-SUFFIX_TO_CMP_FUNCTION = {
-    ".scp": diff_scp_lines,
-    ".seg": diff_seg_lines,
-}
-
-
 @attrs(auto_attribs=True, frozen=True, slots=True)
 class Diff:
     f1: Path
@@ -132,16 +123,7 @@ class Diff:
     @diff_type.default
     def init_diff_type(self) -> DiffType:
         if self.d1 != self.d2:
-            # If a SCP or a segmentation file, there are internal paths that
-            # don't matter. Check them separately.
-            if (
-                self.f1.suffix == self.f2.suffix
-                and self.f1.suffix in SUFFIX_TO_CMP_FUNCTION
-                and SUFFIX_TO_CMP_FUNCTION[self.f1.suffix](self.f1, self.f2)
-            ):
-                return DiffType.INNER_PATHS_DIFFER
-            else:
-                return DiffType.SOMETHING_ELSE_DIFFERS
+            return DiffType.SOMETHING_ELSE_DIFFERS
         else:
             return DiffType.SAME
 
