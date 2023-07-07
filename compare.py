@@ -5,9 +5,10 @@ import filecmp
 import hashlib
 from enum import Enum, unique
 from pathlib import Path
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, Sequence
 
 from attr import attrib, attrs
+from attr.validators import instance_of
 
 from blessings import Terminal
 
@@ -25,7 +26,7 @@ def getargs():
     return parser.parse_args()
 
 
-def strip_common(paths):
+def strip_common(paths: Sequence[Path]) -> Tuple[List[Path], int]:
     paths_parts = (p.parts for p in paths)
     for i, component in enumerate(zip(*paths_parts)):
         if len(set(component)) > 1:
@@ -39,7 +40,7 @@ def get_common_files_nonrecursive(dirname: Path, common_files: List) -> List[Pat
     ]
 
 
-def joinpaths(prefix: Path, paths: List[Union[Path, str]]) -> List[Path]:
+def joinpaths(prefix: Path, paths: Sequence[Union[Path, str]]) -> List[Path]:
     return [prefix.joinpath(Path(p)).resolve(strict=True) for p in paths]
 
 
@@ -112,13 +113,13 @@ class DiffType(Enum):
     SOMETHING_ELSE_DIFFERS = 2
 
 
-@attrs(auto_attribs=True, frozen=True, slots=True)
+@attrs(frozen=True, slots=True)
 class Diff:
-    f1: Path
-    f2: Path
-    d1: str
-    d2: str
-    diff_type: DiffType = attrib(init=False)
+    f1: Path = attrib(validator=instance_of(Path))
+    f2: Path = attrib(validator=instance_of(Path))
+    d1: str = attrib(validator=instance_of(str))
+    d2: str = attrib(validator=instance_of(str))
+    diff_type: DiffType = attrib(validator=instance_of(DiffType), init=False)
 
     @diff_type.default
     def init_diff_type(self) -> DiffType:
@@ -135,10 +136,10 @@ class Diff:
 
 def main(dir1: Path, dir2: Path, recursive: bool) -> None:
     # For now, only take the common files.
-    dircmp = filecmp.dircmp(dir1, dir2)
     if recursive:
         files1, files2, dir1_only, dir2_only = get_common_files_recursive(dir1, dir2)
     else:
+        dircmp = filecmp.dircmp(dir1, dir2)
         files1 = get_common_files_nonrecursive(dir1, dircmp.common_files)
         files2 = get_common_files_nonrecursive(dir2, dircmp.common_files)
         dir1_only = [f for f in joinpaths(dir1, dircmp.left_only) if f.is_file()]
