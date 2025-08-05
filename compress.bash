@@ -4,5 +4,11 @@
 # the best compression.
 
 filename="${1}"
-tar cf "${filename}".tar "${filename}"
+
+TAR=tar
+if command -v gtar 1>/dev/null 2>&1; then
+    TAR=gtar
+fi
+
+${TAR} cf "${filename}".tar "${filename}"
 pigz --best "${filename}".tar
