@@ -10,10 +10,15 @@ repos:
     hooks:
       - id: check-case-conflict
       - id: check-merge-conflict
+      - id: check-json
       - id: check-yaml
       - id: end-of-file-fixer
       - id: fix-byte-order-marker
       - id: trailing-whitespace
+  - repo: https://github.com/google/yamlfmt
+    rev: "v0.17.2"
+    hooks:
+      - id: yamlfmt
   - repo: https://github.com/scop/pre-commit-shfmt
     rev: v3.12.0-2
     hooks:
