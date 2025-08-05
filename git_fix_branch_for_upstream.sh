@@ -48,26 +48,22 @@ get_upstream_github_repo() {
 }
 
 if ! git rev-parse --is-inside-work-tree &>/dev/null; then
-    echo "Error: This script must be run inside a Git repository."
+    echo "Error: This script must be run inside a Git repository." >&2
     exit 1
 fi
 
 if ! git remote | grep -q upstream; then
-    # echo "Error: No 'upstream' remote found."
-    # echo "Please add the upstream remote using:"
-    # echo "  git remote add upstream <upstream-repo-url>"
-    # exit 1
     echo "No 'upstream' remote found. Attempting to determine the upstream repository..."
 
     github_api_url="$(get_github_api_url)"
     if [[ -z "${github_api_url}" ]]; then
-        echo "Error: The 'origin' remote is not a GitHub repository or is in an unsupported format."
+        echo "Error: The 'origin' remote is not a GitHub repository or is in an unsupported format." >&2
         exit 1
     fi
 
     upstream_repo="$(get_upstream_github_repo "${github_api_url}")"
     if [[ -z "${upstream_repo}" ]]; then
-        echo "Error: Unable to determine the upstream repository. The 'origin' remote may not be a fork."
+        echo "Error: Unable to determine the upstream repository. The 'origin' remote may not be a fork." >&2
         exit 1
     fi
 
@@ -83,7 +79,7 @@ git fetch upstream
 default_branch="$(git remote show upstream | awk '/HEAD branch/ {print $NF}')"
 
 if [[ -z "${default_branch}" ]]; then
-    echo "Error: Unable to determine the default branch of the upstream remote."
+    echo "Error: Unable to determine the default branch of the upstream remote." >&2
     exit 1
 fi
 
@@ -92,7 +88,7 @@ echo "Default branch of upstream remote: ${default_branch}"
 current_branch="$(git symbolic-ref --short HEAD)"
 
 if [[ -z "${current_branch}" ]]; then
-    echo "Error: Unable to determine the currently checked-out branch."
+    echo "Error: Unable to determine the currently checked-out branch." >&2
     exit 1
 fi
 
