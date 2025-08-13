@@ -47,41 +47,24 @@ write_hunk_to_files() {
 
 # Read the diff file line by line
 while IFS= read -r line; do
-    if [[ "$line" == diff\ --git* ]]; then
+    if [[ "$line" == ---* ]]; then
         # Write the previous hunk before starting a new diffed file
         if ((diffed_file_counter >= 0)); then
             write_hunk_to_files
         fi
-        # Start of a new diffed file (Git format)
+        # Start of a new diffed file (original file)
         ((diffed_file_counter++))
         hunk_counter=0
-        left_file_name=""
-        right_file_name=""
-        left_file_extension=""
-        right_file_extension=""
-        left_section=""
-        right_section=""
-    elif [[ "$line" == Index:\ * ]]; then
-        # Write the previous hunk before starting a new diffed file
-        if ((diffed_file_counter >= 0)); then
-            write_hunk_to_files
-        fi
-        # Start of a new diffed file (Subversion format)
-        ((diffed_file_counter++))
-        hunk_counter=0
-        left_file_name=""
-        right_file_name=""
-        left_file_extension=""
-        right_file_extension=""
-        left_section=""
-        right_section=""
-        # Extract the file name from the "Index:" line
-        left_file_name="${line#Index: }"
+        left_file_name="${line#--- }"
         left_file_name_without_extension="${left_file_name%.*}"
         left_file_extension="${left_file_name##*.}"
-        right_file_name="$left_file_name" # Subversion diffs don't specify a separate modified file name
-        right_file_name_without_extension="$left_file_name_without_extension"
-        right_file_extension="$left_file_extension"
+        left_section=""
+        right_section=""
+    elif [[ "$line" == +++* ]]; then
+        # Modified file name (new file)
+        right_file_name="${line#+++ }"
+        right_file_name_without_extension="${right_file_name%.*}"
+        right_file_extension="${right_file_name##*.}"
     elif [[ "$line" == @@* ]]; then
         # Write the previous hunk before starting a new hunk
         if ((diffed_file_counter >= 0)); then
@@ -99,16 +82,6 @@ while IFS= read -r line; do
         right_start_line="${right_start_line#+}"
         left_section=""
         right_section=""
-    elif [[ "$line" == ---* ]]; then
-        # Original file name (Git or Subversion format)
-        left_file_name="${line#--- }"
-        left_file_name_without_extension="${left_file_name%.*}"
-        left_file_extension="${left_file_name##*.}"
-    elif [[ "$line" == +++* ]]; then
-        # Modified file name (Git or Subversion format)
-        right_file_name="${line#+++ }"
-        right_file_name_without_extension="${right_file_name%.*}"
-        right_file_extension="${right_file_name##*.}"
     elif [[ "$line" == -* ]]; then
         # Line from the original file
         left_section+="${line:1}"$'\n'
