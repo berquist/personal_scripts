@@ -1,7 +1,6 @@
 #!/bin/bash
 
 set -euo pipefail
-set -x
 
 if [ "$#" -ne 1 ]; then
     echo "Usage: $0 <diff_file>"
@@ -57,6 +56,8 @@ while IFS= read -r line; do
         right_file_name=""
         left_file_extension=""
         right_file_extension=""
+        left_section=""
+        right_section=""
     elif [[ "$line" == Index:\ * ]]; then
         # Write the previous hunk before starting a new diffed file
         write_hunk_to_files
@@ -67,6 +68,8 @@ while IFS= read -r line; do
         right_file_name=""
         left_file_extension=""
         right_file_extension=""
+        left_section=""
+        right_section=""
         # Extract the file name from the "Index:" line
         left_file_name="${line#Index: }"
         left_file_name_without_extension="${left_file_name%.*}"
@@ -82,9 +85,10 @@ while IFS= read -r line; do
         # Extract hunk line numbers
         hunk_info="${line#@@ }"
         hunk_info="${hunk_info%% @@}"
-        left_start_line="${hunk_info%% *}"
+        left_start_line="${hunk_info%%,*}" # Extract only the starting line number for the left file
         left_start_line="${left_start_line#-}"
         right_start_line="${hunk_info#* }"
+        right_start_line="${right_start_line%%,*}" # Extract only the starting line number for the right file
         right_start_line="${right_start_line#+}"
         left_section=""
         right_section=""
