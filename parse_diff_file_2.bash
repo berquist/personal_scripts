@@ -13,6 +13,7 @@ diff_file_dir_name=$(dirname "$diff_file")
 diff_file_name_without_extension="${diff_file_base_name%.*}"
 
 diffed_file_counter=0
+processing_diffed_file=false # Flag to track whether we are actively processing a diffed file
 
 # Initialize variables for hunk processing
 left_section=""
@@ -32,7 +33,7 @@ sanitize_filename() {
 
 # Function to write the current hunk to files
 write_hunk_to_files() {
-    if [[ -n "$left_section" || -n "$right_section" ]]; then
+    if [[ "$processing_diffed_file" == true && (-n "$left_section" || -n "$right_section") ]]; then
         sanitized_left_file_name=$(sanitize_filename "$left_file_name_without_extension")
         sanitized_right_file_name=$(sanitize_filename "$right_file_name_without_extension")
 
@@ -58,6 +59,7 @@ while IFS= read -r line; do
         right_file_extension=""
         left_section=""
         right_section=""
+        processing_diffed_file=true
     elif [[ "$line" == Index:\ * ]]; then
         # Write the previous hunk before starting a new diffed file
         write_hunk_to_files
@@ -70,6 +72,7 @@ while IFS= read -r line; do
         right_file_extension=""
         left_section=""
         right_section=""
+        processing_diffed_file=true
         # Extract the file name from the "Index:" line
         left_file_name="${line#Index: }"
         left_file_name_without_extension="${left_file_name%.*}"
