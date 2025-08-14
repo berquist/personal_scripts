@@ -3,15 +3,17 @@ import os
 import re
 import subprocess
 from pathlib import Path
-from typing import List, Tuple, TypedDict, Union
+from typing import Dict, Tuple, TypedDict, Union
 
 
 class ValidationResult(TypedDict):
-    valid_hashes: List[str]
-    errors: List[Tuple[int, str]]
-    missing_commits: List[str]
-    strict_comment_errors: List[Tuple[int, str]]
-    comment_diffs: List[Tuple[int, str, str]]  # Line number, comment, commit message
+    valid_hashes: Dict[int, str]
+    errors: Dict[int, str]
+    missing_commits: Dict[int, str]
+    strict_comment_errors: Dict[int, str]
+    comment_diffs: Dict[
+        int, Tuple[str, str]
+    ]  # Line number -> (comment, commit message)
 
 
 def validate_git_blame_ignore_revs(
@@ -38,11 +40,11 @@ def validate_git_blame_ignore_revs(
     if not os.path.exists(file_path):
         raise FileNotFoundError(f"The file '{file_path}' does not exist.")
 
-    valid_hashes: List[str] = []
-    errors: List[Tuple[int, str]] = []
-    missing_commits: List[str] = []
-    strict_comment_errors: List[Tuple[int, str]] = []
-    comment_diffs: List[Tuple[int, str, str]] = []
+    valid_hashes: Dict[int, str] = {}
+    errors: Dict[int, str] = {}
+    missing_commits: Dict[int, str] = {}
+    strict_comment_errors: Dict[int, str] = {}
+    comment_diffs: Dict[int, Tuple[str, str]] = {}
 
     # Regular expression for a valid Git commit hash (40 hexadecimal characters)
     commit_hash_regex = re.compile(r"^[0-9a-f]{40}$")
@@ -69,11 +71,11 @@ def validate_git_blame_ignore_revs(
 
         # Validate the commit hash
         if commit_hash_regex.match(line):
-            valid_hashes.append(line)
+            valid_hashes[line_number] = line
 
             # Check strict comments requirement
             if strict_comments and not has_comment_above:
-                strict_comment_errors.append((line_number, line))
+                strict_comment_errors[line_number] = line
 
             # Check strict comments git requirement
             if strict_comments_git and has_comment_above and call_git:
@@ -90,21 +92,19 @@ def validate_git_blame_ignore_revs(
 
                     # Compare the comment with the commit message
                     if not commit_message.startswith(last_comment):
-                        comment_diffs.append(
-                            (line_number, last_comment, commit_message)
-                        )
+                        comment_diffs[line_number] = (last_comment, commit_message)
                 except subprocess.CalledProcessError:
-                    errors.append((line_number, line))
+                    errors[line_number] = line
 
             # Reset comment tracking after a commit line
             has_comment_above = False
             last_comment = None
         else:
-            errors.append((line_number, line))
+            errors[line_number] = line
 
     if call_git:
         # Check if each valid hash exists in the Git history
-        for commit_hash in valid_hashes:
+        for line_number, commit_hash in valid_hashes.items():
             try:
                 subprocess.run(
                     ["git", "cat-file", "-e", commit_hash],
@@ -113,7 +113,7 @@ def validate_git_blame_ignore_revs(
                     stderr=subprocess.DEVNULL,
                 )
             except subprocess.CalledProcessError:
-                missing_commits.append(commit_hash)
+                missing_commits[line_number] = commit_hash
 
     return ValidationResult(
         valid_hashes=valid_hashes,
@@ -165,12 +165,12 @@ def main() -> None:
 
         print("Validation Results:")
         print(f"Valid hashes ({len(result['valid_hashes'])}):")
-        for hash in result["valid_hashes"]:
-            print(f"  {hash}")
+        for line_number, hash in result["valid_hashes"].items():
+            print(f"  Line {line_number}: {hash}")
 
         if result["errors"]:
             print(f"\nErrors ({len(result['errors'])}):")
-            for line_number, line in result["errors"]:
+            for line_number, line in result["errors"].items():
                 print(f"  Line {line_number}: {line}")
         else:
             print("\nNo errors found!")
@@ -178,8 +178,8 @@ def main() -> None:
         if args.call_git:
             if result["missing_commits"]:
                 print(f"\nMissing commits ({len(result['missing_commits'])}):")
-                for commit in result["missing_commits"]:
-                    print(f"  {commit}")
+                for line_number, commit in result["missing_commits"].items():
+                    print(f"  Line {line_number}: {commit}")
             else:
                 print("\nAll commits are present in the Git history!")
 
@@ -188,7 +188,7 @@ def main() -> None:
                 print(
                     f"\nStrict comment errors ({len(result['strict_comment_errors'])}):"
                 )
-                for line_number, line in result["strict_comment_errors"]:
+                for line_number, line in result["strict_comment_errors"].items():
                     print(f"  Line {line_number}: {line}")
             else:
                 print("\nAll commit lines have comments above them!")
@@ -196,7 +196,9 @@ def main() -> None:
         if args.strict_comments_git:
             if result["comment_diffs"]:
                 print(f"\nComment diffs ({len(result['comment_diffs'])}):")
-                for line_number, comment, commit_message in result["comment_diffs"]:
+                for line_number, (comment, commit_message) in result[
+                    "comment_diffs"
+                ].items():
                     print(f"  Line {line_number}:")
                     print(f"    Comment: {comment}")
                     print(f"    Commit message: {commit_message}")
