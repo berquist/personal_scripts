@@ -1,8 +1,11 @@
 import os
 import re
+from typing import Dict, List, Tuple
 
 
-def validate_git_blame_ignore_revs(file_path):
+def validate_git_blame_ignore_revs(
+    file_path: str,
+) -> Dict[str, List[Tuple[int, str]] | List[str]]:
     """
     Validates the contents of a `.git-blame-ignore-revs` file.
 
@@ -15,8 +18,8 @@ def validate_git_blame_ignore_revs(file_path):
     if not os.path.exists(file_path):
         raise FileNotFoundError(f"The file '{file_path}' does not exist.")
 
-    valid_hashes = []
-    errors = []
+    valid_hashes: List[str] = []
+    errors: List[Tuple[int, str]] = []
 
     # Regular expression for a valid Git commit hash (40 hexadecimal characters)
     commit_hash_regex = re.compile(r"^[0-9a-f]{40}$")
@@ -41,7 +44,7 @@ def validate_git_blame_ignore_revs(file_path):
     }
 
 
-def main():
+def main() -> None:
     file_path = ".git-blame-ignore-revs"  # Change this to the path of your file
 
     try:
