@@ -72,7 +72,7 @@ def main() -> None:
     )
     parser.add_argument(
         "file_path",
-        type=Union[str, Path],
+        type=Path,  # Use Path as the type conversion function
         help="Path to the .git-blame-ignore-revs file.",
     )
     parser.add_argument(
