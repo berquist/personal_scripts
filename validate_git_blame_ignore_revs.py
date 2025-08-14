@@ -1,20 +1,24 @@
 import os
 import re
-from typing import Dict, List, Tuple
+from pathlib import Path
+from typing import Dict, List, Tuple, Union
 
 
 def validate_git_blame_ignore_revs(
-    file_path: str,
-) -> Dict[str, List[Tuple[int, str]] | List[str]]:
+    file_path: Union[str, Path],
+) -> Dict[str, Union[List[str], List[Tuple[int, str]]]]:
     """
     Validates the contents of a `.git-blame-ignore-revs` file.
 
     Args:
-        file_path (str): Path to the `.git-blame-ignore-revs` file.
+        file_path (Union[str, Path]): Path to the `.git-blame-ignore-revs` file.
 
     Returns:
         dict: A dictionary containing valid hashes and errors.
     """
+    # Convert Path object to string if necessary
+    file_path = str(file_path)
+
     if not os.path.exists(file_path):
         raise FileNotFoundError(f"The file '{file_path}' does not exist.")
 
@@ -45,7 +49,9 @@ def validate_git_blame_ignore_revs(
 
 
 def main() -> None:
-    file_path = ".git-blame-ignore-revs"  # Change this to the path of your file
+    file_path: Union[str, Path] = (
+        ".git-blame-ignore-revs"  # Change this to the path of your file
+    )
 
     try:
         result = validate_git_blame_ignore_revs(file_path)
