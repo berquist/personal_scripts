@@ -3,12 +3,18 @@ import os
 import re
 import subprocess
 from pathlib import Path
-from typing import Dict, List, Tuple, Union
+from typing import List, Tuple, TypedDict, Union
+
+
+class ValidationResult(TypedDict):
+    valid_hashes: List[str]
+    errors: List[Tuple[int, str]]
+    missing_commits: List[str]
 
 
 def validate_git_blame_ignore_revs(
     file_path: Union[str, Path], call_git: bool = False
-) -> Dict[str, Union[List[str], List[Tuple[int, str]]]]:
+) -> ValidationResult:
     """
     Validates the contents of a `.git-blame-ignore-revs` file.
 
@@ -17,7 +23,7 @@ def validate_git_blame_ignore_revs(
         call_git (bool): If True, ensures each commit is in the history of the checked-out branch.
 
     Returns:
-        dict: A dictionary containing valid hashes and errors.
+        ValidationResult: A dictionary containing valid hashes, errors, and missing commits.
     """
     # Convert Path object to string if necessary
     file_path = str(file_path)
@@ -59,11 +65,11 @@ def validate_git_blame_ignore_revs(
             except subprocess.CalledProcessError:
                 missing_commits.append(commit_hash)
 
-    return {
-        "valid_hashes": valid_hashes,
-        "errors": errors,
-        "missing_commits": missing_commits,
-    }
+    return ValidationResult(
+        valid_hashes=valid_hashes,
+        errors=errors,
+        missing_commits=missing_commits,
+    )
 
 
 def main() -> None:
