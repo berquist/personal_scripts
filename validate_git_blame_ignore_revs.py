@@ -11,10 +11,14 @@ class ValidationResult(TypedDict):
     errors: List[Tuple[int, str]]
     missing_commits: List[str]
     strict_comment_errors: List[Tuple[int, str]]
+    comment_diffs: List[Tuple[int, str, str]]  # Line number, comment, commit message
 
 
 def validate_git_blame_ignore_revs(
-    file_path: Union[str, Path], call_git: bool = False, strict_comments: bool = False
+    file_path: Union[str, Path],
+    call_git: bool = False,
+    strict_comments: bool = False,
+    strict_comments_git: bool = False,
 ) -> ValidationResult:
     """
     Validates the contents of a `.git-blame-ignore-revs` file.
@@ -23,9 +27,10 @@ def validate_git_blame_ignore_revs(
         file_path (Union[str, Path]): Path to the `.git-blame-ignore-revs` file.
         call_git (bool): If True, ensures each commit is in the history of the checked-out branch.
         strict_comments (bool): If True, requires each commit line to have one or more comment lines above it.
+        strict_comments_git (bool): If True, ensures the comment above each commit matches the first part of the commit message.
 
     Returns:
-        ValidationResult: A dictionary containing valid hashes, errors, missing commits, and strict comment errors.
+        ValidationResult: A dictionary containing valid hashes, errors, missing commits, strict comment errors, and comment diffs.
     """
     # Convert Path object to string if necessary
     file_path = str(file_path)
@@ -37,6 +42,7 @@ def validate_git_blame_ignore_revs(
     errors: List[Tuple[int, str]] = []
     missing_commits: List[str] = []
     strict_comment_errors: List[Tuple[int, str]] = []
+    comment_diffs: List[Tuple[int, str, str]] = []
 
     # Regular expression for a valid Git commit hash (40 hexadecimal characters)
     commit_hash_regex = re.compile(r"^[0-9a-f]{40}$")
@@ -46,6 +52,7 @@ def validate_git_blame_ignore_revs(
 
     # Track whether the previous lines were comments
     has_comment_above = False
+    last_comment = None
 
     for line_number, line in enumerate(lines, start=1):
         line = line.strip()
@@ -57,6 +64,7 @@ def validate_git_blame_ignore_revs(
         # Check for comments
         if line.startswith("#"):
             has_comment_above = True
+            last_comment = line.lstrip("#").strip()
             continue
 
         # Validate the commit hash
@@ -67,8 +75,30 @@ def validate_git_blame_ignore_revs(
             if strict_comments and not has_comment_above:
                 strict_comment_errors.append((line_number, line))
 
+            # Check strict comments git requirement
+            if strict_comments_git and has_comment_above and call_git:
+                try:
+                    # Get the commit message for the hash
+                    result = subprocess.run(
+                        ["git", "log", "-n", "1", "--pretty=format:%s", line],
+                        check=True,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        text=True,
+                    )
+                    commit_message = result.stdout.strip()
+
+                    # Compare the comment with the commit message
+                    if not commit_message.startswith(last_comment):
+                        comment_diffs.append(
+                            (line_number, last_comment, commit_message)
+                        )
+                except subprocess.CalledProcessError:
+                    errors.append((line_number, line))
+
             # Reset comment tracking after a commit line
             has_comment_above = False
+            last_comment = None
         else:
             errors.append((line_number, line))
 
@@ -90,6 +120,7 @@ def validate_git_blame_ignore_revs(
         errors=errors,
         missing_commits=missing_commits,
         strict_comment_errors=strict_comment_errors,
+        comment_diffs=comment_diffs,
     )
 
 
@@ -112,12 +143,24 @@ def main() -> None:
         action="store_true",
         help="Require each commit line to have one or more comment lines above it.",
     )
+    parser.add_argument(
+        "--strict-comments-git",
+        action="store_true",
+        help="Ensure the comment above each commit matches the first part of the commit message. Requires --strict-comments and --call-git.",
+    )
 
     args = parser.parse_args()
 
+    # Ensure --strict-comments-git requires --strict-comments and --call-git
+    if args.strict_comments_git and not (args.strict_comments and args.call_git):
+        parser.error("--strict-comments-git requires --strict-comments and --call-git.")
+
     try:
         result = validate_git_blame_ignore_revs(
-            args.file_path, args.call_git, args.strict_comments
+            args.file_path,
+            args.call_git,
+            args.strict_comments,
+            args.strict_comments_git,
         )
 
         print("Validation Results:")
@@ -149,6 +192,16 @@ def main() -> None:
                     print(f"  Line {line_number}: {line}")
             else:
                 print("\nAll commit lines have comments above them!")
+
+        if args.strict_comments_git:
+            if result["comment_diffs"]:
+                print(f"\nComment diffs ({len(result['comment_diffs'])}):")
+                for line_number, comment, commit_message in result["comment_diffs"]:
+                    print(f"  Line {line_number}:")
+                    print(f"    Comment: {comment}")
+                    print(f"    Commit message: {commit_message}")
+            else:
+                print("\nAll comments match the corresponding commit messages!")
     except FileNotFoundError as e:
         print(e)
 
