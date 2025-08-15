@@ -1,9 +1,9 @@
+import argparse
 import os
 import re
 import subprocess
 from pathlib import Path
-from typing import Dict, Tuple, Union, TypedDict
-import argparse
+from typing import Dict, Tuple, TypedDict, Union
 
 
 class ValidationResult(TypedDict):
@@ -11,7 +11,9 @@ class ValidationResult(TypedDict):
     errors: Dict[int, str]
     missing_commits: Dict[int, str]
     strict_comment_errors: Dict[int, str]
-    comment_diffs: Dict[int, Tuple[str, str]]  # Line number -> (comment, commit message)
+    comment_diffs: Dict[
+        int, Tuple[str, str]
+    ]  # Line number -> (comment, commit message)
 
 
 def validate_git_blame_ignore_revs(
@@ -81,37 +83,36 @@ def validate_git_blame_ignore_revs(
         else:
             errors[line_number] = line
 
-    if call_git:
-        # Verify the existence of each commit hash using `git cat-file -e`
-        for line_number, commit_hash in valid_hashes.items():
-            try:
-                subprocess.run(
-                    ["git", "cat-file", "-e", commit_hash],
-                    check=True,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                )
-            except subprocess.CalledProcessError:
-                missing_commits[line_number] = commit_hash
+    if call_git or strict_comments_git:
+        # Fetch commit messages and verify existence using `git show`
+        commit_hashes = list(valid_hashes.values())
+        try:
+            result = subprocess.run(
+                ["git", "show", "--pretty=format:%H %s", "--no-patch"] + commit_hashes,
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            git_output = result.stdout.strip().split("\n")
+            git_commit_map = {
+                line.split(" ", 1)[0]: line.split(" ", 1)[1] for line in git_output
+            }
 
-    if strict_comments_git:
-        # Fetch commit messages for all valid hashes using `git show`
-        for line_number, commit_hash in valid_hashes.items():
-            try:
-                result = subprocess.run(
-                    ["git", "log", "-n", "1", "--pretty=format:%s", commit_hash],
-                    check=True,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    text=True,
-                )
-                commit_message = result.stdout.strip()
-
-                # Compare the comment with the commit message
-                last_comment = lines[line_number - 2].strip().lstrip("#").strip() if line_number > 1 else ""
-                if not commit_message.startswith(last_comment):
-                    comment_diffs[line_number] = (last_comment, commit_message)
-            except subprocess.CalledProcessError:
+            for line_number, commit_hash in valid_hashes.items():
+                if commit_hash not in git_commit_map:
+                    missing_commits[line_number] = commit_hash
+                elif strict_comments_git:
+                    commit_message = git_commit_map[commit_hash]
+                    last_comment = (
+                        lines[line_number - 2].strip().lstrip("#").strip()
+                        if line_number > 1
+                        else ""
+                    )
+                    if not commit_message.startswith(last_comment):
+                        comment_diffs[line_number] = (last_comment, commit_message)
+        except subprocess.CalledProcessError:
+            for line_number, commit_hash in valid_hashes.items():
                 missing_commits[line_number] = commit_hash
 
     return ValidationResult(
@@ -124,7 +125,9 @@ def validate_git_blame_ignore_revs(
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Validate a .git-blame-ignore-revs file.")
+    parser = argparse.ArgumentParser(
+        description="Validate a .git-blame-ignore-revs file."
+    )
     parser.add_argument(
         "file_path",
         type=Path,  # Use Path as the type conversion function
@@ -154,7 +157,10 @@ def main() -> None:
 
     try:
         result = validate_git_blame_ignore_revs(
-            args.file_path, args.call_git, args.strict_comments, args.strict_comments_git
+            args.file_path,
+            args.call_git,
+            args.strict_comments,
+            args.strict_comments_git,
         )
 
         print("Validation Results:")
@@ -179,7 +185,9 @@ def main() -> None:
 
         if args.strict_comments:
             if result["strict_comment_errors"]:
-                print(f"\nStrict comment errors ({len(result['strict_comment_errors'])}):")
+                print(
+                    f"\nStrict comment errors ({len(result['strict_comment_errors'])}):"
+                )
                 for line_number, line in result["strict_comment_errors"].items():
                     print(f"  Line {line_number}: {line}")
             else:
@@ -188,7 +196,9 @@ def main() -> None:
         if args.strict_comments_git:
             if result["comment_diffs"]:
                 print(f"\nComment diffs ({len(result['comment_diffs'])}):")
-                for line_number, (comment, commit_message) in result["comment_diffs"].items():
+                for line_number, (comment, commit_message) in result[
+                    "comment_diffs"
+                ].items():
                     print(f"  Line {line_number}:")
                     print(f"    Comment: {comment}")
                     print(f"    Commit message: {commit_message}")
