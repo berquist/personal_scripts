@@ -52,7 +52,11 @@ def parse_git_blame_ignore_revs(file_path: Union[str, Path]) -> Tuple[List[str],
 
 
 def validate_commit_hashes(
-    valid_hashes: Dict[int, str], lines: List[str], strict_comments: bool, strict_comments_git: bool
+    valid_hashes: Dict[int, str],
+    lines: List[str],
+    strict_comments: bool,
+    strict_comments_git: bool,
+    git_show_output: Dict[str, str],
 ) -> Tuple[Dict[int, str], Dict[int, Tuple[str, str]]]:
     """Validate commit hashes for strict comments and strict comments git."""
     strict_comment_errors = {}
@@ -65,52 +69,13 @@ def validate_commit_hashes(
             strict_comment_errors[line_number] = commit_hash
 
         if strict_comments_git:
-            try:
-                commit_message = run_git_command(
-                    ["git", "show", "--quiet", "--pretty=format:%s", commit_hash]
-                )
-                if not commit_message.startswith(last_comment):
-                    comment_diffs[line_number] = (last_comment, commit_message)
-            except RuntimeError:
-                # If `git show` fails, treat the commit as missing
+            commit_message = git_show_output.get(commit_hash)
+            if commit_message is None:
                 strict_comment_errors[line_number] = commit_hash
+            elif not commit_message.startswith(last_comment):
+                comment_diffs[line_number] = (last_comment, commit_message)
 
     return strict_comment_errors, comment_diffs
-
-
-def validate_pre_commit_ci_commits(
-    valid_hashes: Dict[int, str], lines: List[str], strict_comments: bool, strict_comments_git: bool
-) -> Dict[str, str]:
-    """Validate pre-commit.ci commits."""
-    pre_commit_ci_commits = run_git_command(
-        ["git", "log", "--pretty=format:%H %s", "--author=pre-commit-ci[bot]"]
-    )
-    missing_pre_commit_ci_commits = {}
-
-    for commit_entry in pre_commit_ci_commits.split("\n"):
-        if not commit_entry.strip():
-            continue
-        parts = commit_entry.split(" ", 1)
-        if len(parts) != 2:
-            continue
-        commit_hash, commit_message = parts
-
-        if commit_hash not in valid_hashes.values():
-            missing_pre_commit_ci_commits[commit_hash] = commit_message
-        elif strict_comments or strict_comments_git:
-            for line_number, line in valid_hashes.items():
-                if line == commit_hash:
-                    last_comment = (
-                        lines[line_number - 2].strip().lstrip("#").strip()
-                        if line_number > 1
-                        else ""
-                    )
-                    if strict_comments and not last_comment:
-                        missing_pre_commit_ci_commits[commit_hash] = commit_message
-                    if strict_comments_git and not commit_message.startswith(last_comment):
-                        missing_pre_commit_ci_commits[commit_hash] = commit_message
-
-    return missing_pre_commit_ci_commits
 
 
 def validate_git_blame_ignore_revs(
@@ -130,23 +95,59 @@ def validate_git_blame_ignore_revs(
         if line.strip() and not line.strip().startswith("#") and line_number not in valid_hashes
     }
 
-    missing_commits = {}
-    if call_git:
-        for line_number, commit_hash in valid_hashes.items():
-            try:
-                run_git_command(["git", "cat-file", "-e", commit_hash])
-            except RuntimeError:
-                missing_commits[line_number] = commit_hash
+    # Fetch commit messages and validate existence using `git show`
+    git_show_output = {}
+    if call_git or strict_comments_git:
+        try:
+            git_show_result = run_git_command(
+                ["git", "show", "--quiet", "--pretty=format:%H %s"] + list(valid_hashes.values())
+            )
+            for line in git_show_result.split("\n"):
+                parts = line.split(" ", 1)
+                if len(parts) == 2:
+                    commit_hash, commit_message = parts
+                    git_show_output[commit_hash] = commit_message
+        except RuntimeError:
+            # If `git show` fails, mark all commits as missing
+            missing_commits = {
+                line_number: commit_hash for line_number, commit_hash in valid_hashes.items()
+            }
+            return ValidationResult(
+                valid_hashes=valid_hashes,
+                errors=errors,
+                missing_commits=missing_commits,
+                strict_comment_errors={},
+                comment_diffs={},
+                missing_pre_commit_ci_commits={},
+            )
 
+    # Validate strict comments and strict comments git
     strict_comment_errors, comment_diffs = validate_commit_hashes(
-        valid_hashes, lines, strict_comments, strict_comments_git
+        valid_hashes, lines, strict_comments, strict_comments_git, git_show_output
     )
 
+    # Validate missing commits
+    missing_commits = {
+        line_number: commit_hash
+        for line_number, commit_hash in valid_hashes.items()
+        if commit_hash not in git_show_output
+    }
+
+    # Validate pre-commit-ci commits
     missing_pre_commit_ci_commits = {}
     if pre_commit_ci:
-        missing_pre_commit_ci_commits = validate_pre_commit_ci_commits(
-            valid_hashes, lines, strict_comments, strict_comments_git
+        pre_commit_ci_commits = run_git_command(
+            ["git", "log", "--pretty=format:%H %s", "--author=pre-commit-ci[bot]"]
         )
+        for commit_entry in pre_commit_ci_commits.split("\n"):
+            if not commit_entry.strip():
+                continue
+            parts = commit_entry.split(" ", 1)
+            if len(parts) != 2:
+                continue
+            commit_hash, commit_message = parts
+            if commit_hash not in valid_hashes.values():
+                missing_pre_commit_ci_commits[commit_hash] = commit_message
 
     return ValidationResult(
         valid_hashes=valid_hashes,
