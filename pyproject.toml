@@ -1,3 +1,6 @@
+[project]
+requires-python = ">=3.8"
+
 [tool.black]
 line-length = 100
 target-version = ['py38']
@@ -8,6 +11,10 @@ profile = "black"
 # Placing third-party imports at the end makes their inclusion more obvious
 sections = ["FUTURE", "STDLIB", "ATTRS", "FIRSTPARTY", "THIRDPARTY", "LOCALFOLDER"]
 known_attrs = ["attr"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py38"
 
 [tool.towncrier]
     package="REPONAME"
