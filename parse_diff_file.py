@@ -2,59 +2,62 @@ import os
 import sys
 
 
-def sanitize_filename(filename):
+def sanitize_filename(filename: str) -> str:
     """Sanitize filenames by replacing directory separators with underscores."""
     return filename.replace("/", "_")
 
 
 def write_hunk_to_files(
-    diff_file_dir_name,
-    diff_file_name_without_extension,
-    diffed_file_counter,
-    left_file_name_without_extension,
-    right_file_name_without_extension,
-    hunk_counter,
-    left_start_line,
-    right_start_line,
-    left_file_extension,
-    right_file_extension,
-    left_section,
-    right_section,
-):
+    diff_file_dir_name: str,
+    diff_file_name_without_extension: str,
+    diffed_file_counter: int,
+    left_file_name_without_extension: str,
+    right_file_name_without_extension: str,
+    hunk_counter: int,
+    left_start_line: str,
+    right_start_line: str,
+    left_file_extension: str,
+    right_file_extension: str,
+    left_section: str,
+    right_section: str,
+) -> None:
     """Write the current hunk to files."""
     if left_section or right_section:
         sanitized_left_file_name = sanitize_filename(left_file_name_without_extension)
         sanitized_right_file_name = sanitize_filename(right_file_name_without_extension)
 
-        left_file = f"{diff_file_dir_name}/{diff_file_name_without_extension}.{diffed_file_counter}.left.{sanitized_left_file_name}.{hunk_counter}.{left_start_line}.{left_file_extension}"
-        right_file = f"{diff_file_dir_name}/{diff_file_name_without_extension}.{diffed_file_counter}.right.{sanitized_right_file_name}.{hunk_counter}.{right_start_line}.{right_file_extension}"
+        left_file = os.path.join(
+            diff_file_dir_name,
+            f"{diff_file_name_without_extension}.{diffed_file_counter}.left."
+            f"{sanitized_left_file_name}.{hunk_counter}.{left_start_line}.{left_file_extension}",
+        )
+        right_file = os.path.join(
+            diff_file_dir_name,
+            f"{diff_file_name_without_extension}.{diffed_file_counter}.right."
+            f"{sanitized_right_file_name}.{hunk_counter}.{right_start_line}.{right_file_extension}",
+        )
 
-        with open(left_file, "w") as lf:
+        with open(left_file, "w") as lf, open(right_file, "w") as rf:
             lf.write(left_section)
-        with open(right_file, "w") as rf:
             rf.write(right_section)
 
 
-def main():
-    if len(sys.argv) != 2:
-        print(f"Usage: {sys.argv[0]} <diff_file>")
-        sys.exit(1)
-
-    diff_file = sys.argv[1]
+def process_diff_file(diff_file: str) -> None:
+    """Process the diff file and write hunks to output files."""
     diff_file_base_name = os.path.basename(diff_file)
     diff_file_dir_name = os.path.dirname(diff_file)
-    diff_file_name_without_extension = os.path.splitext(diff_file_base_name)[0]
+    diff_file_name_without_extension, _ = os.path.splitext(diff_file_base_name)
 
     diffed_file_counter = -1  # Initialize to -1 to indicate no files have been processed yet
+    hunk_counter = 0
 
     # Initialize variables for hunk processing
     left_section = ""
     right_section = ""
-    left_file_name = ""
-    right_file_name = ""
+    left_file_name_without_extension = ""
+    right_file_name_without_extension = ""
     left_file_extension = ""
     right_file_extension = ""
-    hunk_counter = 0
     left_start_line = ""
     right_start_line = ""
 
@@ -152,6 +155,15 @@ def main():
         )
 
     print(f"Processed {diffed_file_counter} file(s) and {hunk_counter} hunk(s).")
+
+
+def main() -> None:
+    if len(sys.argv) != 2:
+        print(f"Usage: {sys.argv[0]} <diff_file>")
+        sys.exit(1)
+
+    diff_file = sys.argv[1]
+    process_diff_file(diff_file)
 
 
 if __name__ == "__main__":
