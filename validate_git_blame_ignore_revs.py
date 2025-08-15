@@ -11,9 +11,8 @@ class ValidationResult(TypedDict):
     errors: Dict[int, str]
     missing_commits: Dict[int, str]
     strict_comment_errors: Dict[int, str]
-    comment_diffs: Dict[
-        int, Tuple[str, str]
-    ]  # Line number -> (comment, commit message)
+    comment_diffs: Dict[int, Tuple[str, str]]  # Line number -> (comment, commit message)
+    missing_pre_commit_ci_commits: Dict[str, str]  # Commit hash -> Commit message
 
 
 def validate_git_blame_ignore_revs(
@@ -21,6 +20,7 @@ def validate_git_blame_ignore_revs(
     call_git: bool = False,
     strict_comments: bool = False,
     strict_comments_git: bool = False,
+    pre_commit_ci: bool = False,
 ) -> ValidationResult:
     """
     Validates the contents of a `.git-blame-ignore-revs` file.
@@ -30,9 +30,10 @@ def validate_git_blame_ignore_revs(
         call_git (bool): If True, ensures each commit is in the history of the checked-out branch.
         strict_comments (bool): If True, requires each commit line to have one or more comment lines above it.
         strict_comments_git (bool): If True, ensures the comment above each commit matches the first part of the commit message.
+        pre_commit_ci (bool): If True, ensures all commits authored by `pre-commit-ci[bot]` are present in the file.
 
     Returns:
-        ValidationResult: A dictionary containing valid hashes, errors, missing commits, strict comment errors, and comment diffs.
+        ValidationResult: A dictionary containing valid hashes, errors, missing commits, strict comment errors, comment diffs, and missing pre-commit-ci commits.
     """
     # Convert Path object to string if necessary
     file_path = str(file_path)
@@ -45,6 +46,7 @@ def validate_git_blame_ignore_revs(
     missing_commits: Dict[int, str] = {}
     strict_comment_errors: Dict[int, str] = {}
     comment_diffs: Dict[int, Tuple[str, str]] = {}
+    missing_pre_commit_ci_commits: Dict[str, str] = {}
 
     # Regular expression for a valid Git commit hash (40 hexadecimal characters)
     commit_hash_regex = re.compile(r"^[0-9a-f]{40}$")
@@ -110,19 +112,42 @@ def validate_git_blame_ignore_revs(
             except subprocess.CalledProcessError:
                 missing_commits[line_number] = commit_hash
 
+    if pre_commit_ci:
+        # Fetch all commits authored by `pre-commit-ci[bot]` in the checked-out branch
+        try:
+            result = subprocess.run(
+                ["git", "log", "--pretty=format:%H %s", "--author=pre-commit-ci[bot]"],
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            pre_commit_ci_commits = result.stdout.strip().split("\n")
+            for commit_entry in pre_commit_ci_commits:
+                # Skip empty or malformed lines
+                if not commit_entry.strip():
+                    continue
+                parts = commit_entry.split(" ", 1)
+                if len(parts) != 2:
+                    continue
+                commit_hash, commit_message = parts
+                if commit_hash not in valid_hashes.values():
+                    missing_pre_commit_ci_commits[commit_hash] = commit_message
+        except subprocess.CalledProcessError:
+            raise RuntimeError("Failed to fetch commits authored by pre-commit-ci[bot].")
+
     return ValidationResult(
         valid_hashes=valid_hashes,
         errors=errors,
         missing_commits=missing_commits,
         strict_comment_errors=strict_comment_errors,
         comment_diffs=comment_diffs,
+        missing_pre_commit_ci_commits=missing_pre_commit_ci_commits,
     )
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Validate a .git-blame-ignore-revs file."
-    )
+    parser = argparse.ArgumentParser(description="Validate a .git-blame-ignore-revs file.")
     parser.add_argument(
         "file_path",
         type=Path,  # Use Path as the type conversion function
@@ -143,6 +168,11 @@ def main() -> None:
         action="store_true",
         help="Ensure the comment above each commit matches the first part of the commit message. Requires --strict-comments and --call-git.",
     )
+    parser.add_argument(
+        "--pre-commit-ci",
+        action="store_true",
+        help="Ensure all commits authored by pre-commit-ci[bot] are present in the file. Requires --call-git.",
+    )
 
     args = parser.parse_args()
 
@@ -150,12 +180,17 @@ def main() -> None:
     if args.strict_comments_git and not (args.strict_comments and args.call_git):
         parser.error("--strict-comments-git requires --strict-comments and --call-git.")
 
+    # Ensure --pre-commit-ci requires --call-git
+    if args.pre_commit_ci and not args.call_git:
+        parser.error("--pre-commit-ci requires --call-git.")
+
     try:
         result = validate_git_blame_ignore_revs(
             args.file_path,
             args.call_git,
             args.strict_comments,
             args.strict_comments_git,
+            args.pre_commit_ci,
         )
 
         print("Validation Results:")
@@ -180,9 +215,7 @@ def main() -> None:
 
         if args.strict_comments:
             if result["strict_comment_errors"]:
-                print(
-                    f"\nStrict comment errors ({len(result['strict_comment_errors'])}):"
-                )
+                print(f"\nStrict comment errors ({len(result['strict_comment_errors'])}):")
                 for line_number, line in result["strict_comment_errors"].items():
                     print(f"  Line {line_number}: {line}")
             else:
@@ -191,14 +224,22 @@ def main() -> None:
         if args.strict_comments_git:
             if result["comment_diffs"]:
                 print(f"\nComment diffs ({len(result['comment_diffs'])}):")
-                for line_number, (comment, commit_message) in result[
-                    "comment_diffs"
-                ].items():
+                for line_number, (comment, commit_message) in result["comment_diffs"].items():
                     print(f"  Line {line_number}:")
                     print(f"    Comment: {comment}")
                     print(f"    Commit message: {commit_message}")
             else:
                 print("\nAll comments match the corresponding commit messages!")
+
+        if args.pre_commit_ci:
+            if result["missing_pre_commit_ci_commits"]:
+                print(
+                    f"\nMissing pre-commit-ci commits ({len(result['missing_pre_commit_ci_commits'])}):"
+                )
+                for commit_hash, commit_message in result["missing_pre_commit_ci_commits"].items():
+                    print(f"  Commit {commit_hash}: {commit_message}")
+            else:
+                print("\nAll pre-commit-ci commits are present in the file!")
     except FileNotFoundError as e:
         print(e)
 
