@@ -1,5 +1,5 @@
+import argparse
 import os
-import sys
 
 
 def sanitize_filename(filename: str) -> str:
@@ -158,12 +158,17 @@ def process_diff_file(diff_file: str) -> None:
 
 
 def main() -> None:
-    if len(sys.argv) != 2:
-        print(f"Usage: {sys.argv[0]} <diff_file>")
-        sys.exit(1)
+    parser = argparse.ArgumentParser(
+        description="Process a diff file and split its hunks into separate files."
+    )
+    parser.add_argument(
+        "diff_file",
+        type=str,
+        help="Path to the diff file to process.",
+    )
+    args = parser.parse_args()
 
-    diff_file = sys.argv[1]
-    process_diff_file(diff_file)
+    process_diff_file(args.diff_file)
 
 
 if __name__ == "__main__":
