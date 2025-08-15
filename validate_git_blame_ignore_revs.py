@@ -133,6 +133,19 @@ def validate_git_blame_ignore_revs(
                 commit_hash, commit_message = parts
                 if commit_hash not in valid_hashes.values():
                     missing_pre_commit_ci_commits[commit_hash] = commit_message
+                elif strict_comments or strict_comments_git:
+                    # Check strict comments and strict comments git for pre-commit-ci commits
+                    for line_number, line in valid_hashes.items():
+                        if line == commit_hash:
+                            last_comment = (
+                                lines[line_number - 2].strip().lstrip("#").strip()
+                                if line_number > 1
+                                else ""
+                            )
+                            if strict_comments and not last_comment:
+                                strict_comment_errors[line_number] = commit_hash
+                            if strict_comments_git and not commit_message.startswith(last_comment):
+                                comment_diffs[line_number] = (last_comment, commit_message)
         except subprocess.CalledProcessError:
             raise RuntimeError("Failed to fetch commits authored by pre-commit-ci[bot].")
 
