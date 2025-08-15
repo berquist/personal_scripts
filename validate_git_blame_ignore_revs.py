@@ -85,34 +85,29 @@ def validate_git_blame_ignore_revs(
 
     if call_git or strict_comments_git:
         # Fetch commit messages and verify existence using `git show`
-        commit_hashes = list(valid_hashes.values())
-        try:
-            result = subprocess.run(
-                ["git", "show", "--pretty=format:%H %s", "--no-patch"] + commit_hashes,
-                check=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-            )
-            git_output = result.stdout.strip().split("\n")
-            git_commit_map = {
-                line.split(" ", 1)[0]: line.split(" ", 1)[1] for line in git_output
-            }
-
-            for line_number, commit_hash in valid_hashes.items():
-                if commit_hash not in git_commit_map:
+        for line_number, commit_hash in valid_hashes.items():
+            try:
+                result = subprocess.run(
+                    ["git", "show", "--quiet", "--pretty=format:%H %s", commit_hash],
+                    check=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                )
+                git_output = result.stdout.strip()
+                if not git_output:
                     missing_commits[line_number] = commit_hash
-                elif strict_comments_git:
-                    commit_message = git_commit_map[commit_hash]
-                    last_comment = (
-                        lines[line_number - 2].strip().lstrip("#").strip()
-                        if line_number > 1
-                        else ""
-                    )
-                    if not commit_message.startswith(last_comment):
-                        comment_diffs[line_number] = (last_comment, commit_message)
-        except subprocess.CalledProcessError:
-            for line_number, commit_hash in valid_hashes.items():
+                else:
+                    commit_hash_from_git, commit_message = git_output.split(" ", 1)
+                    if strict_comments_git:
+                        last_comment = (
+                            lines[line_number - 2].strip().lstrip("#").strip()
+                            if line_number > 1
+                            else ""
+                        )
+                        if not commit_message.startswith(last_comment):
+                            comment_diffs[line_number] = (last_comment, commit_message)
+            except subprocess.CalledProcessError:
                 missing_commits[line_number] = commit_hash
 
     return ValidationResult(
