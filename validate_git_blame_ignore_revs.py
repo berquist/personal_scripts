@@ -65,11 +65,15 @@ def validate_commit_hashes(
             strict_comment_errors[line_number] = commit_hash
 
         if strict_comments_git:
-            commit_message = run_git_command(
-                ["git", "show", "--quiet", "--pretty=format:%s", commit_hash]
-            )
-            if not commit_message.startswith(last_comment):
-                comment_diffs[line_number] = (last_comment, commit_message)
+            try:
+                commit_message = run_git_command(
+                    ["git", "show", "--quiet", "--pretty=format:%s", commit_hash]
+                )
+                if not commit_message.startswith(last_comment):
+                    comment_diffs[line_number] = (last_comment, commit_message)
+            except RuntimeError:
+                # If `git show` fails, treat the commit as missing
+                strict_comment_errors[line_number] = commit_hash
 
     return strict_comment_errors, comment_diffs
 
