@@ -2,7 +2,7 @@
 
 hashfunc=md5sum
 
-SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+SCRIPTDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 directories=$(printf "%s\n" "$@" | "$SCRIPTDIR"/basename_sort.pl)
 echo "$directories"
 

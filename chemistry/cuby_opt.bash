@@ -5,7 +5,7 @@
 set -v
 inputfilename="${1}"
 stub="${inputfilename%.*}"
-$(command -v cuby4) "${stub}".yaml >& "${stub}".out
+$(command -v cuby4) "${stub}".yaml >&"${stub}".out
 mv optimized.xyz "${stub}".xyz
 \rm grad.pdb
 \rm -r job_*

@@ -76,7 +76,7 @@ def writeslurm(opts, job):
 
     job_name, __ = os.path.splitext(job)
     # Create unique ID for job
-    JOB_ID = uuid4().hex 
+    JOB_ID = uuid4().hex
     RUN = "." + job_name + "." + JOB_ID + ".slurm"
 
     print("run script = ", RUN)

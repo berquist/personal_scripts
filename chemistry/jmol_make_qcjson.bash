@@ -5,7 +5,7 @@
 
 stub=${1%.*}
 
-cat <<EOF > "${stub}".spt
+cat << EOF > "${stub}".spt
 load ${1}
 write ${stub}.qcjson
 EOF

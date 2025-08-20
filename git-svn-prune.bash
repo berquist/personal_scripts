@@ -20,7 +20,7 @@ svn ls $QCSVN/branches | sed 's|^[[:space:]]*||' | sed 's|/$||' > svn-branch-lis
 diff -u git-branch-list svn-branch-list | grep '^-' | sed 's|^-||' | grep -v '^trunk$' | grep -v '^--' > old-branch-list
 
 # Now I just perform standard branch removal procedures for git-svn:
-for i in `cat old-branch-list`;
-do git branch -d -r "$i";
-    rm -rf .git/svn/refs/remotes/"$i";
+for i in $(cat old-branch-list); do
+    git branch -d -r "$i"
+    rm -rf .git/svn/refs/remotes/"$i"
 done

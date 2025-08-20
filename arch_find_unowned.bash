@@ -2,7 +2,7 @@
 # Utility to generate a list of all files that are not part of a package
 # Author: Spider.007 / Sjon
 
-TMPDIR=`mktemp -d`
+TMPDIR=$(mktemp -d)
 FILTER=$(sed '1,/^## FILTER/d' $0 | tr '\n' '|')
 FILTER=${FILTER%|}
 
@@ -13,9 +13,8 @@ pacman -Ql | tee owned_full | cut -d' ' -f2- | sed 's/\/$//' | sort -u > owned
 grep -Ev "^($FILTER)" owned > owned- && mv owned- owned
 
 echo -e '\033[1mOwned, but not found:\033[0m'
-comm -13 full owned | while read entry
-do
-	echo [`grep --max-count=1 $entry owned_full|cut -d' ' -f1`] $entry
+comm -13 full owned | while read entry; do
+    echo [$(grep --max-count=1 $entry owned_full | cut -d' ' -f1)] $entry
 done | sort
 
 grep -Ev "^($FILTER)" full > full- && mv full- full

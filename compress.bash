@@ -6,7 +6,7 @@
 filename="${1}"
 
 TAR=tar
-if command -v gtar 1>/dev/null 2>&1; then
+if command -v gtar 1> /dev/null 2>&1; then
     TAR=gtar
 fi
 

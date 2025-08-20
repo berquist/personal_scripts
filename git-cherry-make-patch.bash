@@ -10,8 +10,7 @@ outname="${upstream}"_"${head}".patch
 echo "" > ${outname}
 
 echo ${upstream} ${head}
-for sha1 in $(git cherry ${upstream} ${head} | awk '{print $2}');
-do
+for sha1 in $(git cherry ${upstream} ${head} | awk '{print $2}'); do
     echo ${sha1}
     git format-patch --stdout -1 ${sha1} >> ${outname}
 done

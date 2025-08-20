@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-
-print_bytes () {
+print_bytes() {
     filename=$1
     pos=$2
 
@@ -10,7 +9,7 @@ print_bytes () {
     # max=$(cat $filename | wc -c)
     # while [[ $((++a)) -lt $max ]]; do
     while [[ $((++a)) -le $pos ]]; do
-        cat $filename | head -c$a | tail -c1 | \
+        cat $filename | head -c$a | tail -c1 |
             xargs -0 -I{} printf '%c %#02x\n' {} "'{}"
     done
 }

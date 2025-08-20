@@ -3,7 +3,7 @@
 # Prepare a PDB file for amber by only leaving ATOM, HETATM, TER, and END cards.
 # All other lines get deleted.
 
-sed    '/^HEADER/d' $1 > $2
+sed '/^HEADER/d' $1 > $2
 sed -i '/^TITLE /d' $2
 sed -i '/^COMPND/d' $2
 sed -i '/^KEYWDS/d' $2

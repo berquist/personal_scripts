@@ -12,4 +12,3 @@ while read -r env_path; do
     echo $env_name
     conda env export -n $env_name > environment_$env_name.yml
 done < "${env_path_file}"
-    

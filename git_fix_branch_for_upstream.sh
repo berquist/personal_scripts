@@ -47,7 +47,7 @@ get_upstream_github_repo() {
     fi
 }
 
-if ! git rev-parse --is-inside-work-tree &>/dev/null; then
+if ! git rev-parse --is-inside-work-tree &> /dev/null; then
     echo "Error: This script must be run inside a Git repository." >&2
     exit 1
 fi
@@ -99,7 +99,7 @@ if [[ "${current_branch}" != "${default_branch}" ]]; then
     git checkout "${default_branch}"
 fi
 
-tracking_branch="$(git rev-parse --abbrev-ref --symbolic-full-name "$default_branch@{upstream}" 2>/dev/null || true)"
+tracking_branch="$(git rev-parse --abbrev-ref --symbolic-full-name "$default_branch@{upstream}" 2> /dev/null || true)"
 
 if [[ "${tracking_branch}" != "upstream/${default_branch}" ]]; then
     echo "Setting upstream tracking for branch '$default_branch' to 'upstream/$default_branch'..."
