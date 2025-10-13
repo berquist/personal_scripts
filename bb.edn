@@ -1,0 +1,1 @@
+{:deps {com.lambdaisland/cli {:mvn/version "1.27.121"}}}

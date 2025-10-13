@@ -1,0 +1,153 @@
+#!/usr/bin/env bb
+
+;; Safely delete a local branch only if it has been merged (regular **or**
+;; squash/cherry-pick) into the current HEAD.
+
+(require '[babashka.process :refer [sh]]
+         '[lambdaisland.cli :as cli])
+
+(defn join
+  "Join a collection of strings using a space."
+  [& strings]
+  (str/join " " strings))
+
+(def shell-opts
+  "Default options for babashka.process/sh"
+  {:continue true})
+
+(defn shell-local-branch-exists?
+  "Does the branch exist locally?"
+  [branch]
+  (let [cmd (join "git" "rev-parse" "--verify" branch)]
+    (println cmd)
+    (sh shell-opts cmd)))
+
+(defn shell-remote-default-branch
+  "Get the raw default branch for the remote."
+  [remote-name]
+  (let [cmd (join "git" "symbolic-ref" (format "refs/remotes/%s/HEAD" remote-name))
+        cmd-result (sh shell-opts cmd)]
+    (println cmd)
+    (if (zero? (:exit cmd-result))
+      cmd-result
+      ;; The remote's HEAD may not be available, so set it and try again.
+      (let [cmd-force-get-head (join "git" "remote" "set-head" remote-name "--auto")
+            cmd-force-get-head-result (sh shell-opts cmd-force-get-head)
+            get-head-exit (:exit cmd-force-get-head-result)]
+        (println cmd-force-get-head)
+        (if (zero? get-head-exit)
+          (let [cmd-take-2-result (sh shell-opts)
+                cmd-take-2-exit (:exit cmd-take-2-result)]
+            (if (zero? cmd-take-2-exit)
+              cmd-take-2-result
+              (System/exit cmd-take-2-exit)))
+          (System/exit get-head-exit))))))
+
+(defn branch-from-ref
+  "Get the branch name from a full or partial ref."
+  [symbolic-ref]
+  (-> symbolic-ref
+      (str/split #"/")
+      last
+      str/trim-newline))
+
+(defn shell-default-branch
+  "Get the default branch for the remote."
+  [remote]
+  (->> remote
+       shell-remote-default-branch
+       :out
+       branch-from-ref))
+
+(defn shell-merge-base-is-ancestor
+  [branch target-ref]
+  (let [cmd (join "git" "merge-base" "--is-ancestor" branch target-ref)]
+    (println cmd)
+    (sh shell-opts cmd)))
+
+(defn shell-diff
+  [branch target-ref]
+  (let [cmd (join "git" "diff" (str target-ref "..." branch))]
+    (println cmd)
+    (sh shell-opts cmd)))
+
+(defn die
+  "Wrap erroring that prints a message."
+  [msg]
+  (println (join "Error: " msg))
+  (System/exit 1))
+
+(defn long-str
+  "https://stackoverflow.com/a/29301443/"
+  [& strings]
+  (str/join "\n" strings))
+
+(defn delete-branch!
+  "Delete *branch* locally or on *remote*.
+   If *dry-run?* is true, only prints the command that would be run."
+  [branch remote dry-run?]
+  (let [cmd (apply join (if remote
+                          ["git" "push" remote "--delete" branch]
+                          ["git" "branch" "-d" branch]))]
+    (if dry-run?
+      (println "[dry‑run] would run:" (pr-str cmd))
+      (do
+        (println (if remote "[remote] delete‑branch" "[local] delete‑branch") branch)
+        (let [{:keys [exit err out]} (sh shell-opts cmd)]
+          (when-not (zero? exit)
+            (die (format "Failed to delete branch '%s': %s" branch err))))))))
+
+(defn git-safe-delete
+  "Safely delete a local or remote branch only if it has been merged
+
+  Safely delete a local or remote branch only if it has been merged (a regular
+  merge or squashed/cherry-picked) into the current HEAD or the remote's
+  default branch."
+  [opts]
+  (let [{:keys [remote dry-run]} opts
+        local (first (::cli/argv opts))
+        dry? (boolean dry-run)]
+
+    (when (nil? local)
+      (die "Exactly one branch name must be supplied"))
+
+    (let [branch (if remote
+                   (format "%s/%s" remote local)
+                   local)
+          {:keys [exit err]} (shell-local-branch-exists? branch)]
+      (when-not (zero? exit)
+        (die (format "branch '%s' does not exist: %s" branch err))))
+
+    (let [target-ref (if remote
+                       (let [def-branch (shell-default-branch remote)]
+                         (str remote "/" def-branch))
+                       "HEAD")]
+      (println (format "target-ref: {%s}" target-ref))
+      (let [{:keys [out err exit]} (shell-merge-base-is-ancestor local target-ref)]
+        (println "[ancestor] {out} {" out "} {err} {" err "} {exit} {" exit "}")
+        (when (zero? exit)
+          (println (if remote
+                     "[ancestor] delete-remote"
+                     "[ancestor] delete-local"))
+          (delete-branch! local remote dry?)
+          (System/exit 0)))
+      (let [{:keys [out err exit]} (shell-diff local target-ref)]
+        (println "[diff] {out} {" out "} {err} {" err "} {exit} {" exit "}")
+        (when (and (zero? exit) (str/blank? out))
+          (println (if remote
+                     "[diff] delete-remote"
+                     "[diff] delete-local"))
+          (delete-branch! local remote dry?)
+          (System/exit 0))))
+    (let [{:keys [out]} (sh shell-opts "git" "rev-parse" "--abbrev-ref" "HEAD")
+          trimmed (str/trim out)]
+      (die (format "branch '%s' is not merged (regular or squash) into %s"
+                   local
+                   (if remote
+                     (str remote "/" trimmed)
+                     trimmed))))))
+
+(cli/dispatch
+ {:command #'git-safe-delete
+  :flags ["--remote REMOTE" "Remote to use"
+          "-n, --dry-run" "Show what would be done, but do not delete"]})
